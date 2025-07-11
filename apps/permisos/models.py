@@ -1,5 +1,5 @@
 from django.db import models
-from organizaciones.models import Area, Cargo
+from apps.organizaciones.models import Area, Cargo
 
 class Permiso(models.Model):
     codigo = models.CharField(max_length=50, unique=True)

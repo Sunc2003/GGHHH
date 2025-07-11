@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from organizaciones.models import Area, Cargo
+from apps.organizaciones.models import Area, Cargo
 
 class CustomUser(AbstractUser):
     area = models.ForeignKey(Area, on_delete=models.SET_NULL, null=True, blank=True)
