@@ -2,12 +2,17 @@
 # Exit on error
 set -o errexit
 
-# Modify this line as needed for your package manager (pip, poetry, etc.)
+# Instala dependencias
 pip install -r requirements.txt
 
-# Convert static asset files
+# Archivos estáticos
 python manage.py collectstatic --no-input
 
-# Apply any outstanding database migrations
+# Crea migraciones si no existen
+python manage.py makemigrations
+
+# Aplica migraciones
 python manage.py migrate
+
+# Crea usuario admin predefinido (si tienes ese comando)
 python manage.py crear_admin
