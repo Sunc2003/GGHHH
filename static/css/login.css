@@ -1,0 +1,129 @@
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: url('/static/img/marsella.png') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(40, 60, 105, 0.27); /* muy sutil */
+  z-index: 0;
+  pointer-events: none;
+}
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  position: relative;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 370px;
+  background: rgba(255,255,255,0.21);
+  border-radius: 1.1rem;
+  box-shadow: 0 4px 18px 0 rgba(31, 38, 135, 0.11);
+  padding: 2.1rem 2rem 1.6rem 2rem;
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+h2.text-center {
+  font-weight: 700;
+  color: #20436b;
+  margin-bottom: 1.4rem;
+  font-size: 2.1rem;
+  text-align: center;
+  letter-spacing: 0.5px;
+  text-shadow: none;
+}
+
+form .mb-3 {
+  margin-bottom: 1.1rem !important;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #28476b;
+  margin-bottom: 0.25rem;
+  font-size: 1rem;
+  letter-spacing: 0.1px;
+}
+
+.form-control {
+  border-radius: 0.48rem;
+  border: 1.1px solid #bdd1e9;
+  padding: 0.72rem 1rem;
+  font-size: 1rem;
+  background: rgba(255,255,255,0.94);
+  color: #22314b;
+  box-shadow: none;
+  width: 100%;
+  margin-bottom: 0;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+  border-color: #3778c2;
+  background: #fff;
+  color: #23395d;
+  outline: none;
+  box-shadow: 0 0 0 2px #b4c5e455;
+}
+
+.btn-primary {
+  display: block;
+  width: 100%;
+  margin: 0 auto;
+  margin-top: 0.2rem;
+  background: linear-gradient(90deg, #3778c2 0%, #51a5db 100%);
+  border: none;
+  border-radius: 0.65rem;
+  font-weight: 600;
+  font-size: 1.12rem;
+  padding: 0.75rem 0;
+  box-shadow: 0 2px 7px 0 #3778c216;
+  transition: background 0.15s;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: linear-gradient(90deg, #255c99 0%, #3778c2 100%);
+}
+
+.alert-danger {
+  border-radius: 0.58rem;
+  padding: 0.68rem 1rem;
+  margin-bottom: 1.1rem;
+  font-size: 0.97rem;
+  background: rgba(225, 76, 60, 0.92);
+  color: #fff;
+  border: none;
+  box-shadow: 0 0 8px #c0392b27;
+}
+
+.text-center.mt-3 {
+  color: #6e819a;
+  font-size: 0.98rem;
+  margin-top: 1.1rem;
+  text-align: center;
+}
+
+@media (max-width: 540px) {
+  .login-card {
+    padding: 1.2rem 0.6rem 1.2rem 0.6rem;
+    border-radius: 1rem;
+    max-width: 98vw;
+  }
+}
