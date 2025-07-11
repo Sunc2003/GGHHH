@@ -29,7 +29,6 @@ def es_admin(user):
     return user.is_authenticated and user.tipo_usuario == 'admin'
 
 ##@user_passes_test(es_admin)
-
 def panel_admin_usuarios(request):
     usuarios = CustomUser.objects.all()
     ahora = timezone.now()
