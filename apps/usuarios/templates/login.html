@@ -10,7 +10,7 @@
 <body>
   <div class="container">
     <div class="login-card mx-auto">
-      <h2 class="text-center mb-4">Iniciar Sesión</h2>
+      <img src="{% static 'img/ggh.png' %}" alt="Logo" class="img-fluid mb-4">
       {% if form.errors %}
         <div class="alert alert-danger">Usuario o contraseña inválidos.</div>
       {% endif %}
@@ -28,7 +28,7 @@
         <button type="submit" class="btn btn-primary">Ingresar</button>
       </form>
       <div class="text-center mt-3">
-        ¿No tienes cuenta?
+       
       </div>
     </div>
   </div>
