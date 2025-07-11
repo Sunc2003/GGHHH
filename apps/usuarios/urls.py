@@ -15,5 +15,6 @@ urlpatterns = [
     path('solicitud/nueva/', SolicitudCreateView.as_view(), name='nueva_solicitud'),
     path('solicitudes/recibidas/', SolicitudesRecibidasView.as_view(), name='solicitudes_recibidas'),
     path('solicitud/<int:pk>/', SolicitudDetailView.as_view(), name='detalle_solicitud'),
-    path('solicitud/<int:pk>/cambiar-estado/', CambiarEstadoView.as_view(), name='cambiar_estado')
+    path('solicitud/<int:pk>/cambiar-estado/', CambiarEstadoView.as_view(), name='cambiar_estado'),
+    
 ]

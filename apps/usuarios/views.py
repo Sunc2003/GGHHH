@@ -11,10 +11,26 @@ from .models import SolicitudCodigo
 from .forms import SolicitudCodigoForm
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import authenticate, login
+from django.views.generic import FormView
+from .forms import LoginForm
 
 
-class IniciarSesionView(LoginView):
-    template_name = 'login.html'  # Ruta al template
+class IniciarSesionView(FormView):
+    template_name = 'login.html'
+    form_class = LoginForm
+    success_url = '/panel/'
+
+    def form_valid(self, form):
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+        user = authenticate(self.request, username=username, password=password)
+        if user is not None:
+            login(self.request, user)
+            return super().form_valid(form)
+        else:
+            form.add_error(None, 'Usuario o contraseña inválidos')
+            return self.form_invalid(form)
 
 class RegistroUsuarioView(CreateView):
     model = CustomUser
