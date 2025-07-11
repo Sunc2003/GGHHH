@@ -40,7 +40,7 @@ def panel_admin_usuarios(request):
             u.en_linea = True
 
     # Lógica para solicitudes
-    solicitudes_enviadas = SolicitudCodigo.objects.filter(emisor=request.user)
+    solicitudes_enviadas = SolicitudCodigo.objects.filter(solicitante=request.user)
     solicitudes_recibidas = SolicitudCodigo.objects.filter(receptor=request.user)
 
     context = {
@@ -54,7 +54,7 @@ def panel_admin_usuarios(request):
 class SolicitudCreateView(LoginRequiredMixin, CreateView):
     model = SolicitudCodigo
     form_class = SolicitudCodigoForm
-    template_name = 'usuarios/solicitud_form.html'
+    template_name = 'solicitud_form.html'
     success_url = reverse_lazy('solicitudes_enviadas')
 
     def form_valid(self, form):
@@ -63,17 +63,17 @@ class SolicitudCreateView(LoginRequiredMixin, CreateView):
 
 class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
     model = SolicitudCodigo
-    template_name = 'usuarios/solicitudes_recibidas.html'
+    template_name = 'solicitudes_recibidas.html'
 
     def get_queryset(self):
         return SolicitudCodigo.objects.filter(receptor=self.request.user)
 
 class SolicitudDetailView(LoginRequiredMixin, DetailView):
     model = SolicitudCodigo
-    template_name = 'usuarios/solicitud_detalle.html'
+    template_name = 'solicitud_detalle.html'
 
 class CambiarEstadoView(LoginRequiredMixin, UpdateView):
     model = SolicitudCodigo
     fields = ['estado']
-    template_name = 'usuarios/cambiar_estado.html'
+    template_name = 'cambiar_estado.html'
     success_url = reverse_lazy('solicitudes_recibidas')

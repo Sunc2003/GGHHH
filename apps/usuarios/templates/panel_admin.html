@@ -39,6 +39,11 @@
     </tbody>
   </table>
 </div>
+<div class="mb-3 text-end">
+  <a href="{% url 'nueva_solicitud' %}" class="btn btn-primary">
+    Enviar Solicitud de Código
+  </a>
+</div>
 <div class="row mt-5">
   <div class="col-md-6">
     <h4>Solicitudes Enviadas</h4>
@@ -65,7 +70,7 @@
         {% for solicitud in solicitudes_recibidas %}
           <li class="list-group-item d-flex justify-content-between align-items-center">
             De: {{ solicitud.emisor.username }}
-            <a href="{% url 'ver_solicitud' solicitud.id %}" class="btn btn-sm btn-outline-primary">Ver</a>
+            <a href="{% url 'detalle_solicitud' solicitud.id %}" class="btn btn-sm btn-outline-primary">Ver</a>
           </li>
         {% endfor %}
       </ul>
