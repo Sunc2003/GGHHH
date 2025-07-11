@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
-# Exit on error
 set -o errexit
 
-# Instala dependencias
+# Instalar dependencias
 pip install -r requirements.txt
 
 # Archivos estáticos
 python manage.py collectstatic --no-input
 
-# Crea migraciones si no existen
-python manage.py makemigrations
+# Solo crear migraciones si hay cambios
+python manage.py makemigrations --check --noinput || python manage.py makemigrations
 
-# Aplica migraciones
+# Aplicar migraciones
 python manage.py migrate
 
-# Crea usuario admin predefinido (si tienes ese comando)
-python manage.py crear_admin
+# Crear usuario admin solo si no existe
+python manage.py crear_admin || echo "Admin ya existe o fallo tolerado"
