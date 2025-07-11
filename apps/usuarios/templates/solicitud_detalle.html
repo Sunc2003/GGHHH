@@ -1,0 +1,8 @@
+<h2>{{ object.titulo }}</h2>
+<p><strong>Descripción:</strong> {{ object.descripcion }}</p>
+<p><strong>Solicitado por:</strong> {{ object.solicitante }}</p>
+<p><strong>Estado:</strong> {{ object.estado }}</p>
+
+{% if request.user == object.receptor and object.estado == 'pendiente' %}
+  <a href="{% url 'cambiar_estado' object.pk %}" class="btn btn-success">Marcar como "Código creado"</a>
+{% endif %}

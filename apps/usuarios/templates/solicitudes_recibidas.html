@@ -1,0 +1,12 @@
+<h2>Solicitudes Recibidas</h2>
+<ul>
+  {% for solicitud in object_list %}
+    <li>
+      <a href="{% url 'detalle_solicitud' solicitud.pk %}">
+        {{ solicitud.titulo }} - {{ solicitud.estado }}
+      </a>
+    </li>
+  {% empty %}
+    <p>No tienes solicitudes recibidas.</p>
+  {% endfor %}
+</ul>

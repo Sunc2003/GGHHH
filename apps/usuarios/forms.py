@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser
+from .models import CustomUser, SolicitudCodigo
+
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -35,3 +36,12 @@ class CustomUserCreationForm(UserCreationForm):
         for field_name, field in self.fields.items():
             if not field.widget.attrs.get('class'):
                 field.widget.attrs['class'] = 'form-control'
+
+
+class SolicitudCodigoForm(forms.ModelForm):
+    class Meta:
+        model = SolicitudCodigo
+        fields = ['receptor', 'titulo', 'descripcion']
+        widgets = {
+            'descripcion': forms.Textarea(attrs={'rows': 4}),
+        }

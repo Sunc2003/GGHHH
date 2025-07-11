@@ -39,4 +39,39 @@
     </tbody>
   </table>
 </div>
+<div class="row mt-5">
+  <div class="col-md-6">
+    <h4>Solicitudes Enviadas</h4>
+    {% if solicitudes_enviadas %}
+      <ul class="list-group">
+        {% for solicitud in solicitudes_enviadas %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Para: {{ solicitud.receptor.username }}
+            <span class="badge {% if solicitud.estado == 'pendiente' %}bg-warning{% else %}bg-success{% endif %}">
+              {{ solicitud.get_estado_display }}
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted">No has enviado ninguna solicitud.</p>
+    {% endif %}
+  </div>
+
+  <div class="col-md-6">
+    <h4>Solicitudes Recibidas</h4>
+    {% if solicitudes_recibidas %}
+      <ul class="list-group">
+        {% for solicitud in solicitudes_recibidas %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            De: {{ solicitud.emisor.username }}
+            <a href="{% url 'ver_solicitud' solicitud.id %}" class="btn btn-sm btn-outline-primary">Ver</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted">No has recibido solicitudes.</p>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}
