@@ -22,6 +22,7 @@ class IniciarSesionView(LoginView):
         form.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Usuario'})
         form.fields['password'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Contraseña'})
         return form
+    
 
 class RegistroUsuarioView(CreateView):
     model = CustomUser
