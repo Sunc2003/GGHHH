@@ -16,3 +16,4 @@ python manage.py migrate
 # Crear usuario admin solo si no existe
 python manage.py crear_admin || echo "Admin ya existe o fallo tolerado"
 python manage.py poblar_sap || echo "Datos basicos de sap agregados"
+python manage.py poblar_cargos_areas.py || echo "Datos basicos de cargos y areas"
