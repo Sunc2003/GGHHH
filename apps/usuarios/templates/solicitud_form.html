@@ -1,12 +1,20 @@
 {% extends "base.html" %}
-
+{% load static %}
+ 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/solicitud_form.css' %}">
+{% endblock %}
+ 
 {% block content %}
 <div class="container mt-5">
-  <h2 class="mb-4">Solicitud de Creación de Código</h2>
-
+ <h2 class="mb-4" style="margin-bottom: 2.3rem !important;">
+  <i class="fas fa-barcode" style="font-size:2.5rem; color:#000000;"></i>
+</h2>
+ 
+ 
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-
+ 
     <!-- Información General -->
     <fieldset class="border p-3 mb-4 rounded">
       <legend class="w-auto px-2">Información General</legend>
@@ -37,7 +45,7 @@
         </div>
       </div>
     </fieldset>
-
+ 
     <!-- Información Técnica -->
     <fieldset class="border p-3 mb-4 rounded">
       <legend class="w-auto px-2">Información Técnica</legend>
@@ -72,7 +80,7 @@
         </div>
       </div>
     </fieldset>
-
+ 
     <!-- Dimensiones y Costo -->
     <fieldset class="border p-3 mb-4 rounded">
       <legend class="w-auto px-2">Dimensiones y Costo</legend>
@@ -99,7 +107,7 @@
         </div>
       </div>
     </fieldset>
-
+ 
     <!-- Botones -->
     <div class="mt-4">
       <button type="submit" class="btn btn-success">📨 Enviar Solicitud</button>
@@ -107,20 +115,20 @@
     </div>
   </form>
 </div>
-
+ 
 <!-- Script para mostrar campos según tipo de cotización -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const cotizacionSelect = document.getElementById('id_cotizacion');
     const campoArchivo = document.getElementById('campo_archivo');
     const campoImagen = document.getElementById('campo_imagen');
-
+ 
     function toggleCampos() {
       const valor = cotizacionSelect.value;
       campoArchivo.style.display = valor === 'documento' ? 'block' : 'none';
       campoImagen.style.display = valor === 'whatsapp' ? 'block' : 'none';
     }
-
+ 
     cotizacionSelect.addEventListener('change', toggleCampos);
     toggleCampos(); // Ejecutar al cargar
   });

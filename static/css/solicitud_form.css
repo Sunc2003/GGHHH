@@ -1,0 +1,219 @@
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.container.mt-5 {
+    background: #fff;
+    border-radius: 0.7rem;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.10);
+    border: 1.6px solid #232323;
+    padding: 2.7rem 2.2rem 2rem 2.2rem;
+    margin-top: 44px;
+    margin-bottom: 56px;
+    max-width: 950px;
+  }
+   
+  /* ===== TÍTULO PRINCIPAL ===== */
+  h2.mb-4 {
+    text-align: center;
+    font-size: 2.25rem;
+    font-weight: 900;
+    color: #222;
+    letter-spacing: 0.8px;
+    margin-bottom: 2.3rem !important;
+    border-bottom: 3px solid #000000;
+    display: inline-block;
+    padding-bottom: 0.55rem;
+    width: 100%;
+  }
+   
+  /* ===== FIELDSETS Y LEYENDAS ===== */
+  fieldset {
+    border: 1.4px solid #e2e2e2 !important;
+    border-radius: 0.55rem;
+    background: #fafbfc;
+    margin-bottom: 2.7rem;
+    padding: 2.2rem 1.4rem 1.25rem 1.4rem !important;
+    box-shadow: 0 2px 12px rgba(192,57,43,0.04);
+    position: relative;
+  }
+   
+  legend {
+    font-size: 1.21rem;
+    font-weight: 700;
+    color: #c0392b;
+    background: #fff;
+    padding: 0 18px;
+    border-radius: 12px;
+    margin-left: 10px;
+    letter-spacing: 0.35px;
+    border: 1px solid #c0392b;
+    box-shadow: 0 1px 5px rgba(192,57,43,0.06);
+  }
+   
+  /* ===== SEPARADORES ===== */
+  hr {
+    border: none;
+    height: 1.1px;
+    background: #eee;
+    margin: 32px 0;
+  }
+   
+  /* ===== ETIQUETAS Y CAMPOS ===== */
+  .form-label {
+    display: block;
+    font-weight: 600;
+    color: #232323;
+    margin-bottom: 0.27rem;
+    letter-spacing: 0.23px;
+    text-align: left;
+  }
+   
+  .form-control, select, input, textarea {
+    border-radius: 0.25rem;
+    border: 1.5px solid #232323;
+    font-size: 1rem;
+    padding: 0.56rem 0.8rem;
+    background: #f6f8f9;
+    color: #1a1a1a;
+    transition: border 0.13s, background 0.11s;
+    box-shadow: none;
+    min-height: 44px;
+    width: 100%;
+  }
+   
+  .form-control:focus, select:focus, input:focus, textarea:focus {
+    border-color: #168039;
+    background: #fff;
+    outline: none;
+  }
+   
+  .form-control.is-valid, select.is-valid, input.is-valid, textarea.is-valid {
+    border-color: #1fa259 !important;
+    background: #f6fff8;
+  }
+   
+  .form-control.is-invalid, select.is-invalid, input.is-invalid, textarea.is-invalid {
+    border-color: #c0392b !important;
+    background: #fff8f8;
+  }
+   
+  .text-danger {
+    font-size: 0.99rem;
+    color: #c0392b !important;
+  }
+   
+  .form-text {
+    font-size: 0.94rem;
+    color: #555;
+    margin-bottom: 0.22rem;
+  }
+   
+  /* ==== FILAS Y COLUMNAS ==== */
+  .row.g-3 {
+    margin-bottom: 0.8rem;
+  }
+  .col-md-6, .col-md-3, .col-12, .col-md-4 {
+    margin-bottom: 1.23rem;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+  @media (min-width: 992px) {
+    .col-md-6 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+    .col-md-3 {
+      flex: 0 0 25%;
+      max-width: 25%;
+    }
+  }
+   
+  /* ===== BOTONES ===== */
+  .mt-4.d-flex {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 16px;
+  }
+   
+  .btn-success {
+    background: #168039;
+    color: #fff;
+    border: 2.1px solid #168039;
+    border-radius: 0.25rem;
+    font-weight: 700;
+    letter-spacing: 0.43px;
+    padding: 0.68rem 2.3rem;
+    font-size: 1.12rem;
+    box-shadow: 0 1.5px 8px rgba(22,128,57,0.10);
+    transition: background 0.15s, border 0.15s, color 0.13s;
+  }
+  .btn-success:hover, .btn-success:focus {
+    background: #12652f;
+    border-color: #12652f;
+    color: #fff;
+  }
+  .btn-secondary {
+    background: #232323;
+    color: #fff;
+    border: 2.1px solid #232323;
+    border-radius: 0.25rem;
+    font-weight: 700;
+    padding: 0.68rem 1.75rem;
+    font-size: 1.12rem;
+    transition: background 0.13s, border 0.13s, color 0.13s;
+  }
+  .btn-secondary:hover, .btn-secondary:focus {
+    background: #181818;
+    border-color: #181818;
+    color: #fff;
+  }
+   
+  /* ===== MENSAJE DE ERROR (Django) ===== */
+  ul.errorlist {
+    list-style: none;
+    color: #c0392b;
+    padding-left: 0.2rem;
+    font-size: 0.97rem;
+    margin-bottom: 0.19rem;
+    margin-top: 0.15rem;
+  }
+   
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 991px) {
+    .container.mt-5 {
+      padding: 1.2rem 0.6rem 0.9rem 0.6rem;
+      margin-top: 19px;
+      margin-bottom: 21px;
+      max-width: 99vw;
+    }
+    fieldset {
+      padding: 1.2rem 0.7rem 0.7rem 0.7rem !important;
+    }
+    h2.mb-4 {
+      font-size: 1.34rem;
+      padding-bottom: 0.31rem;
+    }
+    .row.g-3 {
+      margin-bottom: 0.2rem;
+    }
+  }
+   
+  @media (max-width: 767px) {
+    .col-md-6, .col-md-3, .col-12, .col-md-4 {
+      flex: 0 0 100%;
+      max-width: 100%;
+      margin-bottom: 1rem;
+      padding-left: 2px;
+      padding-right: 2px;
+    }
+    .container.mt-5 {
+      padding: 0.85rem 0.3rem 0.5rem 0.3rem;
+      margin-top: 11px;
+      margin-bottom: 13px;
+    }
+  }
+   
+  /* ===== OPCIONAL: Separador visual entre fieldsets ===== */
+  fieldset + fieldset {
+    margin-top: 2.2rem;
+    border-top: 2.5px solid #eee;
+    padding-top: 2.1rem !important;
+  }
