@@ -1,13 +1,18 @@
 {% extends "base.html" %}
-
+{% load static %}
+ 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/panel_admin.css' %}">
+{% endblock %}
+ 
 {% block content %}
 <div class="container py-5">
   <h2 class="mb-4">Panel de Administración de Usuarios</h2>
-
+ 
   <div class="mb-3 text-end">
     <a href="{% url 'registro' %}" class="btn btn-success">Registrar nuevo usuario</a>
   </div>
-
+ 
   <table class="table table-bordered table-hover align-middle">
     <thead class="table-dark">
       <tr>
@@ -39,11 +44,7 @@
     </tbody>
   </table>
 </div>
-<div class="mb-3 text-end">
-  <a href="{% url 'nueva_solicitud' %}" class="btn btn-primary">
-    Enviar Solicitud de Código
-  </a>
-</div>
+ 
 <div class="row mt-5">
   <div class="col-md-6">
     <h4>Solicitudes Enviadas</h4>
@@ -62,7 +63,7 @@
       <p class="text-muted">No has enviado ninguna solicitud.</p>
     {% endif %}
   </div>
-
+ 
   <div class="col-md-6">
     <h4>Solicitudes Recibidas</h4>
     {% if solicitudes_recibidas %}

@@ -2,41 +2,78 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser, SolicitudCodigo
 from django.core.exceptions import ValidationError
+from apps.organizaciones.models import Area, Cargo
 
 
 class CustomUserCreationForm(UserCreationForm):
+    area = forms.ModelChoiceField(
+        queryset=Area.objects.all(),
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    cargo = forms.ModelChoiceField(
+        queryset=Cargo.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
     class Meta:
         model = CustomUser
         fields = [
-            'username',
-            'first_name',
-            'last_name',
-            'email',
-            'area',
-            'cargo',
-            'usuario_ad',
-            'usuario_office',
-            'usuario_sap',
-            'equipo_a_cargo',
-            'impresora_a_cargo',
-            'movil',
+            'first_name', 'last_name', 'email',
+            'area', 'cargo',
+            'usuario_ad', 'usuario_office', 'usuario_sap',
+            'equipo_a_cargo', 'impresora_a_cargo', 'movil',
         ]
         widgets = {
-            'area': forms.Select(attrs={'class': 'form-control'}),
-            'cargo': forms.Select(attrs={'class': 'form-control'}),
-            'usuario_ad': forms.TextInput(attrs={'class': 'form-control'}),
-            'usuario_office': forms.TextInput(attrs={'class': 'form-control'}),
-            'usuario_sap': forms.TextInput(attrs={'class': 'form-control'}),
-            'equipo_a_cargo': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'usuario_ad':        forms.TextInput(attrs={'class': 'form-control'}),
+            'usuario_office':    forms.TextInput(attrs={'class': 'form-control'}),
+            'usuario_sap':       forms.TextInput(attrs={'class': 'form-control'}),
+            'equipo_a_cargo':    forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'impresora_a_cargo': forms.TextInput(attrs={'class': 'form-control'}),
-            'movil': forms.TextInput(attrs={'class': 'form-control'}),
+            'movil':             forms.TextInput(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
-        super(CustomUserCreationForm, self).__init__(*args, **kwargs)
-        for field_name, field in self.fields.items():
-            if not field.widget.attrs.get('class'):
+        super().__init__(*args, **kwargs)
+
+        for name, field in self.fields.items():
+            if 'class' not in field.widget.attrs:
                 field.widget.attrs['class'] = 'form-control'
+
+        if 'area' in self.data:
+            try:
+                area_id = int(self.data.get('area'))
+                self.fields['cargo'].queryset = Cargo.objects.filter(area_id=area_id).order_by('nombre')
+            except (ValueError, TypeError):
+                self.fields['cargo'].queryset = Cargo.objects.none()
+        elif self.instance.pk and self.instance.area:
+            self.fields['cargo'].queryset = Cargo.objects.filter(area=self.instance.area).order_by('nombre')
+        else:
+            self.fields['cargo'].queryset = Cargo.objects.none()
+
+    # ⬇️ Aquí el PASO B: método save()
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        # Generar username como "Nombre Apellido"
+        nombre = self.cleaned_data.get('first_name', '').strip()
+        apellido = self.cleaned_data.get('last_name', '').strip()
+        base_username = f"{nombre} {apellido}"
+        username = base_username
+        count = 1
+        while CustomUser.objects.filter(username=username).exists():
+            username = f"{base_username} {count}"
+            count += 1
+
+        user.username = username
+        user.email = self.cleaned_data['email']
+
+        if commit:
+            user.save()
+            self.save_m2m()
+        return user
 
 
 class SolicitudCodigoForm(forms.ModelForm):
