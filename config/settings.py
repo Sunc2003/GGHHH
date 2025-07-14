@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'apps.sap',
     'apps.usuarios',
     'apps.permisos',
     'apps.organizaciones',
