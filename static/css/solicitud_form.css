@@ -36,16 +36,26 @@
   }
    
   legend {
-    font-size: 1.21rem;
+    font-size: 1.14rem;
     font-weight: 700;
-    color: #c0392b;
-    background: #fff;
-    padding: 0 18px;
-    border-radius: 12px;
-    margin-left: 10px;
-    letter-spacing: 0.35px;
-    border: 1px solid #c0392b;
-    box-shadow: 0 1px 5px rgba(192,57,43,0.06);
+    color: #222;
+    background: none;
+    padding: 0 10px;
+    border: none;
+    position: relative;
+    margin-left: 2px;
+    letter-spacing: 0.13px;
+  }
+   
+  legend::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 20px;
+    background: #000000;  /* verde institucional, cambia si quieres */
+    border-radius: 8px;
+    margin-right: 8px;
+    vertical-align: -3px;
   }
    
   /* ===== SEPARADORES ===== */
