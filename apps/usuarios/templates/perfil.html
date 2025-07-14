@@ -1,8 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/perfil.css' %}">
+
 <div class="container py-5">
-  <h2 class="mb-4 text-center">Perfil de Usuario</h2>
+  <h2 class="mb-4 text-center"><i class="fas fa-user-circle"></i> Perfil </h2>
 
   <div class="card shadow p-4">
     <div class="row g-3">
