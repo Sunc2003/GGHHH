@@ -1,8 +1,63 @@
-<h2>{{ object.titulo }}</h2>
-<p><strong>Descripción:</strong> {{ object.descripcion }}</p>
-<p><strong>Solicitado por:</strong> {{ object.solicitante }}</p>
-<p><strong>Estado:</strong> {{ object.estado }}</p>
+{% extends "base.html" %}
 
-{% if request.user == object.receptor and object.estado == 'pendiente' %}
-  <a href="{% url 'cambiar_estado' object.pk %}" class="btn btn-success">Marcar como "Código creado"</a>
-{% endif %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Detalle de Solicitud de Código SAP</h2>
+
+  <!-- Información General -->
+  <fieldset class="border p-3 mb-4 rounded">
+    <legend class="w-auto px-2">Información General</legend>
+    <p><strong>Título:</strong> {{ object.titulo }}</p>
+    <p><strong>Descripción:</strong> {{ object.descripcion }}</p>
+    <p><strong>Solicitado por:</strong> {{ object.solicitante }}</p>
+    <p><strong>Receptor:</strong> {{ object.receptor }}</p>
+    <p><strong>Empresa:</strong> {{ object.get_empresa_display }}</p>
+    <p><strong>Tipo de Solicitud:</strong> {{ object.get_tipo_solicitud_display }}</p>
+    <p><strong>Tipo de Cotización:</strong> {{ object.get_cotizacion_display }}</p>
+
+    {% if object.archivo_cotizacion %}
+      <p><strong>Archivo Cotización:</strong> <a href="{{ object.archivo_cotizacion.url }}" target="_blank">Descargar</a></p>
+    {% endif %}
+    {% if object.imagen_whatsapp %}
+      <p><strong>Imagen WhatsApp:</strong><br>
+        <img src="{{ object.imagen_whatsapp.url }}" alt="Imagen WhatsApp" class="img-thumbnail" width="300">
+      </p>
+    {% endif %}
+  </fieldset>
+
+  <!-- Información Técnica -->
+  <fieldset class="border p-3 mb-4 rounded">
+    <legend class="w-auto px-2">Información Técnica</legend>
+    <p><strong>Origen:</strong> {{ object.get_origen_display }}</p>
+    <p><strong>Proveedor:</strong> {{ object.proveedor }}</p>
+    <p><strong>RUT Proveedor:</strong> {{ object.rut_proveedor }}</p>
+    <p><strong>SKU Proveedor:</strong> {{ object.sku_proveedor }}</p>
+    <p><strong>SKU Fabricante:</strong> {{ object.sku_fabricante }}</p>
+    <p><strong>Marca:</strong> {{ object.marca }}</p>
+    <p><strong>UDM:</strong> {{ object.udm }}</p>
+  </fieldset>
+
+  <!-- Dimensiones y Costo -->
+  <fieldset class="border p-3 mb-4 rounded">
+    <legend class="w-auto px-2">Dimensiones y Costo</legend>
+    <p><strong>Largo:</strong> {{ object.largo }} cm</p>
+    <p><strong>Ancho:</strong> {{ object.ancho }} cm</p>
+    <p><strong>Alto:</strong> {{ object.alto }} cm</p>
+    <p><strong>Peso:</strong> {{ object.peso }} kg</p>
+    <p><strong>Costo:</strong> ${{ object.costo }}</p>
+  </fieldset>
+
+  <!-- Estado y Acción -->
+  <fieldset class="border p-3 mb-4 rounded">
+    <legend class="w-auto px-2">Estado de la Solicitud</legend>
+    <p><strong>Estado actual:</strong> {{ object.get_estado_display }}</p>
+    
+    {% if request.user == object.receptor and object.estado == 'pendiente' %}
+      <a href="{% url 'cambiar_estado' object.pk %}" class="btn btn-success">✅ Marcar como "Código creado"</a>
+    {% endif %}
+  </fieldset>
+
+  <!-- Botón de volver -->
+  <a href="{% url 'panel_admin_usuarios' %}" class="btn btn-secondary">← Volver</a>
+</div>
+{% endblock %}

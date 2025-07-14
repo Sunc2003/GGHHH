@@ -4,17 +4,24 @@ from .forms import CustomUserCreationForm
 from .models import CustomUser
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from datetime import timedelta
 from .models import SolicitudCodigo
 from .forms import SolicitudCodigoForm
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import View
 
 
 class IniciarSesionView(LoginView):
     template_name = 'login.html'  # Ruta al template
+    
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Usuario'})
+        form.fields['password'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Contraseña'})
+        return form
 
 class RegistroUsuarioView(CreateView):
     model = CustomUser
@@ -55,7 +62,7 @@ class SolicitudCreateView(LoginRequiredMixin, CreateView):
     model = SolicitudCodigo
     form_class = SolicitudCodigoForm
     template_name = 'solicitud_form.html'
-    success_url = reverse_lazy('solicitudes_enviadas')
+    success_url = reverse_lazy('panel_admin_usuarios')
 
     def form_valid(self, form):
         form.instance.solicitante = self.request.user
@@ -72,8 +79,12 @@ class SolicitudDetailView(LoginRequiredMixin, DetailView):
     model = SolicitudCodigo
     template_name = 'solicitud_detalle.html'
 
-class CambiarEstadoView(LoginRequiredMixin, UpdateView):
-    model = SolicitudCodigo
-    fields = ['estado']
-    template_name = 'cambiar_estado.html'
-    success_url = reverse_lazy('solicitudes_recibidas')
+class CambiarEstadoView(View):
+    def get(self, request, pk):
+        solicitud = get_object_or_404(SolicitudCodigo, pk=pk)
+
+        if request.user == solicitud.receptor and solicitud.estado == 'pendiente':
+            solicitud.estado = 'creado'
+            solicitud.save()
+
+        return redirect('panel_admin_usuarios')  # Asegúrate que esta URL existe

@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'apps.usuarios',
     'apps.permisos',
     'apps.organizaciones',
+    'apps.sap',
+    
 ]
 
 MIDDLEWARE = [

@@ -1,11 +1,128 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block content %}
-<div class="container py-4">
-  <h3>Enviar solicitud de código</h3>
-  <form method="post">
+<div class="container mt-5">
+  <h2 class="mb-4">Solicitud de Creación de Código</h2>
+
+  <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Enviar solicitud</button>
+
+    <!-- Información General -->
+    <fieldset class="border p-3 mb-4 rounded">
+      <legend class="w-auto px-2">Información General</legend>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Receptor</label>
+          {{ form.receptor }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Empresa</label>
+          {{ form.empresa }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Tipo de Solicitud</label>
+          {{ form.tipo_solicitud }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Tipo de Cotización</label>
+          {{ form.cotizacion }}
+        </div>
+        <div class="col-md-6" id="campo_archivo" style="display: none;">
+          <label class="form-label">Archivo Cotización</label>
+          {{ form.archivo_cotizacion }}
+        </div>
+        <div class="col-md-6" id="campo_imagen" style="display: none;">
+          <label class="form-label">Imagen WhatsApp</label>
+          {{ form.imagen_whatsapp }}
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Información Técnica -->
+    <fieldset class="border p-3 mb-4 rounded">
+      <legend class="w-auto px-2">Información Técnica</legend>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Origen</label>
+          {{ form.origen }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Proveedor</label>
+          {{ form.proveedor }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">SKU Proveedor</label>
+          {{ form.sku_proveedor }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">SKU Fabricante</label>
+          {{ form.sku_fabricante }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Descripción del Producto</label>
+          {{ form.descripcion }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Marca</label>
+          {{ form.marca }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Unidad de Medida (UDM)</label>
+          {{ form.udm }}
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Dimensiones y Costo -->
+    <fieldset class="border p-3 mb-4 rounded">
+      <legend class="w-auto px-2">Dimensiones y Costo</legend>
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Largo (cm)</label>
+          {{ form.largo }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Ancho (cm)</label>
+          {{ form.ancho }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Alto (cm)</label>
+          {{ form.alto }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Peso (kg)</label>
+          {{ form.peso }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Costo Estimado</label>
+          {{ form.costo }}
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Botones -->
+    <div class="mt-4">
+      <button type="submit" class="btn btn-success">📨 Enviar Solicitud</button>
+      <a href="{% url 'panel_admin_usuarios' %}" class="btn btn-secondary">Cancelar</a>
+    </div>
   </form>
 </div>
+
+<!-- Script para mostrar campos según tipo de cotización -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const cotizacionSelect = document.getElementById('id_cotizacion');
+    const campoArchivo = document.getElementById('campo_archivo');
+    const campoImagen = document.getElementById('campo_imagen');
+
+    function toggleCampos() {
+      const valor = cotizacionSelect.value;
+      campoArchivo.style.display = valor === 'documento' ? 'block' : 'none';
+      campoImagen.style.display = valor === 'whatsapp' ? 'block' : 'none';
+    }
+
+    cotizacionSelect.addEventListener('change', toggleCampos);
+    toggleCampos(); // Ejecutar al cargar
+  });
+</script>
 {% endblock %}
