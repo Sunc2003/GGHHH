@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h3 class="mb-4 text-center">Listado de Usuarios AD</h3>
+
+  <!-- Filtros -->
+  <form method="get" class="row g-3 mb-4">
+    <div class="col-md-5">
+      <select name="area" class="form-select">
+        <option value="">-- Filtrar por Área --</option>
+        {% for area in areas %}
+          <option value="{{ area.id }}" {% if filtro_area == area.id|stringformat:"s" %}selected{% endif %}>{{ area.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-5">
+      <select name="cargo" class="form-select">
+        <option value="">-- Filtrar por Cargo --</option>
+        {% for c in cargos %}
+          <option value="{{ c.id }}" {% if filtro_cargo == c.id|stringformat:"s" %}selected{% endif %}>{{ c.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+    </div>
+  </form>
+
+  <!-- Tabla -->
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle text-center">
+      <thead class="table-dark">
+        <tr>
+          <th>Área</th>
+          <th>Cargo</th>
+          <th>Username</th>
+          <th>Nombre completo</th>
+          <th>Usuario AD</th>
+          <th>Office</th>
+          <th>SAP</th>
+          <th>Equipo</th>
+          <th>Impresora</th>
+          <th>Móvil</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in usuarios %}
+        <tr>
+          <td>{{ user.area }}</td>
+          <td>{{ user.cargo }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.first_name }} {{ user.last_name }}</td>
+          <td>{{ user.usuario_ad }}</td>
+          <td>{{ user.usuario_office }}</td>
+          <td>{{ user.usuario_sap }}</td>
+          <td>{{ user.equipo_a_cargo|default:"—" }}</td>
+          <td>{{ user.impresora_a_cargo|default:"—" }}</td>
+          <td>{{ user.movil|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9">No se encontraron usuarios.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginación -->
+  <div class="d-flex justify-content-center">
+    {% if is_paginated %}
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filtro_area %}&area={{ filtro_area }}{% endif %}{% if filtro_cargo %}&cargo={{ filtro_cargo }}{% endif %}">&laquo;</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filtro_area %}&area={{ filtro_area }}{% endif %}{% if filtro_cargo %}&cargo={{ filtro_cargo }}{% endif %}">&raquo;</a></li>
+        {% endif %}
+      </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

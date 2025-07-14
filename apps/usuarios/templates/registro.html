@@ -1,14 +1,23 @@
 {% extends "base.html" %}
-
+{% load static %}
+ 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/registro.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+ 
+{% endblock %}
+ 
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-md-8">
-      <h2 class="mb-4 text-center">Registro de Usuario</h2>
+          <div class="icono-registro">
+      <i class="fa-solid fa-user-tie"></i>
+    </div>
+ 
       <form method="post">
         {% csrf_token %}
         <div class="row g-3">
-
           <!-- Campo Área -->
           <div class="col-md-6">
             <label for="{{ form.area.id_for_label }}" class="form-label">{{ form.area.label }}</label>
@@ -17,7 +26,6 @@
               <div class="text-danger">{{ error }}</div>
             {% endfor %}
           </div>
-
           <!-- Campo Cargo -->
           <div class="col-md-6">
             <label for="{{ form.cargo.id_for_label }}" class="form-label">{{ form.cargo.label }}</label>
@@ -26,7 +34,6 @@
               <div class="text-danger">{{ error }}</div>
             {% endfor %}
           </div>
-
           <!-- Los demás campos -->
           {% for field in form %}
             {% if field.name != 'area' and field.name != 'cargo' %}
@@ -43,7 +50,6 @@
             {% endif %}
           {% endfor %}
         </div>
-
         <div class="text-center mt-4">
           <button type="submit" class="btn btn-primary">Registrar</button>
         </div>
@@ -51,13 +57,11 @@
     </div>
   </div>
 </div>
-
-<!-- Script para actualizar dinámicamente el campo de Cargos -->
+ 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const areaSelect  = document.getElementById('id_area');
     const cargoSelect = document.getElementById('id_cargo');
-
     function cargarCargos(areaId) {
       fetch(`/usuarios/api/cargos_por_area/${areaId}/`)
         .then(res => res.json())
@@ -66,17 +70,15 @@
           data.forEach(c => {
             const o = document.createElement('option');
             o.value = c.id;
-            o.textContent = c.nombre;  // 🔄 Aquí estaba el error
+            o.textContent = c.nombre;
             cargoSelect.appendChild(o);
           });
         });
     }
-
     if (areaSelect && cargoSelect) {
       if (areaSelect.value) {
         cargarCargos(areaSelect.value);
       }
-
       areaSelect.addEventListener('change', () => {
         if (areaSelect.value) {
           cargarCargos(areaSelect.value);

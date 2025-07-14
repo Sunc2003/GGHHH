@@ -12,6 +12,7 @@ from .forms import SolicitudCodigoForm
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
+from apps.organizaciones.models import Area, Cargo
 
 
 class IniciarSesionView(LoginView):
@@ -89,3 +90,33 @@ class CambiarEstadoView(View):
             solicitud.save()
 
         return redirect('panel_admin_usuarios')  # Asegúrate que esta URL existe
+
+
+class UsuariosADListView(ListView):
+    model = CustomUser
+    template_name = 'usuarios_ad.html'
+    context_object_name = 'usuarios'
+    paginate_by = 10
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        area_id = self.request.GET.get('area')
+        cargo_id = self.request.GET.get('cargo')
+
+        if area_id:
+            qs = qs.filter(area_id=area_id)
+        if cargo_id:
+            qs = qs.filter(cargo_id=cargo_id)
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['areas'] = Area.objects.all()
+        context['cargos'] = Cargo.objects.all()
+        context['filtro_area'] = self.request.GET.get('area', '')
+        context['filtro_cargo'] = self.request.GET.get('cargo', '')
+        return context
+    
+def perfil_usuario(request):
+    return render(request, 'perfil.html', {'usuario': request.user})

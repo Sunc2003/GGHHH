@@ -1,0 +1,129 @@
+/* ==== CONTENEDOR PRINCIPAL ==== */
+.container.py-5 {
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.09);
+    padding: 2rem 2rem 1.5rem 2rem;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    border: 1.5px solid #222;
+  }
+   
+  /* ==== TÍTULO PROFESIONAL ==== */
+  .titulo-registro {
+    text-align: center;
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #191919;
+    letter-spacing: 0.5px;
+    background: none;
+    margin-bottom: 1.7rem;
+    padding-bottom: 0.45rem;
+    border: none;
+    position: relative;
+    display: block;
+  }
+  .titulo-registro::after {
+    content: "";
+    display: block;
+    margin: 0.42rem auto 0 auto;
+    width: 40%;
+    border-bottom: 2.5px solid #c0392b;
+    border-radius: 2px;
+  }
+   
+  /* ==== FORMULARIO ==== */
+  form {
+    margin-top: 1.5rem;
+  }
+   
+  .form-label {
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 0.2rem;
+    letter-spacing: 0.3px;
+  }
+   
+  .form-control, select, input, textarea {
+    border-radius: 0.2rem;
+    border: 1.8px solid #111;
+    font-size: 1.05rem;
+    padding: 0.58rem 0.75rem;
+    background: #f9f9f9;
+    color: #181818;
+    transition: border 0.16s, background 0.12s;
+    box-shadow: none;
+  }
+  .form-control:focus, select:focus, input:focus, textarea:focus {
+    border-color: #000;
+    background: #fff;
+    outline: none;
+  }
+  .form-control.is-valid, select.is-valid, input.is-valid, textarea.is-valid {
+    border-color: #1fa259 !important;
+    background: #f6fff8;
+  }
+  .form-control.is-invalid, select.is-invalid, input.is-invalid, textarea.is-invalid {
+    border-color: #c0392b !important;
+    background: #fff8f8;
+  }
+   
+  .form-text {
+    font-size: 0.92rem;
+    color: #3d3d3d;
+    margin-bottom: 0.2rem;
+  }
+  .text-danger {
+    font-size: 0.96rem;
+    margin-top: 0.13rem;
+    color: #c0392b !important;
+  }
+   
+  .btn-primary {
+    background: #000;
+    color: #fff;
+    border: 2.5px solid #c0392b;
+    border-radius: 0.25rem;
+    padding: 0.67rem 2.1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    box-shadow: none;
+    transition: border 0.18s, background 0.15s, color 0.15s;
+  }
+  .btn-primary:hover, .btn-primary:focus {
+    background: #c0392b;
+    color: #fff;
+    border-color: #000;
+  }
+   
+  /* ==== RESPONSIVE ==== */
+  @media (max-width: 767px) {
+    .container.py-5 {
+      padding: 1.1rem 0.3rem 0.8rem 0.3rem;
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+    .col-md-6, .col-md-8 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+   
+   
+   
+  .icono-registro {
+    text-align: center;
+    margin-bottom: 1.8rem;
+  }
+   
+  .icono-registro i {
+    font-size: 3.3rem;
+    color: #191919;
+    border-bottom: 2.5px solid #c0392b;
+    padding-bottom: 0.38rem;
+    display: inline-block;
+    margin-bottom: 0.2rem;
+    /* Sombra sutil debajo del ícono */
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.06));
+  }
