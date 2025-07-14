@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from apps.organizaciones.models import Area, Cargo
 
 class Command(BaseCommand):
-    help = 'Pobla las tablas Area y Cargo con datos predefinidos'
+    help = 'Pobla la base de datos con las áreas y cargos definidos'
 
     def handle(self, *args, **options):
         datos = [
@@ -57,10 +57,9 @@ class Command(BaseCommand):
         ]
 
         for nombre_cargo, nombre_area in datos:
-            area_obj, _ = Area.objects.get_or_create(nombre_area=nombre_area)
-            cargo_obj, created = Cargo.objects.get_or_create(nombre_cargo=nombre_cargo, area=area_obj)
+            area, _ = Area.objects.get_or_create(nombre=nombre_area)
+            cargo, created = Cargo.objects.get_or_create(nombre=nombre_cargo, area=area)
             if created:
-                self.stdout.write(self.style.SUCCESS(f'✔ Cargo "{nombre_cargo}" creado en área "{nombre_area}"'))
+                self.stdout.write(self.style.SUCCESS(f"✔ Cargo '{nombre_cargo}' creado en área '{nombre_area}'"))
             else:
-                self.stdout.write(f'⚠ Cargo "{nombre_cargo}" ya existe')
-
+                self.stdout.write(f"⚠ Cargo '{nombre_cargo}' ya existía")
