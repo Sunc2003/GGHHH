@@ -13,7 +13,7 @@ class CustomUser(AbstractUser):
     usuario_sap = models.CharField(max_length=100, blank=True, null=True)
     equipo_a_cargo = models.TextField(blank=True, null=True)
     impresora_a_cargo = models.CharField(max_length=100, blank=True, null=True)
-    movil = models.CharField(max_length=20, blank=True, null=True)
+    movil = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         return self.get_full_name() or self.username
