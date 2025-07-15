@@ -13,6 +13,17 @@ from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from apps.organizaciones.models import Area, Cargo
+from apps.usuarios.decorators import cargo_requerido
+from django.utils.decorators import method_decorator
+
+
+CARGOS_AUTORIZADOS_ENVIO = [
+    "ASISTENTE COMERCIAL DE SERVICIOS",
+    "ASISTENTE DE EJECUTIVOS COMERCIALES",
+    "EJECUTIVO COMERCIAL",
+    "Encargado de Línea",
+]
+
 
 
 class IniciarSesionView(LoginView):
@@ -60,6 +71,7 @@ def panel_admin_usuarios(request):
 
     return render(request, 'panel_admin.html', context)
 
+@method_decorator(cargo_requerido(CARGOS_AUTORIZADOS_ENVIO), name='dispatch')
 class SolicitudCreateView(LoginRequiredMixin, CreateView):
     model = SolicitudCodigo
     form_class = SolicitudCodigoForm
