@@ -28,7 +28,8 @@
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="{% url 'panel_admin_usuarios' %}">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'nueva_solicitud' %}">Solicitud de código</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'usuarios_ad' %}">Usuarios AD</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'usuarios_ad' %}">Usuarios AD</a></li>        
+          <li class="nav-item"><a class="nav-link" href="{% url 'crear_permiso' %}">Gestion de Permisos</a></li>  
         </ul>
         <ul class="navbar-nav ms-auto">
           {% if user.is_authenticated %}

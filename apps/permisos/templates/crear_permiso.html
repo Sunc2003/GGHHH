@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+
+      <!-- FORMULARIO -->
+      <div class="card shadow rounded-4 mb-5">
+        <div class="card-body">
+          <h4 class="card-title text-center mb-4">Crear nuevo permiso</h4>
+
+          <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label for="{{ form.codigo.id_for_label }}" class="form-label">Código del Permiso</label>
+              {{ form.codigo }}
+              {% if form.codigo.errors %}
+                <div class="text-danger small">{{ form.codigo.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre del Permiso</label>
+              {{ form.nombre }}
+              {% if form.nombre.errors %}
+                <div class="text-danger small">{{ form.nombre.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="{{ form.descripcion.id_for_label }}" class="form-label">Descripción</label>
+              {{ form.descripcion }}
+              {% if form.descripcion.errors %}
+                <div class="text-danger small">{{ form.descripcion.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary rounded-pill">Guardar Permiso</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- LISTADO DE PERMISOS -->
+      <div class="card shadow rounded-4">
+        <div class="card-body">
+          <h5 class="card-title mb-3">Permisos existentes</h5>
+
+          {% if permisos %}
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col">Código</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Descripción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for permiso in permisos %}
+                    <tr>
+                      <td><code>{{ permiso.codigo }}</code></td>
+                      <td>{{ permiso.nombre }}</td>
+                      <td>{{ permiso.descripcion|default:"—" }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="text-muted">No hay permisos registrados aún.</p>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

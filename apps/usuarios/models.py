@@ -14,15 +14,13 @@ class CustomUser(AbstractUser):
     equipo_a_cargo = models.TextField(blank=True, null=True)
     impresora_a_cargo = models.CharField(max_length=100, blank=True, null=True)
     movil = models.CharField(max_length=50, blank=True, null=True)
+    permisos_directos = models.ManyToManyField('permisos.Permiso', blank=True, related_name='usuarios_con_permiso_directo')
 
     def __str__(self):
         return self.get_full_name() or self.username
 
     def obtener_permisos(self):
-        from permisos.models import Permiso
-        permisos_area = Permiso.objects.filter(permisoarea__area=self.area)
-        permisos_cargo = Permiso.objects.filter(permisocargo__cargo=self.cargo)
-        return (permisos_area | permisos_cargo).distinct()
+        return self.permisos_directos.all()
 
     def tiene_permiso(self, codigo_permiso):
         return self.obtener_permisos().filter(codigo=codigo_permiso).exists()

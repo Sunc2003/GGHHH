@@ -1,28 +1,22 @@
 from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy
-from .forms import CustomUserCreationForm
-from .models import CustomUser
+from apps.usuarios.forms import CustomUserCreationForm
+from apps.usuarios.models import CustomUser
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from datetime import timedelta
-from .models import SolicitudCodigo
-from .forms import SolicitudCodigoForm
+from apps.usuarios.models import SolicitudCodigo
+from apps.usuarios.forms import SolicitudCodigoForm
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from apps.organizaciones.models import Area, Cargo
-from apps.usuarios.decorators import cargo_requerido
 from django.utils.decorators import method_decorator
+from apps.permisos.decorators import permiso_requerido 
 
 
-CARGOS_AUTORIZADOS_ENVIO = [
-    "ASISTENTE COMERCIAL DE SERVICIOS",
-    "ASISTENTE DE EJECUTIVOS COMERCIALES",
-    "EJECUTIVO COMERCIAL",
-    "Encargado de Línea",
-]
 
 
 
@@ -35,7 +29,7 @@ class IniciarSesionView(LoginView):
         form.fields['password'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Contraseña'})
         return form
     
-
+@method_decorator(permiso_requerido('CREACION_USUARIO'), name='dispatch')
 class RegistroUsuarioView(CreateView):
     model = CustomUser
     form_class = CustomUserCreationForm
@@ -71,7 +65,7 @@ def panel_admin_usuarios(request):
 
     return render(request, 'panel_admin.html', context)
 
-@method_decorator(cargo_requerido(CARGOS_AUTORIZADOS_ENVIO), name='dispatch')
+@method_decorator(permiso_requerido('SOLICITUD_CODIGO'), name='dispatch')
 class SolicitudCreateView(LoginRequiredMixin, CreateView):
     model = SolicitudCodigo
     form_class = SolicitudCodigoForm

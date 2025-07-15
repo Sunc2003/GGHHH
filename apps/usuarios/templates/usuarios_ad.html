@@ -41,6 +41,7 @@
           <th>Equipo</th>
           <th>Impresora</th>
           <th>Móvil</th>
+          <th>Acciones</th> <!-- ✅ nueva columna -->
         </tr>
       </thead>
       <tbody>
@@ -56,9 +57,14 @@
           <td>{{ user.equipo_a_cargo|default:"—" }}</td>
           <td>{{ user.impresora_a_cargo|default:"—" }}</td>
           <td>{{ user.movil|default:"—" }}</td>
+          <td>
+            <a href="{% url 'asignar_permisos_usuario' user.pk %}" class="btn btn-sm btn-outline-primary">
+              <i class="fa fa-shield-alt"></i> Permisos
+            </a>
+          </td>
         </tr>
         {% empty %}
-        <tr><td colspan="9">No se encontraron usuarios.</td></tr>
+        <tr><td colspan="11">No se encontraron usuarios.</td></tr>
         {% endfor %}
       </tbody>
     </table>

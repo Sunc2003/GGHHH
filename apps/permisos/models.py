@@ -5,6 +5,9 @@ class Permiso(models.Model):
     codigo = models.CharField(max_length=50, unique=True)
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True)
+    
+    class Meta:
+        app_label = 'permisos'
 
     def __str__(self):
         return f"[{self.codigo}] {self.nombre}"
