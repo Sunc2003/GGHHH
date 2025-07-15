@@ -1,23 +1,21 @@
 {% extends "base.html" %}
 {% load static %}
- 
+
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/solicitud_form.css' %}">
 {% endblock %}
- 
+
 {% block content %}
-<div class="container mt-5">
- <h2 class="mb-4" style="margin-bottom: 2.3rem !important;">
-  <i class="fas fa-barcode" style="font-size:2.5rem; color:#000000;"></i>
-</h2>
- 
- 
+  <h2 class="mb-4">
+    <i class="fas fa-barcode" style="font-size:2.5rem; color:#000000;"></i>
+  </h2>
+
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
- 
+
     <!-- Información General -->
-    <fieldset class="border p-3 mb-4 rounded">
-      <legend class="w-auto px-2">Información General</legend>
+    <fieldset>
+      <legend>Información General</legend>
       <div class="row g-3">
         <div class="col-md-6">
           <label class="form-label">Receptor</label>
@@ -45,10 +43,10 @@
         </div>
       </div>
     </fieldset>
- 
+
     <!-- Información Técnica -->
-    <fieldset class="border p-3 mb-4 rounded">
-      <legend class="w-auto px-2">Información Técnica</legend>
+    <fieldset>
+      <legend>Información Técnica</legend>
       <div class="row g-3">
         <div class="col-md-6">
           <label class="form-label">Origen</label>
@@ -80,10 +78,10 @@
         </div>
       </div>
     </fieldset>
- 
+
     <!-- Dimensiones y Costo -->
-    <fieldset class="border p-3 mb-4 rounded">
-      <legend class="w-auto px-2">Dimensiones y Costo</legend>
+    <fieldset>
+      <legend>Dimensiones y Costo</legend>
       <div class="row g-3">
         <div class="col-md-3">
           <label class="form-label">Largo (cm)</label>
@@ -107,30 +105,29 @@
         </div>
       </div>
     </fieldset>
- 
+
     <!-- Botones -->
-    <div class="mt-4">
+    <div class="mt-4 d-flex">
       <button type="submit" class="btn btn-success">📨 Enviar Solicitud</button>
       <a href="{% url 'panel_admin_usuarios' %}" class="btn btn-secondary">Cancelar</a>
     </div>
   </form>
-</div>
- 
-<!-- Script para mostrar campos según tipo de cotización -->
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const cotizacionSelect = document.getElementById('id_cotizacion');
-    const campoArchivo = document.getElementById('campo_archivo');
-    const campoImagen = document.getElementById('campo_imagen');
- 
-    function toggleCampos() {
-      const valor = cotizacionSelect.value;
-      campoArchivo.style.display = valor === 'documento' ? 'block' : 'none';
-      campoImagen.style.display = valor === 'whatsapp' ? 'block' : 'none';
-    }
- 
-    cotizacionSelect.addEventListener('change', toggleCampos);
-    toggleCampos(); // Ejecutar al cargar
-  });
-</script>
+
+  <!-- Script para mostrar campos según tipo de cotización -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const cotizacionSelect = document.getElementById('id_cotizacion');
+      const campoArchivo = document.getElementById('campo_archivo');
+      const campoImagen = document.getElementById('campo_imagen');
+
+      function toggleCampos() {
+        const valor = cotizacionSelect.value;
+        campoArchivo.style.display = valor === 'documento' ? 'block' : 'none';
+        campoImagen.style.display = valor === 'whatsapp' ? 'block' : 'none';
+      }
+
+      cotizacionSelect.addEventListener('change', toggleCampos);
+      toggleCampos(); // Ejecutar al cargar
+    });
+  </script>
 {% endblock %}

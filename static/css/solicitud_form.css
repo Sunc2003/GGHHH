@@ -8,7 +8,8 @@
     margin-top: 44px;
     margin-bottom: 56px;
     max-width: 950px;
-  }
+}
+
    
   /* ===== TÍTULO PRINCIPAL ===== */
   h2.mb-4 {
@@ -25,15 +26,14 @@
   }
    
   /* ===== FIELDSETS Y LEYENDAS ===== */
-  fieldset {
-    border: 1.4px solid #e2e2e2 !important;
-    border-radius: 0.55rem;
-    background: #fafbfc;
+fieldset {
+    border: none !important;        /* <--- Sin borde */
+    background: none;               /* <--- Sin fondo blanco */
     margin-bottom: 2.7rem;
     padding: 2.2rem 1.4rem 1.25rem 1.4rem !important;
-    box-shadow: 0 2px 12px rgba(192,57,43,0.04);
+    box-shadow: none;
     position: relative;
-  }
+}
    
   legend {
     font-size: 1.14rem;
