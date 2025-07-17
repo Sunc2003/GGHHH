@@ -10,7 +10,9 @@ from .views import (
     SolicitudDetailView,
     CambiarEstadoView,
     UsuariosADListView,
-    perfil_usuario
+    perfil_usuario,
+    solicitudes_enviadas_view
+    
 )
 from apps.organizaciones.views import cargos_por_area
 
@@ -25,7 +27,8 @@ urlpatterns = [
     path('solicitud/<int:pk>/cambiar-estado/', CambiarEstadoView.as_view(), name='cambiar_estado'),
     path('usuarios_ad/', UsuariosADListView.as_view(), name='usuarios_ad'),
     path('perfil/', perfil_usuario, name='perfil_usuario'),
-    
+    path('solicitudes/enviadas/', solicitudes_enviadas_view, name='solicitudes_enviadas'),
+
     # API para carga dinámica de cargos
     path('api/cargos_por_area/<int:area_id>/', cargos_por_area, name='cargos_por_area'),
 ]

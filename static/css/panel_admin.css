@@ -198,3 +198,24 @@ html {
     scrollbar-width: thin;
     scrollbar-color: #b0b2b8 #ececec;
 }
+ 
+ 
+/* Tabla más compacta para el panel admin */
+.table td, .table th {
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
+    font-size: 0.96rem !important;
+}
+ 
+.table {
+    font-size: 0.97rem;
+    margin-bottom: 1rem;
+}
+ 
+@media (max-width: 767.98px) {
+    .table td, .table th {
+        font-size: 0.88rem !important;
+        padding-top: 0.32rem !important;
+        padding-bottom: 0.32rem !important;
+    }
+}

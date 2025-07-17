@@ -54,6 +54,38 @@ def panel_admin_usuarios(request):
             u.en_linea = True
 
     # Lógica para solicitudes
+    ##solicitudes_enviadas = SolicitudCodigo.objects.filter(solicitante=request.user)
+    solicitudes_recibidas = SolicitudCodigo.objects.filter(receptor=request.user)
+
+    context = {
+        'usuarios': usuarios,
+        ##'solicitudes_enviadas': solicitudes_enviadas,
+        'solicitudes_recibidas': solicitudes_recibidas,
+    }
+
+    return render(request, 'panel_admin.html', context)
+
+
+##DESCOMENTAR PARA CUANDO TENGAMOS LOS PERMISOS CONFIGURADOSdef solicitud_form(request):
+    usuarios = CustomUser.objects.all()
+
+    context = {
+        'usuarios': usuarios,
+    }
+
+    if request.user.tiene_permiso('SOLICITUD_CODIGO'):
+        context['solicitudes_enviadas'] = SolicitudCodigo.objects.filter(solicitante=request.user)
+
+    if request.user.tiene_permiso('VER_SOLICITUDES_RECIBIDAS'):
+        context['solicitudes_recibidas'] = SolicitudCodigo.objects.filter(receptor=request.user)
+
+    return render(request, 'solicitud_form.html', context)
+
+##def solicitud_form(request):  ##CUANDO SE HABILITE LA DE ARRIBA BORRAR ESTA
+    print("Usuario autenticado:", request.user)
+    print("Solicitudes enviadas:", SolicitudCodigo.objects.filter(solicitante=request.user).count())
+    usuarios = CustomUser.objects.all()
+
     solicitudes_enviadas = SolicitudCodigo.objects.filter(solicitante=request.user)
     solicitudes_recibidas = SolicitudCodigo.objects.filter(receptor=request.user)
 
@@ -63,9 +95,29 @@ def panel_admin_usuarios(request):
         'solicitudes_recibidas': solicitudes_recibidas,
     }
 
-    return render(request, 'panel_admin.html', context)
+    return render(request, 'solicitud_form.html', context)
 
-@method_decorator(permiso_requerido('SOLICITUD_CODIGO'), name='dispatch')
+##@login_required
+##def solicitudes_enviadas_view(request):
+    solicitudes_enviadas = SolicitudCodigo.objects.filter(solicitante=request.user).order_by('-fecha_creacion')
+
+    return render(request, 'solicitud_form.html', {
+        'usuario': request.user,
+        'solicitudes_enviadas': solicitudes_enviadas
+    })
+
+##@method_decorator(permiso_requerido('SOLICITUD_CODIGO'), name='dispatch')
+##class SolicitudCreateView(LoginRequiredMixin, CreateView):
+    model = SolicitudCodigo
+    form_class = SolicitudCodigoForm
+    template_name = 'solicitud_form.html'
+    success_url = reverse_lazy('panel_admin_usuarios')
+
+    def form_valid(self, form):
+        form.instance.solicitante = self.request.user
+        return super().form_valid(form)
+
+@method_decorator(permiso_requerido('SOLICITUD_CODIGO'), name='dispatch')    
 class SolicitudCreateView(LoginRequiredMixin, CreateView):
     model = SolicitudCodigo
     form_class = SolicitudCodigoForm
@@ -76,13 +128,28 @@ class SolicitudCreateView(LoginRequiredMixin, CreateView):
         form.instance.solicitante = self.request.user
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['solicitudes_enviadas'] = SolicitudCodigo.objects.filter(solicitante=self.request.user).order_by('-fecha_creacion')
+        context['usuario'] = self.request.user  # por si tu HTML lo necesita
+        return context
+
+
 class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
     model = SolicitudCodigo
     template_name = 'solicitudes_recibidas.html'
+    context_object_name = 'solicitudes_recibidas'
 
     def get_queryset(self):
-        return SolicitudCodigo.objects.filter(receptor=self.request.user)
-
+        qs = SolicitudCodigo.objects.filter(receptor=self.request.user)
+        print("Filtradas antes:", qs.count())
+        pendientes = qs.filter(estado='pendiente')
+        print("Solo pendientes:", pendientes.count())
+        for s in pendientes:
+            print(s.id, s.estado)
+        return pendientes       
+        
+        
 class SolicitudDetailView(LoginRequiredMixin, DetailView):
     model = SolicitudCodigo
     template_name = 'solicitud_detalle.html'
@@ -126,3 +193,12 @@ class UsuariosADListView(ListView):
     
 def perfil_usuario(request):
     return render(request, 'perfil.html', {'usuario': request.user})
+
+def solicitudes_enviadas_view(request):
+    solicitudes = SolicitudCodigo.objects.filter(solicitante=request.user).order_by('-fecha_envio')
+    
+    context = {
+        'usuario': request.user,  # 👈 necesario para que funcione {{ usuario. ... }}
+        'solicitudes': solicitudes
+    }
+    return render(request, 'perfil.html', context)

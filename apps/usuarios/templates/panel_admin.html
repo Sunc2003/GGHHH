@@ -13,14 +13,21 @@
     <a href="{% url 'registro' %}" class="btn btn-success">Registrar nuevo usuario</a>
   </div>
  
+  <!-- Filtro de estado de usuarios -->
+  <div class="mb-3">
+    <label for="filtro-estado" class="form-label">Filtrar por estado:</label>
+    <select id="filtro-estado" class="form-select" style="width:auto; display:inline-block; margin-left: 10px;">
+      <option value="todos">Todos</option>
+      <option value="enlinea" selected>En línea</option>
+      <option value="desconectado">Desconectado</option>
+    </select>
+  </div>
+ 
   <table class="table table-bordered table-hover align-middle">
     <thead class="table-dark">
       <tr>
         <th>Usuario</th>
         <th>Email</th>
-        <th>Tipo</th>
-        <th>Área</th>
-        <th>Cargo</th>
         <th>Estado</th>
       </tr>
     </thead>
@@ -29,9 +36,6 @@
       <tr>
         <td>{{ u.username }}</td>
         <td>{{ u.email }}</td>
-        <td>{{ u.get_tipo_usuario_display|default:"-" }}</td>
-        <td>{{ u.area|default:"-" }}</td>
-        <td>{{ u.cargo|default:"-" }}</td>
         <td>
           {% if u.en_linea %}
             <span class="badge bg-success">En línea</span>
@@ -44,40 +48,30 @@
     </tbody>
   </table>
 </div>
+
+
+
  
-<div class="row mt-5">
-  <div class="col-md-6">
-    <h4>Solicitudes Enviadas</h4>
-    {% if solicitudes_enviadas %}
-      <ul class="list-group">
-        {% for solicitud in solicitudes_enviadas %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            Para: {{ solicitud.receptor.username }}
-            <span class="badge {% if solicitud.estado == 'pendiente' %}bg-warning{% else %}bg-success{% endif %}">
-              {{ solicitud.get_estado_display }}
-            </span>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-muted">No has enviado ninguna solicitud.</p>
-    {% endif %}
-  </div>
+<!-- Filtro tabla usuarios por estado (JS vanilla) -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const filtro = document.getElementById('filtro-estado');
+    const filtrar = function () {
+        const rows = document.querySelectorAll('table tbody tr');
+        rows.forEach(row => {
+            const estado = row.querySelector('.badge')?.textContent?.trim();
+            if (filtro.value === 'todos') {
+                row.style.display = '';
+            } else if (filtro.value === 'enlinea') {
+                row.style.display = estado === 'En línea' ? '' : 'none';
+            } else if (filtro.value === 'desconectado') {
+                row.style.display = estado === 'Desconectado' ? '' : 'none';
+            }
+        });
+    };
+    filtro.addEventListener('change', filtrar);
+    filtrar(); // Ejecutar al cargar la página
+});
+</script>
  
-  <div class="col-md-6">
-    <h4>Solicitudes Recibidas</h4>
-    {% if solicitudes_recibidas %}
-      <ul class="list-group">
-        {% for solicitud in solicitudes_recibidas %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            De: {{ solicitud.emisor.username }}
-            <a href="{% url 'detalle_solicitud' solicitud.id %}" class="btn btn-sm btn-outline-primary">Ver</a>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-muted">No has recibido solicitudes.</p>
-    {% endif %}
-  </div>
-</div>
 {% endblock %}

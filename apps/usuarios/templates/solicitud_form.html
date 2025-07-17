@@ -1,133 +1,238 @@
 {% extends "base.html" %}
 {% load static %}
-
+ 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/solicitud_form.css' %}">
+  <style>
+    #solicitud-form-contenedor, #solicitudes-enviadas-contenedor { display: none; }
+    .btn-solicitar-codigo, .btn-solicitudes-enviadas {
+      background: #232323;
+      color: #fff;
+      border: 2px solid #232323;
+      border-radius: 0.25rem;
+      font-weight: 700;
+      letter-spacing: 0.43px;
+      padding: 0.8rem 2.6rem;
+      font-size: 1.12rem;
+      box-shadow: 0 1.5px 8px rgba(40,40,40,0.10);
+      transition: background 0.15s, border 0.15s, color 0.13s;
+      outline: none;
+      margin: 0.5rem;
+    }
+    .btn-solicitar-codigo:hover, .btn-solicitar-codigo:focus,
+    .btn-solicitudes-enviadas:hover, .btn-solicitudes-enviadas:focus {
+      background: #000;
+      color: #fff;
+      border-color: #000;
+    }
+    .solicitud-centrado {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      width: 100%;
+    }
+  </style>
 {% endblock %}
-
+ 
 {% block content %}
-  <h2 class="mb-4">
-    <i class="fas fa-barcode" style="font-size:2.5rem; color:#000000;"></i>
-  </h2>
-
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-
-    <!-- Información General -->
-    <fieldset>
-      <legend>Información General</legend>
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label">Receptor</label>
-          {{ form.receptor }}
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Empresa</label>
-          {{ form.empresa }}
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Tipo de Solicitud</label>
-          {{ form.tipo_solicitud }}
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Tipo de Cotización</label>
-          {{ form.cotizacion }}
-        </div>
-        <div class="col-md-6" id="campo_archivo" style="display: none;">
-          <label class="form-label">Archivo Cotización</label>
-          {{ form.archivo_cotizacion }}
-        </div>
-        <div class="col-md-6" id="campo_imagen" style="display: none;">
-          <label class="form-label">Imagen WhatsApp</label>
-          {{ form.imagen_whatsapp }}
-        </div>
-      </div>
-    </fieldset>
-
-    <!-- Información Técnica -->
-    <fieldset>
-      <legend>Información Técnica</legend>
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label">Origen</label>
-          {{ form.origen }}
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Proveedor</label>
-          {{ form.proveedor }}
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">SKU Proveedor</label>
-          {{ form.sku_proveedor }}
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">SKU Fabricante</label>
-          {{ form.sku_fabricante }}
-        </div>
-        <div class="col-12">
-          <label class="form-label">Descripción del Producto</label>
-          {{ form.descripcion }}
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Marca</label>
-          {{ form.marca }}
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Unidad de Medida (UDM)</label>
-          {{ form.udm }}
-        </div>
-      </div>
-    </fieldset>
-
-    <!-- Dimensiones y Costo -->
-    <fieldset>
-      <legend>Dimensiones y Costo</legend>
-      <div class="row g-3">
-        <div class="col-md-3">
-          <label class="form-label">Largo (cm)</label>
-          {{ form.largo }}
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Ancho (cm)</label>
-          {{ form.ancho }}
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Alto (cm)</label>
-          {{ form.alto }}
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Peso (kg)</label>
-          {{ form.peso }}
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Costo Estimado</label>
-          {{ form.costo }}
-        </div>
-      </div>
-    </fieldset>
-
-    <!-- Botones -->
-    <div class="mt-4 d-flex">
-      <button type="submit" class="btn btn-success">📨 Enviar Solicitud</button>
-      <a href="{% url 'panel_admin_usuarios' %}" class="btn btn-secondary">Cancelar</a>
+  <div class="solicitud-centrado">
+    <div>
+      <button id="btn-mostrar-form" class="btn-solicitar-codigo">
+        Solicitar Código
+      </button>
+      <button id="btn-mostrar-enviadas" class="btn-solicitudes-enviadas">
+        Solicitudes Enviadas
+      </button>
+      <a href="{% url 'solicitudes_recibidas' %}" class="btn btn-outline-primary btn-lg">
+        <i class="fas fa-inbox"></i> Ver Solicitudes Recibidas
+      </a>
     </div>
-  </form>
-
-  <!-- Script para mostrar campos según tipo de cotización -->
+    <div class="row mt-5">
+      <div class="col-md-12">
+        <h4 class="mb-3"><i class="fas fa-paper-plane"></i> Solicitudes Enviadas</h4>
+    
+        {% if solicitudes_enviadas %}
+          <ul class="list-group shadow-sm">
+            {% for solicitud in solicitudes_enviadas %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>Para:</strong> {{ solicitud.receptor.get_full_name|default:solicitud.receptor.username }}<br>
+                  <small class="text-muted">Enviada: {{ solicitud.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                </div>
+                <span class="badge rounded-pill 
+                  {% if solicitud.estado == 'pendiente' %}bg-warning text-dark
+                  {% elif solicitud.estado == 'creado' %}bg-success
+                  {% else %}bg-secondary
+                  {% endif %}">
+                  {{ solicitud.get_estado_display }}
+                </span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="alert alert-secondary" role="alert">
+            <i class="fas fa-info-circle"></i> No has enviado ninguna solicitud.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    
+ 
+ 
+    <div id="solicitud-form-contenedor">
+      <h2 class="mb-4">
+        <i class="fas fa-barcode" style="font-size:2.5rem; color:#000000;"></i>
+      </h2>
+ 
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+ 
+        <!-- Información General -->
+        <fieldset>
+          <legend>Información General</legend>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Receptor</label>
+              {{ form.receptor }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Empresa</label>
+              {{ form.empresa }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Tipo de Solicitud</label>
+              {{ form.tipo_solicitud }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Tipo de Cotización</label>
+              {{ form.cotizacion }}
+            </div>
+            <div class="col-md-6" id="campo_archivo" style="display: none;">
+              <label class="form-label">Archivo Cotización</label>
+              {{ form.archivo_cotizacion }}
+            </div>
+            <div class="col-md-6" id="campo_imagen" style="display: none;">
+              <label class="form-label">Imagen WhatsApp</label>
+              {{ form.imagen_whatsapp }}
+            </div>
+          </div>
+        </fieldset>
+ 
+        <!-- Información Técnica -->
+        <fieldset>
+          <legend>Información Técnica</legend>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Origen</label>
+              {{ form.origen }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Proveedor</label>
+              {{ form.proveedor }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">SKU Proveedor</label>
+              {{ form.sku_proveedor }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">SKU Fabricante</label>
+              {{ form.sku_fabricante }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Descripción del Producto</label>
+              {{ form.descripcion }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Marca</label>
+              {{ form.marca }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Unidad de Medida (UDM)</label>
+              {{ form.udm }}
+            </div>
+          </div>
+        </fieldset>
+ 
+        <!-- Dimensiones y Costo -->
+        <fieldset>
+          <legend>Dimensiones y Costo</legend>
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Largo (cm)</label>
+              {{ form.largo }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Ancho (cm)</label>
+              {{ form.ancho }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Alto (cm)</label>
+              {{ form.alto }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Peso (kg)</label>
+              {{ form.peso }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Costo Estimado</label>
+              {{ form.costo }}
+            </div>
+          </div>
+        </fieldset>
+ 
+        <!-- Botones -->
+        <div class="mt-4 d-flex">
+          <button type="submit" class="btn btn-success">Enviar Solicitud</button>
+          <button type="button" class="btn btn-secondary ms-2" onclick="volverABotones()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+ 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const cotizacionSelect = document.getElementById('id_cotizacion');
-      const campoArchivo = document.getElementById('campo_archivo');
-      const campoImagen = document.getElementById('campo_imagen');
-
-      function toggleCampos() {
-        const valor = cotizacionSelect.value;
-        campoArchivo.style.display = valor === 'documento' ? 'block' : 'none';
-        campoImagen.style.display = valor === 'whatsapp' ? 'block' : 'none';
+      const btnForm = document.getElementById('btn-mostrar-form');
+      const btnEnviadas = document.getElementById('btn-mostrar-enviadas');
+      const contenedorForm = document.getElementById('solicitud-form-contenedor');
+      const contenedorEnviadas = document.getElementById('solicitudes-enviadas-contenedor');
+ 
+      function volverABotones() {
+        btnForm.style.display = 'inline-block';
+        btnEnviadas.style.display = 'inline-block';
+        contenedorForm.style.display = 'none';
+        contenedorEnviadas.style.display = 'none';
       }
-
-      cotizacionSelect.addEventListener('change', toggleCampos);
-      toggleCampos(); // Ejecutar al cargar
+      window.volverABotones = volverABotones;
+ 
+      btnForm.addEventListener('click', function () {
+        btnForm.style.display = 'none';
+        btnEnviadas.style.display = 'none';
+        contenedorForm.style.display = 'block';
+        contenedorEnviadas.style.display = 'none';
+      });
+ 
+      btnEnviadas.addEventListener('click', function () {
+        btnForm.style.display = 'none';
+        btnEnviadas.style.display = 'none';
+        contenedorForm.style.display = 'none';
+        contenedorEnviadas.style.display = 'block';
+      });
+ 
+      const cotizacionSelect = document.getElementById('id_cotizacion');
+      if (cotizacionSelect) {
+        const campoArchivo = document.getElementById('campo_archivo');
+        const campoImagen = document.getElementById('campo_imagen');
+        function toggleCampos() {
+          const valor = cotizacionSelect.value;
+          campoArchivo.style.display = valor === 'documento' ? 'block' : 'none';
+          campoImagen.style.display = valor === 'whatsapp' ? 'block' : 'none';
+        }
+        cotizacionSelect.addEventListener('change', toggleCampos);
+        toggleCampos();
+      }
     });
   </script>
+  
 {% endblock %}
