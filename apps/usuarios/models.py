@@ -97,6 +97,7 @@ class SolicitudCodigo(models.Model):
     titulo = models.CharField(max_length=100, null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
     fecha_creacion = models.DateTimeField(default=timezone.now)
+    comentario_estado = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.get_tipo_solicitud_display()} - {self.solicitante.username} → {self.receptor.username}"

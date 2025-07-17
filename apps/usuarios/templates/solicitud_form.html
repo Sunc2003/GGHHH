@@ -4,10 +4,11 @@
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/solicitud_form.css' %}">
   <style>
-    #solicitud-form-contenedor, #solicitudes-enviadas-contenedor { display: none; }
-    .btn-solicitar-codigo, .btn-solicitudes-enviadas {
+    /* ------ BOTONES IGUALES PARA TODOS ------ */
+    .btn-solicitar-codigo, .btn-solicitar-codigo:visited, .btn-solicitar-codigo:link,
+    .btn-solicitudes-enviadas, .btn-solicitudes-enviadas:visited, .btn-solicitudes-enviadas:link {
       background: #232323;
-      color: #fff;
+      color: #fff !important;
       border: 2px solid #232323;
       border-radius: 0.25rem;
       font-weight: 700;
@@ -18,74 +19,63 @@
       transition: background 0.15s, border 0.15s, color 0.13s;
       outline: none;
       margin: 0.5rem;
+      text-decoration: none;
+      display: inline-block;
+      cursor: pointer;
     }
     .btn-solicitar-codigo:hover, .btn-solicitar-codigo:focus,
     .btn-solicitudes-enviadas:hover, .btn-solicitudes-enviadas:focus {
       background: #000;
-      color: #fff;
+      color: #fff !important;
       border-color: #000;
     }
+    /* --- CONTENEDORES --- */
     .solicitud-centrado {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       min-height: 60vh;
       width: 100%;
     }
+    .solicitud-menu-botones {
+      margin-top: 4rem;
+      margin-bottom: 2.5rem;
+      display: flex;
+      gap: 1.1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    #solicitud-form-contenedor, #solicitudes-enviadas-contenedor {
+      display: none;
+      width: 100%;
+      max-width: 900px;
+    }
+    /* Puedes seguir usando el resto de tu CSS de campos, fieldset, etc. */
   </style>
 {% endblock %}
  
 {% block content %}
   <div class="solicitud-centrado">
-    <div>
+ 
+    <!-- MENÚ de BOTONES PRINCIPAL -->
+    <div id="menu-botones" class="solicitud-menu-botones">
       <button id="btn-mostrar-form" class="btn-solicitar-codigo">
         Solicitar Código
       </button>
-      <button id="btn-mostrar-enviadas" class="btn-solicitudes-enviadas">
+      <button id="btn-mostrar-enviadas" class="btn-solicitar-codigo">
         Solicitudes Enviadas
       </button>
-      <a href="{% url 'solicitudes_recibidas' %}" class="btn btn-outline-primary btn-lg">
+      <a href="{% url 'solicitudes_recibidas' %}" class="btn-solicitar-codigo">
         <i class="fas fa-inbox"></i> Ver Solicitudes Recibidas
       </a>
     </div>
-    <div class="row mt-5">
-      <div class="col-md-12">
-        <h4 class="mb-3"><i class="fas fa-paper-plane"></i> Solicitudes Enviadas</h4>
-    
-        {% if solicitudes_enviadas %}
-          <ul class="list-group shadow-sm">
-            {% for solicitud in solicitudes_enviadas %}
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                  <strong>Para:</strong> {{ solicitud.receptor.get_full_name|default:solicitud.receptor.username }}<br>
-                  <small class="text-muted">Enviada: {{ solicitud.fecha_creacion|date:"d/m/Y H:i" }}</small>
-                </div>
-                <span class="badge rounded-pill 
-                  {% if solicitud.estado == 'pendiente' %}bg-warning text-dark
-                  {% elif solicitud.estado == 'creado' %}bg-success
-                  {% else %}bg-secondary
-                  {% endif %}">
-                  {{ solicitud.get_estado_display }}
-                </span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <div class="alert alert-secondary" role="alert">
-            <i class="fas fa-info-circle"></i> No has enviado ninguna solicitud.
-          </div>
-        {% endif %}
-      </div>
-    </div>
-    
  
- 
+    <!-- FORMULARIO DE SOLICITUD -->
     <div id="solicitud-form-contenedor">
       <h2 class="mb-4">
         <i class="fas fa-barcode" style="font-size:2.5rem; color:#000000;"></i>
       </h2>
- 
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
  
@@ -182,44 +172,65 @@
           </div>
         </fieldset>
  
-        <!-- Botones -->
         <div class="mt-4 d-flex">
           <button type="submit" class="btn btn-success">Enviar Solicitud</button>
-          <button type="button" class="btn btn-secondary ms-2" onclick="volverABotones()">Cancelar</button>
+          <button type="button" class="btn btn-secondary ms-2" onclick="volverAMenu()">Cancelar</button>
         </div>
       </form>
     </div>
+ 
+    <!-- LISTADO DE SOLICITUDES ENVIADAS -->
+    <div id="solicitudes-enviadas-contenedor">
+      <h4 class="mb-3"><i class="fas fa-paper-plane"></i> Solicitudes Enviadas</h4>
+      {% if solicitudes_enviadas %}
+        <ul class="list-group shadow-sm">
+          {% for solicitud in solicitudes_enviadas %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>Para:</strong> {{ solicitud.receptor.get_full_name|default:solicitud.receptor.username }}<br>
+                <small class="text-muted">Enviada: {{ solicitud.fecha_creacion|date:"d/m/Y H:i" }}</small>
+              </div>
+              <span class="badge rounded-pill
+                {% if solicitud.estado == 'pendiente' %}bg-warning text-dark
+                {% elif solicitud.estado == 'creado' %}bg-success
+                {% else %}bg-secondary
+                {% endif %}">
+                {{ solicitud.get_estado_display }}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="alert alert-secondary" role="alert">
+          <i class="fas fa-info-circle"></i> No has enviado ninguna solicitud.
+        </div>
+      {% endif %}
+      <div class="mt-4 d-flex">
+        <button type="button" class="btn btn-secondary" onclick="volverAMenu()">Volver</button>
+      </div>
+    </div>
+ 
   </div>
  
   <script>
+    // --- Mostrar/Ocultar divs según botón ----
+    function mostrarDiv(idDiv) {
+      document.getElementById('menu-botones').style.display = 'none';
+      document.getElementById('solicitud-form-contenedor').style.display = 'none';
+      document.getElementById('solicitudes-enviadas-contenedor').style.display = 'none';
+      document.getElementById(idDiv).style.display = 'block';
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    function volverAMenu() {
+      document.getElementById('menu-botones').style.display = 'flex';
+      document.getElementById('solicitud-form-contenedor').style.display = 'none';
+      document.getElementById('solicitudes-enviadas-contenedor').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
     document.addEventListener('DOMContentLoaded', function () {
-      const btnForm = document.getElementById('btn-mostrar-form');
-      const btnEnviadas = document.getElementById('btn-mostrar-enviadas');
-      const contenedorForm = document.getElementById('solicitud-form-contenedor');
-      const contenedorEnviadas = document.getElementById('solicitudes-enviadas-contenedor');
- 
-      function volverABotones() {
-        btnForm.style.display = 'inline-block';
-        btnEnviadas.style.display = 'inline-block';
-        contenedorForm.style.display = 'none';
-        contenedorEnviadas.style.display = 'none';
-      }
-      window.volverABotones = volverABotones;
- 
-      btnForm.addEventListener('click', function () {
-        btnForm.style.display = 'none';
-        btnEnviadas.style.display = 'none';
-        contenedorForm.style.display = 'block';
-        contenedorEnviadas.style.display = 'none';
-      });
- 
-      btnEnviadas.addEventListener('click', function () {
-        btnForm.style.display = 'none';
-        btnEnviadas.style.display = 'none';
-        contenedorForm.style.display = 'none';
-        contenedorEnviadas.style.display = 'block';
-      });
- 
+      document.getElementById('btn-mostrar-form').onclick = () => mostrarDiv('solicitud-form-contenedor');
+      document.getElementById('btn-mostrar-enviadas').onclick = () => mostrarDiv('solicitudes-enviadas-contenedor');
+      // Campo condicional cotización
       const cotizacionSelect = document.getElementById('id_cotizacion');
       if (cotizacionSelect) {
         const campoArchivo = document.getElementById('campo_archivo');
@@ -234,5 +245,4 @@
       }
     });
   </script>
-  
 {% endblock %}
