@@ -1,4 +1,4 @@
-from django.views.generic.edit import CreateView
+
 from django.urls import reverse_lazy
 from apps.usuarios.forms import CustomUserCreationForm
 from apps.usuarios.models import CustomUser
@@ -15,6 +15,8 @@ from django.views import View
 from apps.organizaciones.models import Area, Cargo
 from django.utils.decorators import method_decorator
 from apps.permisos.decorators import permiso_requerido 
+from .forms import CambiarEstadoForm
+import os
 
 
 
@@ -150,19 +152,32 @@ class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
         return pendientes       
         
         
-class SolicitudDetailView(LoginRequiredMixin, DetailView):
+class SolicitudDetailView(DetailView):
     model = SolicitudCodigo
     template_name = 'solicitud_detalle.html'
 
-class CambiarEstadoView(View):
-    def get(self, request, pk):
-        solicitud = get_object_or_404(SolicitudCodigo, pk=pk)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        archivo = self.object.archivo_cotizacion.name.lower()
 
-        if request.user == solicitud.receptor and solicitud.estado == 'pendiente':
-            solicitud.estado = 'creado'
-            solicitud.save()
+        context['es_pdf'] = archivo.endswith('.pdf')
+        context['es_imagen'] = archivo.endswith(('.jpg', '.jpeg', '.png'))
 
-        return redirect('panel_admin_usuarios')  # Asegúrate que esta URL existe
+        return context
+
+class CambiarEstadoView(UpdateView):
+    model = SolicitudCodigo
+    form_class = CambiarEstadoForm
+    template_name = 'cambiar_estado.html'
+
+    def form_valid(self, form):
+        solicitud = form.save(commit=False)
+        solicitud.estado = 'creado'
+        solicitud.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('detalle_solicitud', kwargs={'pk': self.object.pk})
 
 
 class UsuariosADListView(ListView):

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
- 
+
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/solicitud_detalle.css' %}">
 {% endblock %}
- 
+
 {% block content %}
 <div class="container mt-5">
   <h2 class="mb-4">Detalle de Solicitud de Código SAP</h2>
@@ -15,24 +15,33 @@
         <legend>Información General</legend>
         <p><strong>Título:</strong> {{ object.titulo }}</p>
         <p><strong>Descripción:</strong> {{ object.descripcion }}</p>
+        <p><strong>Mensaje:</strong> {{ object.mensaje|linebreaks }}</p>
         <p><strong>Solicitado por:</strong> {{ object.solicitante }}</p>
         <p><strong>Receptor:</strong> {{ object.receptor }}</p>
         <p><strong>Empresa:</strong> {{ object.get_empresa_display }}</p>
         <p><strong>Tipo de Solicitud:</strong> {{ object.get_tipo_solicitud_display }}</p>
         <p><strong>Tipo de Cotización:</strong> {{ object.get_cotizacion_display }}</p>
+
+        <!-- ARCHIVO COTIZACIÓN -->
         {% if object.archivo_cotizacion %}
-          <p><strong>Archivo Cotización:</strong>
-            <a href="{{ object.archivo_cotizacion.url }}" target="_blank">
+          <p><strong>Archivo Cotización:</strong></p>
+
+          {% if es_pdf %}
+            <iframe src="{{ object.archivo_cotizacion.url }}" width="100%" height="500px" style="border:1px solid #ccc;"></iframe>
+          {% else %}
+            <a href="{{ object.archivo_cotizacion.url }}" download>
               <i class="fas fa-file-download"></i> Descargar
             </a>
-          </p>
+          {% endif %}
         {% endif %}
+
+        <!-- IMAGEN WHATSAPP -->
         {% if object.imagen_whatsapp %}
-          <p><strong>Imagen WhatsApp:</strong><br>
-            <img src="{{ object.imagen_whatsapp.url }}" alt="Imagen WhatsApp" class="img-thumbnail" width="250">
-          </p>
+          <p><strong>Imagen WhatsApp:</strong></p>
+          <img src="{{ object.imagen_whatsapp.url }}" alt="Imagen WhatsApp" class="img-thumbnail" width="300">
         {% endif %}
       </fieldset>
+
       <fieldset class="card-detalle">
         <legend>Información Técnica</legend>
         <p><strong>Origen:</strong> {{ object.get_origen_display }}</p>
@@ -44,6 +53,7 @@
         <p><strong>UDM:</strong> {{ object.udm }}</p>
       </fieldset>
     </div>
+
     <!-- Columna Derecha -->
     <div>
       <fieldset class="card-detalle">
@@ -54,17 +64,25 @@
         <p><strong>Peso:</strong> {{ object.peso }} kg</p>
         <p><strong>Costo:</strong> ${{ object.costo }}</p>
       </fieldset>
+
       <fieldset class="card-detalle">
         <legend>Estado de la Solicitud</legend>
         <p><strong>Estado actual:</strong> {{ object.get_estado_display }}</p>
+
         {% if request.user == object.receptor and object.estado == 'pendiente' %}
-          <a href="{% url 'cambiar_estado' object.pk %}" class="btn btn-success">
-            <i class="fas fa-check-circle"></i> Marcar como "Código creado"
-          </a>
+          <form method="post" action="{% url 'cambiar_estado' object.pk %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="comentario_estado" class="form-label"><strong>Comentario:</strong></label>
+              <textarea name="comentario_estado" id="comentario_estado" class="form-control" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">
+              <i class="fas fa-check-circle"></i> Marcar como "Código creado"
+            </button>
+          </form>
         {% endif %}
       </fieldset>
     </div>
   </div>
 </div>
 {% endblock %}
- 

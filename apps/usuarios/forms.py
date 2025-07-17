@@ -82,6 +82,7 @@ class SolicitudCodigoForm(forms.ModelForm):
         exclude = ['solicitante', 'estado', 'fecha_creacion', 'rut_proveedor']
         widgets = {
             'descripcion': forms.Textarea(attrs={'rows': 3}),
+            'mensaje': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Escribe un mensaje para el receptor...'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -97,6 +98,7 @@ class SolicitudCodigoForm(forms.ModelForm):
         self.fields['proveedor'].label = "Proveedor"
         self.fields['marca'].label = "Marca"
         self.fields['udm'].label = "Unidad de Medida (UDM)"
+        self.fields['mensaje'].label = "Mensaje para el receptor"
 
     def clean(self):
         cleaned_data = super().clean()
@@ -127,3 +129,14 @@ class SolicitudCodigoForm(forms.ModelForm):
             self.save_m2m()
 
         return instance
+    
+class CambiarEstadoForm(forms.ModelForm):
+    comentario_estado = forms.CharField(
+        label="Comentario",
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Agrega un comentario sobre el código creado...'})
+    )
+
+    class Meta:
+        model = SolicitudCodigo
+        fields = ['comentario_estado']

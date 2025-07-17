@@ -171,6 +171,15 @@
             </div>
           </div>
         </fieldset>
+        <fieldset>
+          <legend>Mensaje al Receptor</legend>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Mensaje</label>
+              {{ form.mensaje }}
+            </div>
+          </div>
+        </fieldset>
  
         <div class="mt-4 d-flex">
           <button type="submit" class="btn btn-success">Enviar Solicitud</button>
@@ -188,7 +197,10 @@
             <li class="list-group-item d-flex justify-content-between align-items-center">
               <div>
                 <strong>Para:</strong> {{ solicitud.receptor.get_full_name|default:solicitud.receptor.username }}<br>
-                <small class="text-muted">Enviada: {{ solicitud.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                <small class="text-muted">Enviada: {{ solicitud.fecha_creacion|date:"d/m/Y H:i" }}</small><br>
+                {% if solicitud.mensaje %}
+                  <small><strong>Mensaje:</strong> {{ solicitud.mensaje|linebreaksbr }}</small>
+                {% endif %}
               </div>
               <span class="badge rounded-pill
                 {% if solicitud.estado == 'pendiente' %}bg-warning text-dark
