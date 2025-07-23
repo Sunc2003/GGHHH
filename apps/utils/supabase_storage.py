@@ -29,7 +29,7 @@ class SupabaseStorage(Storage):
        response = self.client.storage.from_(self.bucket).upload(name, data, {"content-type": mime_type})
        print("✅ Respuesta de subida Supabase:", response)
        return name
-
+##scassaa
     def url(self, name):
         return f"{settings.SUPABASE_URL}/storage/v1/object/public/{self.bucket}/{name}"
 
