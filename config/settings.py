@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'apps.permisos',
     'apps.organizaciones',
     'apps.utils',
+    'storages',
 ]
  
 MIDDLEWARE = [
@@ -147,17 +148,16 @@ if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Archivos multimedia (PDFs, imágenes, uploads)
-USE_SUPABASE_STORAGE = os.getenv("USE_SUPABASE_STORAGE", "true").lower() == "true"
 
-if USE_SUPABASE_STORAGE:
-    DEFAULT_FILE_STORAGE = "apps.utils.supabase_storage.SupabaseStorage"
-    MEDIA_URL = f"{os.getenv('SUPABASE_URL')}/storage/v1/object/public/{os.getenv('SUPABASE_BUCKET')}/"
-else:
-    MEDIA_URL = "/media/"
-    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
  
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
  
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SUPABASE_URL = os.getenv('SUPABASE_URL')  # Ej: https://xxxxx.supabase.co
+SUPABASE_KEY = os.getenv('SUPABASE_KEY')  # La service_role key
+SUPABASE_BUCKET = os.getenv('SUPABASE_BUCKET', 'media')  # Nombre de tu bucket
+
+
+import apps.utils.storage_override

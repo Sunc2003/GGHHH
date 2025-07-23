@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -45,6 +48,8 @@ INSTALLED_APPS = [
     'apps.usuarios',
     'apps.permisos',
     'apps.organizaciones',
+    'apps.utils',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -128,6 +133,14 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# Supabase Storage config
+DEFAULT_FILE_STORAGE = 'apps.utils.supabase_storage.SupabaseStorage'
+
+
+SUPABASE_URL = os.getenv('SUPABASE_URL')  # Ej: https://xxxxx.supabase.co
+SUPABASE_KEY = os.getenv('SUPABASE_KEY')  # La service_role key
+SUPABASE_BUCKET = os.getenv('SUPABASE_BUCKET', 'media')  # Nombre de tu bucket
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -137,3 +150,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+from django.core.files.storage import default_storage as dj_default_storage
+from apps.utils.supabase_storage import SupabaseStorage
+
+default_storage = SupabaseStorage()
+
+print("✔️ Storage actual desde settings:", default_storage.__class__)
+import apps.utils.storage_override
