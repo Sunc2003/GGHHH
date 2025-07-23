@@ -21,12 +21,14 @@ class SupabaseStorage(Storage):
 
         self.client = create_client(self.url, self.key)
     def _save(self, name, content):
-        content.open()
-        data = content.read()
-        content.close()
-        mime_type = mimetypes.guess_type(name)[0] or 'application/octet-stream'
-        self.client.storage.from_(self.bucket).upload(name, data, {"content-type": mime_type})
-        return name
+       print("🔄 _save() SupabaseStorage ejecutado con nombre:", name)
+       content.open()
+       data = content.read()
+       content.close()
+       mime_type = mimetypes.guess_type(name)[0] or 'application/octet-stream'
+       response = self.client.storage.from_(self.bucket).upload(name, data, {"content-type": mime_type})
+       print("✅ Respuesta de subida Supabase:", response)
+       return name
 
     def url(self, name):
         return f"{settings.SUPABASE_URL}/storage/v1/object/public/{self.bucket}/{name}"
