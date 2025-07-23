@@ -6,9 +6,20 @@ from supabase import create_client
 
 class SupabaseStorage(Storage):
     def __init__(self):
-        self.client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
-        self.bucket = settings.SUPABASE_BUCKET
+        print("🔄 Inicializando SupabaseStorage")
 
+        self.url = getattr(settings, "SUPABASE_URL", None)
+        self.key = getattr(settings, "SUPABASE_KEY", None)
+        self.bucket = getattr(settings, "SUPABASE_BUCKET", "media")
+
+        print(f"📦 SUPABASE_URL: {self.url}")
+        print(f"🔑 SUPABASE_KEY is set: {'Yes' if self.key else 'No'}")
+        print(f"🪣 SUPABASE_BUCKET: {self.bucket}")
+
+        if not all([self.url, self.key]):
+            raise Exception("❌ Faltan variables de entorno para Supabase")
+
+        self.client = create_client(self.url, self.key)
     def _save(self, name, content):
         content.open()
         data = content.read()
