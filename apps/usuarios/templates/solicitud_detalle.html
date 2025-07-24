@@ -25,14 +25,14 @@
         <!-- ARCHIVO COTIZACIÓN -->
         {% if object.archivo_cotizacion %}
         <p>
-          📄 Documento: <a href="{{ object.archivo_cotizacion.url }}" target="_blank">Ver archivo</a>
+          📄 Documento: <a href="https://ygwafhrphrtjenwazsay.supabase.co/storage/v1/object/public/media/{{ object.archivo_cotizacion.name }}" target="_blank">Ver archivo</a>
         </p>
       {% endif %}
       
       {% if object.imagen_whatsapp %}
         <p>
           🖼 Imagen WhatsApp:<br>
-          <img src="{{ object.imagen_whatsapp.url }}" alt="Imagen WhatsApp" style="max-width: 300px;">
+          <img src="https://ygwafhrphrtjenwazsay.supabase.co/storage/v1/object/public/media/{{ object.imagen_whatsapp.name }}" alt="Imagen WhatsApp" style="max-width: 300px;">
         </p>
       {% endif %}
       </fieldset>
