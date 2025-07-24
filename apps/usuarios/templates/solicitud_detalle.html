@@ -23,17 +23,18 @@
         <p><strong>Tipo de Cotización:</strong> {{ object.get_cotizacion_display }}</p>
 
         <!-- ARCHIVO COTIZACIÓN -->
-        {% if object.archivo_cotizacion %}
-          <p><strong>Archivo Cotización:</strong></p>
+        {% if solicitud.archivo_cotizacion %}
+  <p>
+    📄 Documento: <a href="{{ solicitud.archivo_cotizacion.url }}" target="_blank">Ver archivo</a>
+  </p>
+{% endif %}
 
-          {% if es_pdf %}
-            <iframe src="{{ object.archivo_cotizacion.url }}" width="100%" height="500px" style="border:1px solid #ccc;"></iframe>
-          {% else %}
-            <a href="{{ object.archivo_cotizacion.url }}" download>
-              <i class="fas fa-file-download"></i> Descargar
-            </a>
-          {% endif %}
-        {% endif %}
+{% if solicitud.imagen_whatsapp %}
+  <p>
+    🖼 Imagen WhatsApp:<br>
+    <img src="{{ solicitud.imagen_whatsapp.url }}" alt="Imagen WhatsApp" style="max-width: 300px;">
+  </p>
+{% endif %}
 
         <!-- IMAGEN WHATSAPP -->
         {% if object.imagen_whatsapp %}
