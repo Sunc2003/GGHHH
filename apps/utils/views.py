@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 
 class TestSupabaseUploadView(View):
     def get(self, request):
-        name = 'test_render.txt'
+        name = 'test/test_render.txt'
         content = ContentFile(b'Subido desde Render!')
         try:
             path = default_storage.save(name, content)
