@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser, SolicitudCodigo
 from django.core.exceptions import ValidationError
 from apps.organizaciones.models import Area, Cargo
-
+from django.core.files.storage import default_storage
 
 class CustomUserCreationForm(UserCreationForm):
     area = forms.ModelChoiceField(
@@ -120,13 +120,26 @@ class SolicitudCodigoForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
 
-        # Rellenar el RUT automáticamente desde el proveedor
+    # Rellenar el RUT automáticamente desde el proveedor
         if instance.proveedor:
             instance.rut_proveedor = instance.proveedor.rut
 
         if commit:
             instance.save()
             self.save_m2m()
+
+        # Forzar subida a SupabaseStorage
+            if instance.archivo_cotizacion:
+                file = instance.archivo_cotizacion
+                name = file.name
+                print("📎 Forzando subida de archivo cotización:", name)
+                default_storage.save(name, file)
+
+            if instance.imagen_whatsapp:
+                img = instance.imagen_whatsapp
+                name = img.name
+                print("📷 Forzando subida de imagen WhatsApp:", name)
+                default_storage.save(name, img)
 
         return instance
     

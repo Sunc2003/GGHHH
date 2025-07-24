@@ -17,6 +17,7 @@ from django.utils.decorators import method_decorator
 from apps.permisos.decorators import permiso_requerido 
 from .forms import CambiarEstadoForm
 import os
+from apps.utils.supabase_storage import SupabaseStorage
 
 
 
@@ -128,12 +129,35 @@ class SolicitudCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.solicitante = self.request.user
+        solicitud = form.save(commit=False)  # aún no guardamos los archivos
+        storage = SupabaseStorage()
+
+        # Guardar la solicitud sin archivos todavía
+        solicitud.save()
+
+        # Subida forzada a Supabase Storage
+        archivo = self.request.FILES.get('archivo_cotizacion')
+        if archivo:
+            ruta = f"cotizaciones/{archivo.name}"
+            storage._save(ruta, archivo)
+            solicitud.archivo_cotizacion.name = ruta  # asigna ruta manualmente
+
+        imagen = self.request.FILES.get('imagen_whatsapp')
+        if imagen:
+            ruta_img = f"cotizaciones/img/{imagen.name}"
+            storage._save(ruta_img, imagen)
+            solicitud.imagen_whatsapp.name = ruta_img
+
+        solicitud.save()  # ahora sí guarda con los campos de archivo
+
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['solicitudes_enviadas'] = SolicitudCodigo.objects.filter(solicitante=self.request.user).order_by('-fecha_creacion')
-        context['usuario'] = self.request.user  # por si tu HTML lo necesita
+        context['solicitudes_enviadas'] = SolicitudCodigo.objects.filter(
+            solicitante=self.request.user
+        ).order_by('-fecha_creacion')
+        context['usuario'] = self.request.user
         return context
 
 
