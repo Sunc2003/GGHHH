@@ -4,6 +4,7 @@ from django.core.files.storage import Storage
 from django.conf import settings
 from supabase import create_client
 
+
 class SupabaseStorage(Storage):
     def __init__(self):
         print("🔄 Inicializando SupabaseStorage")
