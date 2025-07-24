@@ -21,6 +21,7 @@ class SupabaseStorage(Storage):
             raise Exception("❌ Faltan variables de entorno para Supabase")
 
         self.client = create_client(self.url, self.key)
+        
     def _save(self, name, content):
         content.open()
         data = content.read()
@@ -33,8 +34,7 @@ class SupabaseStorage(Storage):
             self.client.storage.from_(self.bucket).upload(
                 path=name,
                 file=data,
-                file_options={"content-type": mime_type},
-                upsert=True
+                file_options={"content-type": mime_type}
             )
         except Exception as e:
             print("❌ Error en Supabase upload:", e)
