@@ -135,19 +135,11 @@ SUPABASE_KEY = os.getenv('SUPABASE_KEY')  # La service_role key
 SUPABASE_BUCKET = os.getenv('SUPABASE_BUCKET', 'media')  # Nombre de tu bucket
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-from django.core.files.storage import default_storage as dj_default_storage
-from apps.utils.supabase_storage import SupabaseStorage
 
-default_storage = SupabaseStorage()
-
-print("✔️ Storage actual desde settings:", default_storage.__class__)
-import apps.utils.storage_override
