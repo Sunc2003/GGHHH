@@ -80,6 +80,7 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
     success_url = reverse_lazy('panel_admin_usuarios')
 
     def get(self, request):
+        """Mostrar formulario y formset vacío"""
         form = SolicitudCodigoForm()
         DetalleCodigoFormSet = formset_factory(DetalleCodigoForm, extra=0, can_delete=False)
         formset = DetalleCodigoFormSet()
@@ -96,12 +97,14 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
         })
 
     def post(self, request):
+        """Guardar solicitud, adjuntos y productos en Supabase"""
         DetalleCodigoFormSet = formset_factory(DetalleCodigoForm, extra=0, can_delete=False)
         form = SolicitudCodigoForm(request.POST, request.FILES)
         formset = DetalleCodigoFormSet(request.POST)
 
         archivos = request.FILES.getlist('archivos')
         imagenes = request.FILES.getlist('imagenes')
+
         print(f"➡️ Archivos (DOCUMENTOS): {len(archivos)} -> {archivos}")
         print(f"➡️ Archivos (IMÁGENES): {len(imagenes)} -> {imagenes}")
 
@@ -110,24 +113,32 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
             solicitud.solicitante = request.user
             solicitud.save()
 
-            # ✅ Guardar adjuntos directamente como File
+            # 🔹 Usar Supabase Storage para subir archivos
+            storage = SupabaseStorage()
+
+            # 1️⃣ Documentos
             for archivo in archivos:
+                ruta = f"solicitudes/{solicitud.id}/documentos/{archivo.name}"
+                storage._save(ruta, archivo)  # sube a Supabase
                 SolicitudAdjunto.objects.create(
                     solicitud=solicitud,
                     tipo='documento',
-                    archivo=archivo
+                    archivo=ruta  # guardamos la ruta manualmente
                 )
 
+            # 2️⃣ Imágenes
             for imagen in imagenes:
+                ruta = f"solicitudes/{solicitud.id}/imagenes/{imagen.name}"
+                storage._save(ruta, imagen)
                 SolicitudAdjunto.objects.create(
                     solicitud=solicitud,
                     tipo='imagen',
-                    archivo=imagen
+                    archivo=ruta
                 )
 
-            print(f"📂 {len(archivos)} documentos y 🖼️ {len(imagenes)} imágenes guardadas.")
+            print(f"📂 {len(archivos)} documentos y 🖼️ {len(imagenes)} imágenes subidas a Supabase.")
 
-            # Guardar productos
+            # 3️⃣ Guardar productos
             productos_guardados = 0
             for f in formset:
                 if f.cleaned_data:
@@ -150,9 +161,10 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
 
             print(f"📦 {productos_guardados} productos guardados.")
 
-            messages.success(request, "✅ Solicitud registrada con éxito.")
+            messages.success(request, "✅ Solicitud registrada y subida a Supabase con éxito.")
             return redirect(self.success_url)
 
+        # 🔹 Si hay errores re-renderizamos
         print("❌ Errores del formulario:", form.errors.as_data())
         print("❌ Errores del formset:", formset.errors)
 
@@ -167,7 +179,6 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
             'solicitudes_enviadas': solicitudes_enviadas,
             'usuario': request.user
         })
-
 
 class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
     model = SolicitudCodigo
