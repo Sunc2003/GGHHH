@@ -1,88 +1,97 @@
 {% extends "base.html" %}
 {% block content %}
+ 
 <div class="container py-4">
   <h3 class="mb-4 text-center">Listado de Usuarios AD</h3>
-
+ 
   <!-- Filtros -->
-  <form method="get" class="row g-3 mb-4">
-    <div class="col-md-5">
+  <form method="get" class="row g-3 mb-4 align-items-end justify-content-center">
+    <div class="col-lg-4 col-md-6 col-sm-12">
+      <input type="text" name="q" class="form-control" placeholder="Buscar por nombre o username"
+             value="{{ filtro_nombre|default_if_none:'' }}">
+    </div>
+    <div class="col-lg-4 col-md-6 col-sm-12">
       <select name="area" class="form-select">
-        <option value="">-- Filtrar por Área --</option>
+        <option value="">-- Todas las áreas --</option>
         {% for area in areas %}
           <option value="{{ area.id }}" {% if filtro_area == area.id|stringformat:"s" %}selected{% endif %}>{{ area.nombre }}</option>
         {% endfor %}
       </select>
     </div>
-    <div class="col-md-5">
-      <select name="cargo" class="form-select">
-        <option value="">-- Filtrar por Cargo --</option>
-        {% for c in cargos %}
-          <option value="{{ c.id }}" {% if filtro_cargo == c.id|stringformat:"s" %}selected{% endif %}>{{ c.nombre }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="col-md-2">
-      <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+    <div class="col-lg-2 col-md-4 col-sm-12">
+      <button type="submit" class="btn w-100" style="background-color: black; color: white;">Filtrar</button>
     </div>
   </form>
-
-  <!-- Tabla -->
+ 
+  <!-- Tabla responsiva -->
   <div class="table-responsive">
-    <table class="table table-bordered table-hover align-middle text-center">
+    <table class="table table-bordered table-striped table-hover align-middle text-center">
       <thead class="table-dark">
         <tr>
-          <th>Área</th>
           <th>Cargo</th>
-          <th>Username</th>
-          <th>Nombre completo</th>
+          <th>Nombre</th>
           <th>Usuario AD</th>
           <th>Office</th>
           <th>SAP</th>
           <th>Equipo</th>
           <th>Impresora</th>
           <th>Móvil</th>
-          <th>Acciones</th> <!-- ✅ nueva columna -->
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
         {% for user in usuarios %}
         <tr>
-          <td>{{ user.area }}</td>
-          <td>{{ user.cargo }}</td>
-          <td>{{ user.username }}</td>
-          <td>{{ user.first_name }} {{ user.last_name }}</td>
-          <td>{{ user.usuario_ad }}</td>
-          <td>{{ user.usuario_office }}</td>
-          <td>{{ user.usuario_sap }}</td>
-          <td>{{ user.equipo_a_cargo|default:"—" }}</td>
-          <td>{{ user.impresora_a_cargo|default:"—" }}</td>
-          <td>{{ user.movil|default:"—" }}</td>
-          <td>
-            <a href="{% url 'asignar_permisos_usuario' user.pk %}" class="btn btn-sm btn-outline-primary">
+          <td data-label="Cargo">{{ user.cargo }}</td>
+          <td data-label="Nombre">{{ user.username }}</td>
+          <td data-label="Usuario AD">{{ user.usuario_ad }}</td>
+          <td data-label="Office">{{ user.usuario_office }}</td>
+          <td data-label="SAP">{{ user.usuario_sap }}</td>
+          <td data-label="Equipo">{{ user.equipo_a_cargo|default:"—" }}</td>
+          <td data-label="Impresora">{{ user.impresora_a_cargo|default:"—" }}</td>
+          <td data-label="Móvil">{{ user.movil|default:"—" }}</td>
+          <td data-label="Acciones">
+            <a href="{% url 'asignar_permisos_usuario' user.pk %}" class="btn btn-sm" style="border: 1px solid black; color: black;">
               <i class="fa fa-shield-alt"></i> Permisos
             </a>
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="11">No se encontraron usuarios.</td></tr>
+        <tr>
+          <td colspan="9">No se encontraron usuarios.</td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-
+ 
   <!-- Paginación -->
-  <div class="d-flex justify-content-center">
-    {% if is_paginated %}
-      <ul class="pagination">
-        {% if page_obj.has_previous %}
-          <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filtro_area %}&area={{ filtro_area }}{% endif %}{% if filtro_cargo %}&cargo={{ filtro_cargo }}{% endif %}">&laquo;</a></li>
-        {% endif %}
-        <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
-        {% if page_obj.has_next %}
-          <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filtro_area %}&area={{ filtro_area }}{% endif %}{% if filtro_cargo %}&cargo={{ filtro_cargo }}{% endif %}">&raquo;</a></li>
-        {% endif %}
-      </ul>
-    {% endif %}
+  {% if is_paginated %}
+  <div class="d-flex justify-content-center mt-4">
+    <ul class="pagination flex-wrap">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link"
+           href="?page={{ page_obj.previous_page_number }}{% if filtro_area %}&area={{ filtro_area }}{% endif %}{% if filtro_nombre %}&q={{ filtro_nombre }}{% endif %}">
+          &laquo;
+        </a>
+      </li>
+      {% endif %}
+      <li class="page-item disabled">
+        <span class="page-link">
+          Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+      </li>
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link"
+           href="?page={{ page_obj.next_page_number }}{% if filtro_area %}&area={{ filtro_area }}{% endif %}{% if filtro_nombre %}&q={{ filtro_nombre }}{% endif %}">
+          &raquo;
+        </a>
+      </li>
+      {% endif %}
+    </ul>
   </div>
+  {% endif %}
 </div>
 {% endblock %}

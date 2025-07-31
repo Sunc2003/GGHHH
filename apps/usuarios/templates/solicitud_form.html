@@ -1,260 +1,242 @@
 {% extends "base.html" %}
 {% load static %}
- 
+
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/solicitud_form.css' %}">
-  <style>
-    /* ------ BOTONES IGUALES PARA TODOS ------ */
-    .btn-solicitar-codigo, .btn-solicitar-codigo:visited, .btn-solicitar-codigo:link,
-    .btn-solicitudes-enviadas, .btn-solicitudes-enviadas:visited, .btn-solicitudes-enviadas:link {
-      background: #232323;
-      color: #fff !important;
-      border: 2px solid #232323;
-      border-radius: 0.25rem;
-      font-weight: 700;
-      letter-spacing: 0.43px;
-      padding: 0.8rem 2.6rem;
-      font-size: 1.12rem;
-      box-shadow: 0 1.5px 8px rgba(40,40,40,0.10);
-      transition: background 0.15s, border 0.15s, color 0.13s;
-      outline: none;
-      margin: 0.5rem;
-      text-decoration: none;
-      display: inline-block;
-      cursor: pointer;
-    }
-    .btn-solicitar-codigo:hover, .btn-solicitar-codigo:focus,
-    .btn-solicitudes-enviadas:hover, .btn-solicitudes-enviadas:focus {
-      background: #000;
-      color: #fff !important;
-      border-color: #000;
-    }
-    /* --- CONTENEDORES --- */
-    .solicitud-centrado {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 60vh;
-      width: 100%;
-    }
-    .solicitud-menu-botones {
-      margin-top: 4rem;
-      margin-bottom: 2.5rem;
-      display: flex;
-      gap: 1.1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    #solicitud-form-contenedor, #solicitudes-enviadas-contenedor {
-      display: none;
-      width: 100%;
-      max-width: 900px;
-    }
-    /* Puedes seguir usando el resto de tu CSS de campos, fieldset, etc. */
-  </style>
+<link rel="stylesheet" href="{% static 'css/solicitud_form.css' %}">
+<style>
+  .btn-solicitar-codigo {
+    background:#232323;color:#fff!important;border:2px solid #232323;
+    border-radius:0.25rem;font-weight:700;letter-spacing:0.43px;
+    padding:0.8rem 2.6rem;font-size:1.12rem;
+    box-shadow:0 1.5px 8px rgba(40,40,40,0.10);transition:background 0.15s;
+  }
+  .btn-solicitar-codigo:hover {background:#000;border-color:#000;}
+  .formset-form {
+    border-left:5px solid #007bff;background-color:#f9f9f9;
+    padding:1rem;margin-bottom:1rem;border-radius:5px;
+  }
+  .tabla-productos th,.tabla-productos td {font-size:0.9rem;vertical-align:middle;}
+  .tabla-productos .btn {padding:0.1rem 0.4rem;font-size:0.8rem;}
+  .error-msg {color:#d9534f;font-size:0.85rem;margin-top:3px;}
+</style>
 {% endblock %}
- 
+
 {% block content %}
-  <div class="solicitud-centrado">
- 
-    <!-- MENÚ de BOTONES PRINCIPAL -->
-    <div id="menu-botones" class="solicitud-menu-botones">
-      <button id="btn-mostrar-form" class="btn-solicitar-codigo">
-        Solicitar Código
-      </button>
-      <button id="btn-mostrar-enviadas" class="btn-solicitar-codigo">
-        Solicitudes Enviadas
-      </button>
-      <a href="{% url 'solicitudes_recibidas' %}" class="btn-solicitar-codigo">
-        <i class="fas fa-inbox"></i> Ver Solicitudes Recibidas
-      </a>
-    </div>
- 
-    <!-- FORMULARIO DE SOLICITUD -->
-    <div id="solicitud-form-contenedor">
-      <h2 class="mb-4">
-        <i class="fas fa-barcode" style="font-size:2.5rem; color:#000000;"></i>
-      </h2>
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
- 
-        <!-- Información General -->
-        <fieldset>
-          <legend>Información General</legend>
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label">Receptor</label>
-              {{ form.receptor }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Empresa</label>
-              {{ form.empresa }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Tipo de Solicitud</label>
-              {{ form.tipo_solicitud }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Tipo de Cotización</label>
-              {{ form.cotizacion }}
-            </div>
-            <div class="col-md-6" id="campo_archivo" style="display: none;">
-              <label class="form-label">Archivo Cotización</label>
-              {{ form.archivo_cotizacion }}
-            </div>
-            <div class="col-md-6" id="campo_imagen" style="display: none;">
-              <label class="form-label">Imagen WhatsApp</label>
-              {{ form.imagen_whatsapp }}
-            </div>
-          </div>
-        </fieldset>
- 
-        <!-- Información Técnica -->
-        <fieldset>
-          <legend>Información Técnica</legend>
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label">Origen</label>
-              {{ form.origen }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Proveedor</label>
-              {{ form.proveedor }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">SKU Proveedor</label>
-              {{ form.sku_proveedor }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">SKU Fabricante</label>
-              {{ form.sku_fabricante }}
-            </div>
-            <div class="col-12">
-              <label class="form-label">Descripción del Producto</label>
-              {{ form.descripcion }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Marca</label>
-              {{ form.marca }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Unidad de Medida (UDM)</label>
-              {{ form.udm }}
-            </div>
-          </div>
-        </fieldset>
- 
-        <!-- Dimensiones y Costo -->
-        <fieldset>
-          <legend>Dimensiones y Costo</legend>
-          <div class="row g-3">
-            <div class="col-md-3">
-              <label class="form-label">Largo (cm)</label>
-              {{ form.largo }}
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Ancho (cm)</label>
-              {{ form.ancho }}
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Alto (cm)</label>
-              {{ form.alto }}
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Peso (kg)</label>
-              {{ form.peso }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Costo Estimado</label>
-              {{ form.costo }}
-            </div>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>Mensaje al Receptor</legend>
-          <div class="row g-3">
-            <div class="col-12">
-              <label class="form-label">Mensaje</label>
-              {{ form.mensaje }}
-            </div>
-          </div>
-        </fieldset>
- 
-        <div class="mt-4 d-flex">
-          <button type="submit" class="btn btn-success">Enviar Solicitud</button>
-          <button type="button" class="btn btn-secondary ms-2" onclick="volverAMenu()">Cancelar</button>
-        </div>
-      </form>
-    </div>
- 
-    <!-- LISTADO DE SOLICITUDES ENVIADAS -->
-    <div id="solicitudes-enviadas-contenedor">
-      <h4 class="mb-3"><i class="fas fa-paper-plane"></i> Solicitudes Enviadas</h4>
-      {% if solicitudes_enviadas %}
-        <ul class="list-group shadow-sm">
-          {% for solicitud in solicitudes_enviadas %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <div>
-                <strong>Para:</strong> {{ solicitud.receptor.get_full_name|default:solicitud.receptor.username }}<br>
-                <small class="text-muted">Enviada: {{ solicitud.fecha_creacion|date:"d/m/Y H:i" }}</small><br>
-                {% if solicitud.mensaje %}
-                  <small><strong>Mensaje:</strong> {{ solicitud.mensaje|linebreaksbr }}</small>
-                {% endif %}
-              </div>
-              <span class="badge rounded-pill
-                {% if solicitud.estado == 'pendiente' %}bg-warning text-dark
-                {% elif solicitud.estado == 'creado' %}bg-success
-                {% else %}bg-secondary
-                {% endif %}">
-                {{ solicitud.get_estado_display }}
-              </span>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <div class="alert alert-secondary" role="alert">
-          <i class="fas fa-info-circle"></i> No has enviado ninguna solicitud.
-        </div>
-      {% endif %}
-      <div class="mt-4 d-flex">
-        <button type="button" class="btn btn-secondary" onclick="volverAMenu()">Volver</button>
-      </div>
-    </div>
- 
+<div class="container py-5">
+  <div id="menu-botones" class="mb-4 d-flex flex-wrap gap-3">
+    <button id="btn-mostrar-form" class="btn-solicitar-codigo">Solicitar Código</button>
+    <button id="btn-mostrar-enviadas" class="btn-solicitar-codigo">Solicitudes Enviadas</button>
+    <a href="{% url 'solicitudes_recibidas' %}" class="btn-solicitar-codigo">
+      <i class="fas fa-inbox"></i> Ver Solicitudes Recibidas
+    </a>
   </div>
- 
-  <script>
-    // --- Mostrar/Ocultar divs según botón ----
-    function mostrarDiv(idDiv) {
-      document.getElementById('menu-botones').style.display = 'none';
-      document.getElementById('solicitud-form-contenedor').style.display = 'none';
-      document.getElementById('solicitudes-enviadas-contenedor').style.display = 'none';
-      document.getElementById(idDiv).style.display = 'block';
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-    function volverAMenu() {
-      document.getElementById('menu-botones').style.display = 'flex';
-      document.getElementById('solicitud-form-contenedor').style.display = 'none';
-      document.getElementById('solicitudes-enviadas-contenedor').style.display = 'none';
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-    document.addEventListener('DOMContentLoaded', function () {
-      document.getElementById('btn-mostrar-form').onclick = () => mostrarDiv('solicitud-form-contenedor');
-      document.getElementById('btn-mostrar-enviadas').onclick = () => mostrarDiv('solicitudes-enviadas-contenedor');
-      // Campo condicional cotización
-      const cotizacionSelect = document.getElementById('id_cotizacion');
-      if (cotizacionSelect) {
-        const campoArchivo = document.getElementById('campo_archivo');
-        const campoImagen = document.getElementById('campo_imagen');
-        function toggleCampos() {
-          const valor = cotizacionSelect.value;
-          campoArchivo.style.display = valor === 'documento' ? 'block' : 'none';
-          campoImagen.style.display = valor === 'whatsapp' ? 'block' : 'none';
-        }
-        cotizacionSelect.addEventListener('change', toggleCampos);
-        toggleCampos();
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div id="formulario-container" style="display:none;">
+    <h2 class="mb-4"><i class="fas fa-barcode"></i> Nueva Solicitud de Código SAP</h2>
+    <form method="post" enctype="multipart/form-data" id="solicitud-form">
+      {% csrf_token %}
+      <fieldset class="border p-3 mb-4">
+        <legend>Información General</legend>
+        <div class="row g-3">
+          <div class="col-md-4">
+            {{ form.receptor.label_tag }}{{ form.receptor }}
+            {% for error in form.receptor.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-md-4">
+            {{ form.empresa.label_tag }}{{ form.empresa }}
+            {% for error in form.empresa.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-md-4">
+            {{ form.tipo_solicitud.label_tag }}{{ form.tipo_solicitud }}
+            {% for error in form.tipo_solicitud.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-md-4">
+            {{ form.cotizacion.label_tag }}{{ form.cotizacion }}
+            {% for error in form.cotizacion.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+          </div>
+          
+          <!-- Nuevos campos múltiples -->
+          <div class="col-md-6" id="campo_archivo" style="display:none;">
+            {{ form.archivos.label_tag }}{{ form.archivos }}
+            <small class="text-muted">Puedes seleccionar varios archivos</small>
+            {% for error in form.archivos.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-md-6" id="campo_imagen" style="display:none;">
+            {{ form.imagenes.label_tag }}{{ form.imagenes }}
+            <small class="text-muted">Puedes seleccionar varias imágenes</small>
+            {% for error in form.imagenes.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Tabla de productos -->
+      <fieldset class="border p-3 mb-4">
+        <legend>Productos Agregados</legend>
+        <div class="table-responsive">
+          <table class="table table-striped tabla-productos" id="tabla-detalles">
+            <thead>
+              <tr>
+                <th>#</th><th>Descripción</th><th>Marca</th><th>UDM</th>
+                <th>Origen</th><th>Proveedor</th>
+                <th>Dimensiones</th><th>Peso</th><th>Costo</th>
+                <th>SKU Prov.</th><th>SKU Fab.</th><th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </fieldset>
+
+      <!-- Formulario visible para agregar productos -->
+      <fieldset class="border p-3 mb-4">
+        <legend>Agregar Producto</legend>
+        <div class="formset-form" id="formset-actual">
+          {% for field in formset.empty_form.visible_fields %}
+            <div class="mb-2">
+              {{ field.label_tag }}{{ field }}
+              {% for error in field.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+        {{ formset.management_form }}
+        <button type="button" class="btn btn-outline-primary mt-2" id="add-product-btn">
+          + Agregar Producto
+        </button>
+      </fieldset>
+
+      <!-- Mensaje -->
+      <fieldset class="border p-3 mb-4">
+        <legend>Mensaje al Receptor</legend>
+        <div class="mb-3">
+          {{ form.mensaje.label_tag }}{{ form.mensaje }}
+          {% for error in form.mensaje.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+        </div>
+      </fieldset>
+
+      <div class="d-flex justify-content-start">
+        <button type="submit" class="btn btn-success me-2">Enviar Solicitud</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Solicitudes enviadas -->
+  <div id="solicitudes-enviadas" style="display:none;">
+    <h3>Solicitudes Enviadas</h3>
+    <table class="table table-hover">
+      <thead><tr><th>#</th><th>Empresa</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+      <tbody>
+        {% for s in solicitudes_enviadas %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ s.get_empresa_display }}</td>
+          <td>{{ s.get_tipo_solicitud_display }}</td>
+          <td>{{ s.get_estado_display }}</td>
+          <td>{{ s.fecha_creacion|date:"d-m-Y H:i" }}</td>
+          <td><a href="{% url 'detalle_solicitud' s.id %}" class="btn btn-sm btn-outline-primary">Ver</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center">No has enviado solicitudes aún.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- JS dinámico -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const menu = document.getElementById('menu-botones');
+  const formContainer = document.getElementById('formulario-container');
+  const solicitudesContainer = document.getElementById('solicitudes-enviadas');
+  const cotSelect = document.getElementById('id_cotizacion');
+  const campoArchivo = document.getElementById('campo_archivo');
+  const campoImagen = document.getElementById('campo_imagen');
+  const tabla = document.querySelector('#tabla-detalles tbody');
+  const addBtn = document.getElementById('add-product-btn');
+  const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+  let index = parseInt(totalForms.value);
+
+  document.getElementById('btn-mostrar-form').onclick = () => {
+    formContainer.style.display='block';
+    solicitudesContainer.style.display='none';
+    menu.style.display='none';
+  };
+  document.getElementById('btn-mostrar-enviadas').onclick = () => {
+    formContainer.style.display='none';
+    solicitudesContainer.style.display='block';
+    menu.style.display='none';
+  };
+
+  if(cotSelect){
+    cotSelect.addEventListener('change', () => {
+      const val = cotSelect.value;
+      campoArchivo.style.display = val === 'documento' ? 'block' : 'none';
+      campoImagen.style.display = val === 'whatsapp' ? 'block' : 'none';
+    });
+    cotSelect.dispatchEvent(new Event('change'));
+  }
+
+  addBtn.addEventListener('click', () => {
+    const currentForm = document.querySelector('#formset-actual');
+    const inputs = currentForm.querySelectorAll('input, select, textarea');
+    const producto = {};
+    let valido = true;
+
+    inputs.forEach(input => {
+      if (!input.value && input.required !== false) {
+        input.classList.add('is-invalid');
+        valido = false;
+      } else {
+        input.classList.remove('is-invalid');
+        producto[input.name.split('-')[2]] = input.value;
       }
     });
-  </script>
+    if (!valido) return;
+
+    const marcaTexto = currentForm.querySelector('select[name$="-marca"]')?.selectedOptions[0].text || '';
+    const udmTexto = currentForm.querySelector('select[name$="-udm"]')?.selectedOptions[0].text || '';
+    const origenTexto = currentForm.querySelector('select[name$="-origen"]')?.selectedOptions[0].text || '';
+    const proveedorTexto = currentForm.querySelector('select[name$="-proveedor"]')?.selectedOptions[0].text || '';
+
+    const fila = document.createElement('tr');
+    fila.innerHTML = `
+      <td>${index+1}</td>
+      <td>${producto.descripcion}</td>
+      <td>${marcaTexto}</td>
+      <td>${udmTexto}</td>
+      <td>${origenTexto}</td>
+      <td>${proveedorTexto}</td>
+      <td>${producto.largo}x${producto.ancho}x${producto.alto}</td>
+      <td>${producto.peso}kg</td>
+      <td>$${producto.costo}</td>
+      <td>${producto.sku_proveedor}</td>
+      <td>${producto.sku_fabricante}</td>
+      <td><button type="button" class="btn btn-sm btn-danger eliminar-fila">✕</button></td>
+    `;
+    tabla.appendChild(fila);
+    fila.querySelector('.eliminar-fila').addEventListener('click', () => fila.remove());
+
+    const form = document.getElementById('solicitud-form');
+    inputs.forEach(input => {
+      const hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.name = `form-${index}-${input.name.split('-')[2]}`;
+      hidden.value = input.value;
+      form.appendChild(hidden);
+    });
+
+    index++;
+    totalForms.value = index;
+    inputs.forEach(input => { input.value = ''; });
+  });
+});
+</script>
 {% endblock %}

@@ -7,8 +7,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from datetime import timedelta
-from apps.usuarios.models import SolicitudCodigo
-from apps.usuarios.forms import SolicitudCodigoForm
+from apps.usuarios.models import SolicitudCodigo, DetalleCodigo, SolicitudAdjunto
+from apps.usuarios.forms import SolicitudCodigoForm, DetalleCodigoForm, DetalleCodigoFormSet
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
@@ -18,8 +18,12 @@ from apps.permisos.decorators import permiso_requerido
 from .forms import CambiarEstadoForm
 import os
 from apps.utils.supabase_storage import SupabaseStorage
-
-
+from decimal import Decimal
+from django.contrib import messages
+from django.views.generic.detail import DetailView
+from django.views.generic.base import TemplateResponseMixin
+from django.forms import formset_factory
+from django.db.models import Q
 
 
 
@@ -69,96 +73,108 @@ def panel_admin_usuarios(request):
     return render(request, 'panel_admin.html', context)
 
 
-##DESCOMENTAR PARA CUANDO TENGAMOS LOS PERMISOS CONFIGURADOSdef solicitud_form(request):
-    usuarios = CustomUser.objects.all()
-
-    context = {
-        'usuarios': usuarios,
-    }
-
-    if request.user.tiene_permiso('SOLICITUD_CODIGO'):
-        context['solicitudes_enviadas'] = SolicitudCodigo.objects.filter(solicitante=request.user)
-
-    if request.user.tiene_permiso('VER_SOLICITUDES_RECIBIDAS'):
-        context['solicitudes_recibidas'] = SolicitudCodigo.objects.filter(receptor=request.user)
-
-    return render(request, 'solicitud_form.html', context)
-
-##def solicitud_form(request):  ##CUANDO SE HABILITE LA DE ARRIBA BORRAR ESTA
-    print("Usuario autenticado:", request.user)
-    print("Solicitudes enviadas:", SolicitudCodigo.objects.filter(solicitante=request.user).count())
-    usuarios = CustomUser.objects.all()
-
-    solicitudes_enviadas = SolicitudCodigo.objects.filter(solicitante=request.user)
-    solicitudes_recibidas = SolicitudCodigo.objects.filter(receptor=request.user)
-
-    context = {
-        'usuarios': usuarios,
-        'solicitudes_enviadas': solicitudes_enviadas,
-        'solicitudes_recibidas': solicitudes_recibidas,
-    }
-
-    return render(request, 'solicitud_form.html', context)
-
-##@login_required
-##def solicitudes_enviadas_view(request):
-    solicitudes_enviadas = SolicitudCodigo.objects.filter(solicitante=request.user).order_by('-fecha_creacion')
-
-    return render(request, 'solicitud_form.html', {
-        'usuario': request.user,
-        'solicitudes_enviadas': solicitudes_enviadas
-    })
-
-##@method_decorator(permiso_requerido('SOLICITUD_CODIGO'), name='dispatch')
-##class SolicitudCreateView(LoginRequiredMixin, CreateView):
-    model = SolicitudCodigo
-    form_class = SolicitudCodigoForm
-    template_name = 'solicitud_form.html'
-    success_url = reverse_lazy('panel_admin_usuarios')
-
-    def form_valid(self, form):
-        form.instance.solicitante = self.request.user
-        return super().form_valid(form)
 
 @method_decorator(permiso_requerido('SOLICITUD_CODIGO'), name='dispatch')    
-class SolicitudCreateView(LoginRequiredMixin, CreateView):
-    model = SolicitudCodigo
-    form_class = SolicitudCodigoForm
+class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
     template_name = 'solicitud_form.html'
     success_url = reverse_lazy('panel_admin_usuarios')
 
-    def form_valid(self, form):
-        form.instance.solicitante = self.request.user
-        solicitud = form.save(commit=False)  # aún no guardamos los archivos
-        storage = SupabaseStorage()
+    def get(self, request):
+        """ Mostrar formulario y formset vacío """
+        form = SolicitudCodigoForm()
+        DetalleCodigoFormSet = formset_factory(DetalleCodigoForm, extra=0, can_delete=False)
+        formset = DetalleCodigoFormSet()
 
-        # Guardar la solicitud sin archivos todavía
-        solicitud.save()
-
-        # Subida forzada a Supabase Storage
-        archivo = self.request.FILES.get('archivo_cotizacion')
-        if archivo:
-            ruta = f"cotizaciones/{archivo.name}"
-            storage._save(ruta, archivo)
-            solicitud.archivo_cotizacion.name = ruta  # asigna ruta manualmente
-
-        imagen = self.request.FILES.get('imagen_whatsapp')
-        if imagen:
-            ruta_img = f"cotizaciones/img/{imagen.name}"
-            storage._save(ruta_img, imagen)
-            solicitud.imagen_whatsapp.name = ruta_img
-
-        solicitud.save()  # ahora sí guarda con los campos de archivo
-
-        return super().form_valid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['solicitudes_enviadas'] = SolicitudCodigo.objects.filter(
-            solicitante=self.request.user
+        solicitudes_enviadas = SolicitudCodigo.objects.filter(
+            solicitante=request.user
         ).order_by('-fecha_creacion')
-        context['usuario'] = self.request.user
-        return context
+
+        return render(request, self.template_name, {
+            'form': form,
+            'formset': formset,
+            'solicitudes_enviadas': solicitudes_enviadas,
+            'usuario': request.user
+        })
+
+    def post(self, request):
+        """ Guardar solicitud, adjuntos y productos """
+        DetalleCodigoFormSet = formset_factory(DetalleCodigoForm, extra=0, can_delete=False)
+        form = SolicitudCodigoForm(request.POST, request.FILES)
+        formset = DetalleCodigoFormSet(request.POST)
+
+        # 🔹 Logs de depuración
+        archivos = request.FILES.getlist('archivos')
+        imagenes = request.FILES.getlist('imagenes')
+        print(f"➡️ Archivos (DOCUMENTOS): {len(archivos)} -> {archivos}")
+        print(f"➡️ Archivos (IMÁGENES): {len(imagenes)} -> {imagenes}")
+
+        if form.is_valid() and formset.is_valid():
+            # Guardar solicitud principal
+            solicitud = form.save(commit=False)
+            solicitud.solicitante = request.user
+            solicitud.save()
+
+            # 🔹 Guardar adjuntos DOCUMENTOS
+            if archivos:
+                for archivo in archivos:
+                    SolicitudAdjunto.objects.create(
+                        solicitud=solicitud,
+                        tipo='documento',
+                        archivo=archivo
+                    )
+                print(f"📂 {len(archivos)} documentos guardados.")
+
+            # 🔹 Guardar adjuntos IMÁGENES
+            if imagenes:
+                for imagen in imagenes:
+                    SolicitudAdjunto.objects.create(
+                        solicitud=solicitud,
+                        tipo='imagen',
+                        archivo=imagen
+                    )
+                print(f"🖼️ {len(imagenes)} imágenes guardadas.")
+
+            # 🔹 Guardar productos del formset
+            productos_guardados = 0
+            for f in formset:
+                if f.cleaned_data:
+                    DetalleCodigo.objects.create(
+                        solicitud=solicitud,
+                        descripcion=f.cleaned_data.get('descripcion'),
+                        marca=f.cleaned_data.get('marca'),
+                        udm=f.cleaned_data.get('udm'),
+                        origen=f.cleaned_data.get('origen'),
+                        proveedor=f.cleaned_data.get('proveedor'),
+                        largo=f.cleaned_data.get('largo'),
+                        ancho=f.cleaned_data.get('ancho'),
+                        alto=f.cleaned_data.get('alto'),
+                        peso=f.cleaned_data.get('peso'),
+                        costo=f.cleaned_data.get('costo'),
+                        sku_proveedor=f.cleaned_data.get('sku_proveedor'),
+                        sku_fabricante=f.cleaned_data.get('sku_fabricante'),
+                    )
+                    productos_guardados += 1
+
+            print(f"📦 {productos_guardados} productos guardados.")
+
+            messages.success(request, "✅ Solicitud registrada con éxito.")
+            return redirect(self.success_url)
+
+        # 🔹 Si hay errores re-renderizamos el formulario
+        print("❌ Errores del formulario:", form.errors.as_data())
+        print("❌ Errores del formset:", formset.errors)
+
+        solicitudes_enviadas = SolicitudCodigo.objects.filter(
+            solicitante=request.user
+        ).order_by('-fecha_creacion')
+
+        messages.error(request, "⚠️ Hay errores en el formulario. Revisa los campos.")
+        return render(request, self.template_name, {
+            'form': form,
+            'formset': formset,
+            'solicitudes_enviadas': solicitudes_enviadas,
+            'usuario': request.user
+        })
 
 
 class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
@@ -176,17 +192,37 @@ class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
         return pendientes       
         
         
+
 class SolicitudDetailView(DetailView):
     model = SolicitudCodigo
     template_name = 'solicitud_detalle.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        archivo = self.object.archivo_cotizacion.name.lower()
 
-        context['es_pdf'] = archivo.endswith('.pdf')
-        context['es_imagen'] = archivo.endswith(('.jpg', '.jpeg', '.png'))
+        # 🔹 Obtener los adjuntos organizados
+        documentos = self.object.adjuntos.filter(tipo='documento')
+        imagenes = self.object.adjuntos.filter(tipo='imagen')
 
+        context['documentos'] = documentos
+        context['imagenes'] = imagenes
+
+        # 🔹 Obtener los productos asociados a esta solicitud
+        productos = self.object.detalles.all()
+
+        # 🔹 Calcular PMV y PVP por cada producto
+        productos_con_calculo = []
+        for p in productos:
+            pmv = round(p.costo / Decimal('0.84'), 2) if p.costo and p.costo > 0 else None
+            pvp = round(pmv / Decimal('0.6'), 2) if pmv else None
+
+            productos_con_calculo.append({
+                'producto': p,
+                'pmv': pmv,
+                'pvp': pvp
+            })
+
+        context['productos'] = productos_con_calculo
         return context
 
 class CambiarEstadoView(UpdateView):
@@ -209,18 +245,33 @@ class UsuariosADListView(ListView):
     template_name = 'usuarios_ad.html'
     context_object_name = 'usuarios'
     paginate_by = 10
-
+ 
     def get_queryset(self):
         qs = super().get_queryset()
-        area_id = self.request.GET.get('area')
-        cargo_id = self.request.GET.get('cargo')
-
+        area_id = self.request.GET.get('area', '')
+        cargo_id = self.request.GET.get('cargo', '')
+        filtro_nombre = self.request.GET.get('q', '').strip()  # Nuevo
+ 
         if area_id:
             qs = qs.filter(area_id=area_id)
         if cargo_id:
             qs = qs.filter(cargo_id=cargo_id)
-
+        if filtro_nombre:
+            qs = qs.filter(
+                Q(first_name__icontains=filtro_nombre) |
+                Q(last_name__icontains=filtro_nombre) |
+                Q(username__icontains=filtro_nombre)
+            )
         return qs
+ 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['areas'] = Area.objects.all()
+        context['cargos'] = Cargo.objects.all()
+        context['filtro_area'] = self.request.GET.get('area', '')
+        context['filtro_cargo'] = self.request.GET.get('cargo', '')
+        context['filtro_nombre'] = self.request.GET.get('q', '')  # Nuevo
+        return context
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

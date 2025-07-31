@@ -51,13 +51,7 @@ class SolicitudCodigo(models.Model):
         ('whatsapp', 'Por WhatsApp'),
     ]
 
-    ORIGENES = [
-        ('sin_origen', 'Sin origen'),
-        ('nacional', 'Nacional'),
-        ('importado', 'Importado'),
-        ('mixto', 'Mixto'),
-    ]
-
+    # Relaciones de usuarios
     solicitante = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -69,31 +63,13 @@ class SolicitudCodigo(models.Model):
         related_name='solicitudes_recibidas'
     )
 
-    # Datos generales
+    # Datos generales de la solicitud
     empresa = models.CharField(max_length=20, choices=EMPRESAS, default='marsella')
     tipo_solicitud = models.CharField(max_length=20, choices=TIPOS_SOLICITUD, default='nuevo_articulo')
     cotizacion = models.CharField(max_length=20, choices=OPCIONES_COTIZACION, blank=True, null=True)
-    archivo_cotizacion = models.FileField(upload_to='cotizaciones/', blank=True, null=True)
-    imagen_whatsapp = models.ImageField(upload_to='cotizaciones/img/', blank=True, null=True)
 
-    # Datos técnicos
-    origen = models.CharField(max_length=20, choices=ORIGENES, default='sin_origen')
-    proveedor = models.ForeignKey('sap.Proveedor', on_delete=models.CASCADE, null=True, blank=True)
-    rut_proveedor = models.CharField(max_length=12, null=True, blank=True)
-    sku_proveedor = models.CharField(max_length=100, null=True, blank=True)
-    sku_fabricante = models.CharField(max_length=100, null=True, blank=True)
-    descripcion = models.TextField(null=True, blank=True)
-    marca = models.ForeignKey('sap.Marca', on_delete=models.SET_NULL, null=True)
-    udm = models.ForeignKey('sap.UDM', on_delete=models.SET_NULL, null=True)
 
-    # Dimensiones y costo
-    largo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    ancho = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    alto = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    peso = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    costo = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-
-    # Control de estado
+    # Estado y control
     titulo = models.CharField(max_length=100, null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
     fecha_creacion = models.DateTimeField(default=timezone.now)
@@ -101,3 +77,65 @@ class SolicitudCodigo(models.Model):
 
     def __str__(self):
         return f"{self.get_tipo_solicitud_display()} - {self.solicitante.username} → {self.receptor.username}"
+
+
+class DetalleCodigo(models.Model):
+    ORIGENES = [
+        ('nacional', 'Nacional'),
+        ('importado', 'Importado'),
+        ('mixto', 'Mixto'),
+    ]
+
+    solicitud = models.ForeignKey(SolicitudCodigo, on_delete=models.CASCADE, related_name='detalles')
+    descripcion = models.TextField()
+    marca = models.ForeignKey('sap.Marca', on_delete=models.PROTECT)
+    udm = models.ForeignKey('sap.UDM', on_delete=models.PROTECT)
+
+    # NUEVOS CAMPOS
+    origen = models.CharField(max_length=20, choices=ORIGENES, default='nacional')
+    proveedor = models.ForeignKey('sap.Proveedor', on_delete=models.PROTECT, related_name='detalles')
+
+    largo = models.DecimalField(max_digits=10, decimal_places=2)
+    ancho = models.DecimalField(max_digits=10, decimal_places=2)
+    alto = models.DecimalField(max_digits=10, decimal_places=2)
+    peso = models.DecimalField(max_digits=10, decimal_places=2)
+    costo = models.DecimalField(max_digits=15, decimal_places=2)
+    sku_proveedor = models.CharField(max_length=100)
+    sku_fabricante = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"SKU: {self.sku_proveedor or self.sku_fabricante} - ${self.costo}"
+    
+    
+    
+def ruta_adjuntos(instance, filename):
+    # Carpeta base por solicitud
+    carpeta_base = f"solicitudes/{instance.solicitud.id}"
+
+    # Subcarpeta por tipo
+    if instance.tipo == 'documento':
+        carpeta = f"{carpeta_base}/archivos"
+    else:
+        carpeta = f"{carpeta_base}/imagenes"
+
+    return f"{carpeta}/{filename}"
+
+
+class SolicitudAdjunto(models.Model):
+    TIPO_CHOICES = [
+        ('documento', 'Documento'),
+        ('imagen', 'Imagen WhatsApp')
+    ]
+
+    solicitud = models.ForeignKey(
+        'SolicitudCodigo',
+        on_delete=models.CASCADE,
+        related_name='adjuntos'
+    )
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+
+    # 🔥 Ahora usamos el upload_to dinámico
+    archivo = models.FileField(upload_to=ruta_adjuntos)
+
+    def __str__(self):
+        return f"{self.get_tipo_display()} - {self.archivo.name}"

@@ -1,0 +1,132 @@
+#permiso-panel {
+    max-width: 850px;
+    margin: 40px auto 48px auto;
+    padding: 0;
+  }
+   
+  #permiso-panel .card {
+    border: 1px solid #d2d2d2 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border-radius: 4px !important;
+    margin-bottom: 2rem !important;
+  }
+   
+  #permiso-panel .card-title,
+  #permiso-panel h5.card-title {
+    font-size: 1.35rem !important;
+    font-weight: 700 !important;
+    color: #181818 !important;
+    margin-bottom: 1.1rem !important;
+    letter-spacing: 0;
+    text-align: left;
+  }
+   
+  #permiso-panel h5.card-title {
+    font-size: 1.12rem !important;
+  }
+   
+  #permiso-panel .form-label {
+    font-size: 1.04rem !important;
+    font-weight: 600 !important;
+    color: #212121 !important;
+    margin-bottom: .25rem !important;
+    letter-spacing: 0;
+  }
+   
+  #permiso-panel .form-control {
+    min-height: 42px !important;
+    padding: 0.6rem 0.9rem !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
+    color: #232323 !important;
+    background-color: #fff !important;
+    border: 1px solid #bcbcbc !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    transition: none !important;
+  }
+   
+  #permiso-panel .form-control:focus {
+    border-color: #111 !important;
+    outline: none !important;
+  }
+   
+  #permiso-panel .btn-primary {
+    background: #111 !important;
+    border: none !important;
+    font-weight: 600 !important;
+    padding: 0.8rem 1.6rem !important;
+    font-size: 1.05rem !important;
+    border-radius: 4px !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    transition: none !important;
+  }
+   
+  #permiso-panel .btn-primary:hover,
+  #permiso-panel .btn-primary:focus {
+    background: #222 !important;
+    color: #fff !important;
+    transform: none !important;
+  }
+   
+  #permiso-panel .table {
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    margin-bottom: 0 !important;
+    border: 1px solid #bcbcbc !important;
+  }
+   
+  #permiso-panel .table th,
+  #permiso-panel .table td {
+    vertical-align: middle !important;
+    padding: 0.75rem 1rem !important;
+    font-size: .97rem !important;
+    color: #181818 !important;
+    background: #fff !important;
+    border-top: 1px solid #e0e0e0 !important;
+    border-right: 1px solid #e0e0e0 !important;
+  }
+   
+  #permiso-panel .table th:last-child,
+  #permiso-panel .table td:last-child {
+    border-right: none !important;
+  }
+   
+  #permiso-panel .table-light {
+    background-color: #222 !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+    letter-spacing: 0 !important;
+  }
+   
+  #permiso-panel code {
+    background: #f3f3f3 !important;
+    color: #111 !important;
+    padding: 3px 8px !important;
+    border-radius: 4px !important;
+    font-size: 97% !important;
+    font-weight: 600 !important;
+  }
+   
+  #permiso-panel .text-danger.small {
+    font-size: 92% !important;
+    margin-top: 7px !important;
+    font-weight: 600 !important;
+    color: #b8001f !important;
+  }
+   
+  #permiso-panel .mb-4 {
+    margin-bottom: 1.5rem !important;
+  }
+   
+  @media (max-width: 900px) {
+    #permiso-panel { max-width: 99vw !important; }
+    #permiso-panel .card-title { font-size: 1.07rem !important; }
+  }
+  @media (max-width: 600px) {
+    #permiso-panel { margin: 10px auto 24px auto !important; }
+    #permiso-panel .table th, #permiso-panel .table td { font-size: .93rem !important; padding: .5rem .3rem !important; }
+  }

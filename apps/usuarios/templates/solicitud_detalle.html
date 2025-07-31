@@ -1,83 +1,191 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/solicitud_detalle.css' %}">
+  <style>
+    .card-detalle {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    legend {
+      font-size: 1.2rem;
+      font-weight: bold;
+      padding: 0 6px;
+      color: #444;
+    }
+    .table th, .table td {
+      vertical-align: middle;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    img.img-preview {
+      max-width: 120px;
+      margin: 4px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+    }
+    .adjuntos-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <h2 class="mb-4">Detalle de Solicitud de Código SAP</h2>
-  <div class="detalle-grid">
-    <!-- Columna Izquierda -->
-    <div>
-      <fieldset class="card-detalle">
-        <legend>Información General</legend>
-        <p><strong>Título:</strong> {{ object.titulo }}</p>
-        <p><strong>Descripción:</strong> {{ object.descripcion }}</p>
-        <p><strong>Mensaje:</strong> {{ object.mensaje|linebreaks }}</p>
-        <p><strong>Solicitado por:</strong> {{ object.solicitante }}</p>
-        <p><strong>Receptor:</strong> {{ object.receptor }}</p>
-        <p><strong>Empresa:</strong> {{ object.get_empresa_display }}</p>
+<div class="container my-5">
+
+  <h2 class="mb-4 text-center">
+    <i class="fas fa-barcode"></i> Solicitud de Creación de Código SAP
+  </h2>
+
+  <!-- Información General -->
+  <fieldset class="card-detalle">
+    <legend>Información General</legend>
+    <div class="row g-3">
+      <div class="col-md-6">
         <p><strong>Tipo de Solicitud:</strong> {{ object.get_tipo_solicitud_display }}</p>
+        <p><strong>Solicitado por:</strong> {{ object.solicitante }}</p>
+        <p><strong>Empresa:</strong> {{ object.get_empresa_display }}</p>
         <p><strong>Tipo de Cotización:</strong> {{ object.get_cotizacion_display }}</p>
+      </div>
 
-        <!-- ARCHIVO COTIZACIÓN -->
-        {% if object.archivo_cotizacion %}
-        <p>
-          📄 Documento: <a href="https://ygwafhrphrtjenwazsay.supabase.co/storage/v1/object/public/media/{{ object.archivo_cotizacion.name }}" target="_blank">Ver archivo</a>
-        </p>
-      {% endif %}
-      
-      {% if object.imagen_whatsapp %}
-        <p>
-          🖼 Imagen WhatsApp:<br>
-          <img src="https://ygwafhrphrtjenwazsay.supabase.co/storage/v1/object/public/media/{{ object.imagen_whatsapp.name }}" alt="Imagen WhatsApp" style="max-width: 300px;">
-        </p>
-      {% endif %}
-      </fieldset>
+      <div class="col-md-6">
+        {% with adjuntos=object.adjuntos.all %}
+          {% if adjuntos %}
+            <!-- Documentos -->
+            <p><strong>Documentos:</strong></p>
+            <ul>
+              {% for doc in adjuntos %}
+                {% if doc.tipo == 'documento' %}
+                  <li>
+                    📄 <a href="https://ygwafhrphrtjenwazsay.supabase.co/storage/v1/object/public/media/{{ doc.archivo.name }}" target="_blank">
+                      {{ doc.archivo.name|slice:"-50:" }}
+                    </a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
 
-      <fieldset class="card-detalle">
-        <legend>Información Técnica</legend>
-        <p><strong>Origen:</strong> {{ object.get_origen_display }}</p>
-        <p><strong>Proveedor:</strong> {{ object.proveedor }}</p>
-        <p><strong>RUT Proveedor:</strong> {{ object.rut_proveedor }}</p>
-        <p><strong>SKU Proveedor:</strong> {{ object.sku_proveedor }}</p>
-        <p><strong>SKU Fabricante:</strong> {{ object.sku_fabricante }}</p>
-        <p><strong>Marca:</strong> {{ object.marca }}</p>
-        <p><strong>UDM:</strong> {{ object.udm }}</p>
-      </fieldset>
-    </div>
-
-    <!-- Columna Derecha -->
-    <div>
-      <fieldset class="card-detalle">
-        <legend>Dimensiones y Costo</legend>
-        <p><strong>Largo:</strong> {{ object.largo }} cm</p>
-        <p><strong>Ancho:</strong> {{ object.ancho }} cm</p>
-        <p><strong>Alto:</strong> {{ object.alto }} cm</p>
-        <p><strong>Peso:</strong> {{ object.peso }} kg</p>
-        <p><strong>Costo:</strong> ${{ object.costo }}</p>
-      </fieldset>
-
-      <fieldset class="card-detalle">
-        <legend>Estado de la Solicitud</legend>
-        <p><strong>Estado actual:</strong> {{ object.get_estado_display }}</p>
-
-        {% if request.user == object.receptor and object.estado == 'pendiente' %}
-          <form method="post" action="{% url 'cambiar_estado' object.pk %}">
-            {% csrf_token %}
-            <div class="mb-3">
-              <label for="comentario_estado" class="form-label"><strong>Comentario:</strong></label>
-              <textarea name="comentario_estado" id="comentario_estado" class="form-control" rows="3"></textarea>
+            <!-- Imágenes -->
+            <p class="mt-3"><strong>Imágenes WhatsApp:</strong></p>
+            <div class="adjuntos-grid">
+              {% for img in adjuntos %}
+                {% if img.tipo == 'imagen' %}
+                  <a href="https://ygwafhrphrtjenwazsay.supabase.co/storage/v1/object/public/media/{{ img.archivo.name }}" target="_blank">
+                    <img src="https://ygwafhrphrtjenwazsay.supabase.co/storage/v1/object/public/media/{{ img.archivo.name }}" alt="Imagen" class="img-preview">
+                  </a>
+                {% endif %}
+              {% endfor %}
             </div>
-            <button type="submit" class="btn btn-success">
-              <i class="fas fa-check-circle"></i> Marcar como "Código creado"
-            </button>
-          </form>
-        {% endif %}
-      </fieldset>
+          {% else %}
+            <div class="text-muted">No hay adjuntos para esta solicitud.</div>
+          {% endif %}
+        {% endwith %}
+      </div>
     </div>
-  </div>
+
+    {% if object.mensaje %}
+      <div class="mt-3">
+        <p><strong>Mensaje:</strong></p>
+        <div class="alert alert-secondary p-2">{{ object.mensaje|linebreaks }}</div>
+      </div>
+    {% endif %}
+  </fieldset>
+
+  <!-- Tabla de Productos -->
+  {% if productos %}
+  <fieldset class="card-detalle">
+    <legend>Productos Asociados</legend>
+    <div class="table-responsive">
+      <table class="table table-striped table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>Descripción</th>
+            <th>Marca</th>
+            <th>UDM</th>
+            <th>Origen</th>
+            <th>Proveedor</th>
+            <th>Largo (cm)</th>
+            <th>Ancho (cm)</th>
+            <th>Alto (cm)</th>
+            <th>Peso (kg)</th>
+            <th>Costo</th>
+            <th>PMV</th>
+            <th>PVP</th>
+            <th>SKU Proveedor</th>
+            <th>SKU Fabricante</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in productos %}
+            <tr>
+              <td>{{ p.producto.descripcion }}</td>
+              <td>{{ p.producto.marca }}</td>
+              <td>{{ p.producto.udm }}</td>
+              <td>{{ p.producto.get_origen_display }}</td>
+              <td>{{ p.producto.proveedor }}</td>
+              <td>{{ p.producto.largo }}</td>
+              <td>{{ p.producto.ancho }}</td>
+              <td>{{ p.producto.alto }}</td>
+              <td>{{ p.producto.peso }}</td>
+              <td>${{ p.producto.costo }}</td>
+              <td>
+                {% if p.pmv %}
+                  ${{ p.pmv|floatformat:2 }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                {% if p.pvp %}
+                  ${{ p.pvp|floatformat:2 }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>{{ p.producto.sku_proveedor }}</td>
+              <td>{{ p.producto.sku_fabricante }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </fieldset>
+  {% else %}
+    <div class="alert alert-warning text-center">
+      <i class="fas fa-info-circle"></i> Esta solicitud no tiene productos asociados.
+    </div>
+  {% endif %}
+
+  <!-- Estado de la Solicitud -->
+  <fieldset class="card-detalle">
+    <legend>Estado de la Solicitud</legend>
+    <p><strong>Estado actual:</strong> 
+      <span class="badge {% if object.estado == 'pendiente' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+        {{ object.get_estado_display }}
+      </span>
+    </p>
+
+    {% if request.user == object.receptor and object.estado == 'pendiente' %}
+    <form method="post" action="{% url 'cambiar_estado' object.pk %}">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="comentario_estado" class="form-label"><strong>Comentario:</strong></label>
+        <textarea name="comentario_estado" id="comentario_estado" 
+                  class="form-control" rows="3" placeholder="Agregar un comentario (opcional)"></textarea>
+      </div>
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-check-circle"></i> Marcar como "Código Creado"
+      </button>
+    </form>
+    {% endif %}
+  </fieldset>
 </div>
 {% endblock %}

@@ -1,48 +1,61 @@
 {% extends 'base.html' %}
-
+{% load static %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/asignar_permisos_usuario.css' %}">
+{% endblock %}
+ 
 {% block content %}
+ 
+<div id="asignar-permisos-panel">
 <div class="container mt-5 mb-5">
-  <div class="row justify-content-center">
-    <div class="col-md-10 col-lg-8">
-      <div class="card shadow rounded-4">
-        <div class="card-body">
-          <h4 class="card-title text-center mb-4">Asignar Permisos a {{ object.get_full_name|default:object.username }}</h4>
-
-          <form method="post">
-            {% csrf_token %}
-
-            <div class="mb-4">
-              <label class="form-label fw-bold">Permisos disponibles</label>
-              <div class="form-check">
-                {% for permiso in form.permisos_directos %}
-                  <div class="form-check mb-2">
-                    {{ permiso.tag }}
-                    <label class="form-check-label ms-2" for="{{ permiso.id_for_label }}">
-                      {{ permiso.choice_label }}
-                    </label>
-                  </div>
-                {% empty %}
-                  <p class="text-muted">No hay permisos disponibles.</p>
-                {% endfor %}
-              </div>
-              {% if form.permisos_directos.errors %}
-                <div class="text-danger small">{{ form.permisos_directos.errors.0 }}</div>
-              {% endif %}
-            </div>
-
-            <div class="d-grid">
-              <button type="submit" class="btn btn-success rounded-pill">Guardar cambios</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <div class="text-center mt-4">
-        <a href="{% url 'usuarios_ad' %}" class="text-decoration-none">
-          ← Volver al listado de usuarios
-        </a>
-      </div>
-    </div>
-  </div>
+<div class="row justify-content-center">
+<div class="col-12">
+<div class="card">
+<div class="card-body">
+<h4 class="card-title text-center mb-4">Asignar Permisos a {{ object.get_full_name|default:object.username }}</h4>
+<form method="post">
+{% csrf_token %}
+ 
+<label class="form-label fw-bold">
+  <i class="fa-solid fa-key" style="color: #222; margin-right: 7px;"></i>
+  Permisos disponibles
+</label>
+{% for permiso in form.permisos_directos %}
+<label class="custom-checkbox">
+{{ permiso.tag }}
+<span class="checkmark"></span>
+<span class="form-check-label" for="{{ permiso.id_for_label }}">
+{{ permiso.choice_label }}
+</span>
+</label>
+{% empty %}
+<p class="text-muted">No hay permisos disponibles.</p>
+{% endfor %}
+</div>
+{% if form.permisos_directos.errors %}
+<div class="text-danger small">{{ form.permisos_directos.errors.0 }}</div>
+                
+{% endif %}
+</div>
+ 
+              
+<div class="d-grid">
+<button type="submit" class="btn btn-black">Guardar cambios</button>
+</div>
+</form>
+</div>
+</div>
+ 
+<div class="text-center mt-4">
+  <a href="{% url 'usuarios_ad' %}" class="btn btn-black">
+    
+    <i class="fa-solid fa-arrow-left" style="margin-right: 6px;"></i>
+    Volver
+  </a>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 {% endblock %}
