@@ -217,3 +217,9 @@ class CambiarEstadoForm(forms.ModelForm):
     class Meta:
         model = SolicitudCodigo
         fields = ['comentario_estado']
+
+
+
+
+class ArchivoProcesoForm(forms.Form):
+    archivo = forms.FileField(label="Selecciona un archivo PDF o PPT")

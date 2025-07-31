@@ -4,6 +4,9 @@ from apps.organizaciones.models import Area, Cargo
 from django.conf import settings
 from django.utils import timezone
 
+from django.db import models
+from django.conf import settings
+
 class CustomUser(AbstractUser):
     area = models.ForeignKey(Area, on_delete=models.SET_NULL, null=True, blank=True)
     cargo = models.ForeignKey(Cargo, on_delete=models.SET_NULL, null=True, blank=True)
@@ -139,3 +142,39 @@ class SolicitudAdjunto(models.Model):
 
     def __str__(self):
         return f"{self.get_tipo_display()} - {self.archivo.name}"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class ArchivoProceso(models.Model):
+    TIPO_CHOICES = [
+        ('pdf', 'PDF'),
+        ('ppt', 'PPT'),
+    ]
+
+    nombre = models.CharField(max_length=255)
+    archivo = models.CharField(max_length=512)  # Ruta Supabase
+    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+    subido_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='archivos_subidos'
+    )
+
+    def __str__(self):
+        return f"{self.nombre} ({self.tipo})"

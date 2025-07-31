@@ -25,7 +25,26 @@ from django.views.generic.base import TemplateResponseMixin
 from django.forms import formset_factory
 from django.db.models import Q
 from django.core.files.storage import default_storage
+from django.conf import settings
+from django.db import models
 
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from .forms import ArchivoProcesoForm
+from .models import ArchivoProceso
+from apps.utils.supabase_storage import SupabaseStorage
+import os
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from apps.utils.supabase_storage import SupabaseStorage
+from .forms import ArchivoProcesoForm
+from .models import ArchivoProceso
+import os
 
 class IniciarSesionView(LoginView):
     template_name = 'login.html'  # Ruta al template
@@ -295,3 +314,47 @@ def solicitudes_enviadas_view(request):
         'solicitudes': solicitudes
     }
     return render(request, 'perfil.html', context)
+
+
+@login_required
+def procesos_view(request):
+    return render(request, 'procesos.html')
+
+
+
+
+
+
+
+@login_required
+def procesos_view(request):
+    form = ArchivoProcesoForm(request.POST or None, request.FILES or None)
+
+    if request.method == 'POST' and form.is_valid():
+        archivo = form.cleaned_data['archivo']
+        ext = os.path.splitext(archivo.name)[1].lower()
+        if ext not in ['.pdf', '.ppt', '.pptx']:
+            form.add_error('archivo', 'Solo se permiten archivos PDF o PPT.')
+        else:
+            ruta = f"procesos/{archivo.name}"
+            storage = SupabaseStorage()
+            storage._save(ruta, archivo)
+
+            ArchivoProceso.objects.create(
+                nombre=archivo.name,
+                archivo=ruta,
+                tipo='pdf' if ext == '.pdf' else 'ppt',
+                subido_por=request.user
+            )
+            return redirect('procesos')
+
+    # Traer los archivos y agregar la URL pública desde Supabase
+    archivos = ArchivoProceso.objects.order_by('-fecha_subida')
+    storage = SupabaseStorage()
+    for a in archivos:
+        a.url_publica = storage.get_public_url(a.archivo)
+
+    return render(request, 'procesos.html', {
+        'form': form,
+        'archivos': archivos
+    })
