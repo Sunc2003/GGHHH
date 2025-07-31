@@ -102,7 +102,7 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
         form = SolicitudCodigoForm(request.POST, request.FILES)
         formset = DetalleCodigoFormSet(request.POST)
 
-        # 🔹 Logs de depuración
+        # 🔹 Debug: mostrar archivos recibidos
         archivos = request.FILES.getlist('archivos')
         imagenes = request.FILES.getlist('imagenes')
         print(f"➡️ Archivos (DOCUMENTOS): {len(archivos)} -> {archivos}")
@@ -112,29 +112,43 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
             # Guardar solicitud principal
             solicitud = form.save(commit=False)
             solicitud.solicitante = request.user
-            solicitud.save()
+            solicitud.save()  # Necesario para tener ID y crear carpetas
 
-            # 🔹 Guardar adjuntos DOCUMENTOS
+            # -------------------------
+            # 1️⃣ Subir DOCUMENTOS
+            # -------------------------
+            for archivo in archivos:
+                folder = f"solicitudes/{solicitud.id}/documentos/"
+                path = default_storage.save(folder + archivo.name, archivo)
+
+                adjunto = SolicitudAdjunto.objects.create(
+                    solicitud=solicitud,
+                    tipo='documento',
+                    archivo=path  # guardamos la ruta en el FileField
+                )
+
             if archivos:
-                for archivo in archivos:
-                    SolicitudAdjunto.objects.create(
-                        solicitud=solicitud,
-                        tipo='documento',
-                        archivo=archivo
-                    )
-                print(f"📂 {len(archivos)} documentos guardados.")
+                print(f"📂 {len(archivos)} documentos guardados en Supabase.")
 
-            # 🔹 Guardar adjuntos IMÁGENES
+            # -------------------------
+            # 2️⃣ Subir IMÁGENES
+            # -------------------------
+            for imagen in imagenes:
+                folder = f"solicitudes/{solicitud.id}/imagenes/"
+                path = default_storage.save(folder + imagen.name, imagen)
+
+                adjunto = SolicitudAdjunto.objects.create(
+                    solicitud=solicitud,
+                    tipo='imagen',
+                    archivo=path
+                )
+
             if imagenes:
-                for imagen in imagenes:
-                    SolicitudAdjunto.objects.create(
-                        solicitud=solicitud,
-                        tipo='imagen',
-                        archivo=imagen
-                    )
-                print(f"🖼️ {len(imagenes)} imágenes guardadas.")
+                print(f"🖼️ {len(imagenes)} imágenes guardadas en Supabase.")
 
-            # 🔹 Guardar productos del formset
+            # -------------------------
+            # 3️⃣ Guardar productos
+            # -------------------------
             productos_guardados = 0
             for f in formset:
                 if f.cleaned_data:
@@ -160,7 +174,7 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
             messages.success(request, "✅ Solicitud registrada con éxito.")
             return redirect(self.success_url)
 
-        # 🔹 Si hay errores re-renderizamos el formulario
+        # Si hay errores mostramos detalles en consola
         print("❌ Errores del formulario:", form.errors.as_data())
         print("❌ Errores del formset:", formset.errors)
 
