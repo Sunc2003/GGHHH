@@ -24,7 +24,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.base import TemplateResponseMixin
 from django.forms import formset_factory
 from django.db.models import Q
-
+from django.core.files.storage import default_storage
 
 
 class IniciarSesionView(LoginView):
