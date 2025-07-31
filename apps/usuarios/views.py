@@ -124,7 +124,7 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
                 adjunto = SolicitudAdjunto.objects.create(
                     solicitud=solicitud,
                     tipo='documento',
-                    archivo=path  # guardamos la ruta en el FileField
+                    archivo=archivo  # guardamos la ruta en el FileField
                 )
 
             if archivos:
@@ -140,7 +140,7 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
                 adjunto = SolicitudAdjunto.objects.create(
                     solicitud=solicitud,
                     tipo='imagen',
-                    archivo=path
+                    archivo=imagen
                 )
 
             if imagenes:
