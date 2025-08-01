@@ -220,6 +220,9 @@ class CambiarEstadoForm(forms.ModelForm):
 
 
 
+# forms.py
+
+
 
 class ArchivoProcesoForm(forms.Form):
     archivo = forms.FileField(

@@ -3,10 +3,10 @@ from django.db import models
 from apps.organizaciones.models import Area, Cargo
 from django.conf import settings
 from django.utils import timezone
-
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.db import models
+
 
 class CustomUser(AbstractUser):
     area = models.ForeignKey(Area, on_delete=models.SET_NULL, null=True, blank=True)
@@ -150,6 +150,9 @@ class SolicitudAdjunto(models.Model):
 
 
 
+
+
+
 class ArchivoProceso(models.Model):
     nombre = models.CharField(max_length=255)
     archivo = models.CharField(max_length=512)
@@ -159,7 +162,6 @@ class ArchivoProceso(models.Model):
 
     def __str__(self):
         return self.nombre
-
 
 
 

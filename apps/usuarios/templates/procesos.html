@@ -1,25 +1,55 @@
 {% extends "base.html" %}
+{% block title %}Gestión de Procesos{% endblock %}
+
 {% block content %}
 <div class="container py-5">
-  <h2 class="mb-4">Gestión de Procesos</h2>
+  <h2 class="mb-4 text-center text-dark">
+    <i class="fas fa-folder-open"></i> Gestión de Documentos de Procesos
+  </h2>
 
-  <form method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data" class="card p-4 mb-4 shadow-sm">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-dark">Subir archivo</button>
+    <button type="submit" class="btn btn-dark">
+      <i class="fas fa-upload"></i> Subir archivo
+    </button>
   </form>
 
-  <hr>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title mb-3">Archivos disponibles</h5>
 
-  <h4>Archivos Subidos</h4>
-  <ul>
-    {% for archivo in archivos %}
-      <li>
-        {{ archivo.nombre }} — <a href="{{ archivo.url_publica }}" target="_blank">Ver</a>
-      </li>
-    {% empty %}
-      <li>No hay archivos aún.</li>
-    {% endfor %}
-  </ul>
+      {% if archivos %}
+        <table class="table table-bordered table-hover text-center align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Subido por</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for archivo in archivos %}
+              <tr>
+                <td>{{ archivo.nombre }}</td>
+                <td>{{ archivo.get_tipo_display }}</td>
+                <td>{{ archivo.subido_por.get_full_name|default:archivo.subido_por.username }}</td>
+                <td>{{ archivo.fecha_subida|date:"d/m/Y H:i" }}</td>
+                <td>
+                  <a href="{{ archivo.url_publica }}" target="_blank" class="btn btn-outline-dark btn-sm">
+                    <i class="fas fa-eye"></i> Ver
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="alert alert-secondary text-center">No hay archivos subidos todavía.</div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}
