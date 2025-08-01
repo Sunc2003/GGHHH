@@ -220,6 +220,3 @@ class CambiarEstadoForm(forms.ModelForm):
 
 
 
-# forms.py
-
-
