@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User
 
 class CustomUser(AbstractUser):
     area = models.ForeignKey(Area, on_delete=models.SET_NULL, null=True, blank=True)
@@ -158,23 +159,14 @@ class SolicitudAdjunto(models.Model):
 
 
 
-class ArchivoProceso(models.Model):
-    TIPO_CHOICES = [
-        ('pdf', 'PDF'),
-        ('ppt', 'PPT'),
-    ]
 
+
+class ArchivoProceso(models.Model):
     nombre = models.CharField(max_length=255)
-    archivo = models.CharField(max_length=512)  # Ruta Supabase
-    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
+    archivo = models.CharField(max_length=512)  # Ruta en Supabase
+    tipo = models.CharField(max_length=10, choices=[('pdf', 'PDF'), ('ppt', 'PPT')])
+    subido_por = models.ForeignKey(User, on_delete=models.CASCADE)
     fecha_subida = models.DateTimeField(auto_now_add=True)
-    subido_por = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='archivos_subidos'
-    )
 
     def __str__(self):
-        return f"{self.nombre} ({self.tipo})"
+        return self.nombre

@@ -220,6 +220,10 @@ class CambiarEstadoForm(forms.ModelForm):
 
 
 
+from django import forms
 
 class ArchivoProcesoForm(forms.Form):
-    archivo = forms.FileField(label="Selecciona un archivo PDF o PPT")
+    archivo = forms.FileField(
+        label="Archivo PDF o PPT",
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control'})
+    )
