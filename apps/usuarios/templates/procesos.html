@@ -1,20 +1,25 @@
-<form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Subir archivo</button>
-</form>
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4">Gestión de Procesos</h2>
 
-<table class="table">
-  <thead>
-    <tr><th>Nombre</th><th>Tipo</th><th>Ver</th></tr>
-  </thead>
-  <tbody>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-dark">Subir archivo</button>
+  </form>
+
+  <hr>
+
+  <h4>Archivos Subidos</h4>
+  <ul>
     {% for archivo in archivos %}
-      <tr>
-        <td>{{ archivo.nombre }}</td>
-        <td>{{ archivo.get_tipo_display }}</td>
-        <td><a href="{{ archivo.url_publica }}" target="_blank">Ver</a></td>
-      </tr>
+      <li>
+        {{ archivo.nombre }} — <a href="{{ archivo.url_publica }}" target="_blank">Ver</a>
+      </li>
+    {% empty %}
+      <li>No hay archivos aún.</li>
     {% endfor %}
-  </tbody>
-</table>
+  </ul>
+</div>
+{% endblock %}

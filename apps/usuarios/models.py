@@ -150,23 +150,23 @@ class SolicitudAdjunto(models.Model):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 class ArchivoProceso(models.Model):
     nombre = models.CharField(max_length=255)
-    archivo = models.CharField(max_length=512)  # Ruta en Supabase
+    archivo = models.CharField(max_length=512)
     tipo = models.CharField(max_length=10, choices=[('pdf', 'PDF'), ('ppt', 'PPT')])
-    subido_por = models.ForeignKey(User, on_delete=models.CASCADE)
+    subido_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     fecha_subida = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.nombre
+
+
+
+
+
+
+
+
+
+
+

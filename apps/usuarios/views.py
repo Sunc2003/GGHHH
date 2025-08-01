@@ -319,11 +319,8 @@ def solicitudes_enviadas_view(request):
 
 
 
-
 @login_required
 def procesos_view(request):
-    print("📌 Entrando a procesos_view")
-
     form = ArchivoProcesoForm(request.POST or None, request.FILES or None)
 
     if request.method == 'POST' and form.is_valid():
@@ -334,7 +331,6 @@ def procesos_view(request):
             form.add_error('archivo', 'Solo se permiten archivos PDF o PPT.')
         else:
             try:
-                print("📤 Subiendo a Supabase...")
                 storage = SupabaseStorage()
                 ruta = f"procesos/{archivo.name}"
                 storage._save(ruta, archivo)
@@ -348,14 +344,13 @@ def procesos_view(request):
 
                 return redirect('procesos')
             except Exception as e:
-                print("❌ Error al subir:", e)
                 form.add_error(None, f"Error al subir archivo: {e}")
 
     archivos = ArchivoProceso.objects.order_by('-fecha_subida')
     try:
         storage = SupabaseStorage()
         for a in archivos:
-            a.url_publica = storage.get_public_url(a.archivo.name)
+            a.url_publica = storage.get_public_url(a.archivo)
     except Exception as e:
         for a in archivos:
             a.url_publica = '#'

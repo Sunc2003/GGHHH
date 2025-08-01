@@ -220,7 +220,6 @@ class CambiarEstadoForm(forms.ModelForm):
 
 
 
-from django import forms
 
 class ArchivoProcesoForm(forms.Form):
     archivo = forms.FileField(
