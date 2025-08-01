@@ -321,53 +321,9 @@ def solicitudes_enviadas_view(request):
 
 @login_required
 def procesos_view(request):
-    print("📌 Entrando a procesos_view")  # Diagnóstico 1
+    print("📌 Entrando a procesos_view")  # Confirmación de entrada
 
-    form = ArchivoProcesoForm(request.POST or None, request.FILES or None)
-
-    if request.method == 'POST' and form.is_valid():
-        archivo = form.cleaned_data['archivo']
-        ext = os.path.splitext(archivo.name)[1].lower()
-
-        if ext not in ['.pdf', '.ppt', '.pptx']:
-            form.add_error('archivo', 'Solo se permiten archivos PDF o PPT.')
-        else:
-            print("📤 Archivo válido, intentando subir a Supabase")  # Diagnóstico 2
-            try:
-                print("📦 Inicializando SupabaseStorage")  # Diagnóstico 3
-                storage = SupabaseStorage()
-                ruta = f"procesos/{archivo.name}"
-                storage._save(ruta, archivo)
-
-                ArchivoProceso.objects.create(
-                    nombre=archivo.name,
-                    archivo=ruta,
-                    tipo='pdf' if ext == '.pdf' else 'ppt',
-                    subido_por=request.user
-                )
-
-                print("✅ Archivo subido y registrado correctamente")  # Diagnóstico 4
-                return redirect('procesos')
-
-            except Exception as e:
-                print(f"❌ Error al subir archivo: {e}")  # Diagnóstico 5
-                form.add_error(None, f"Error al subir archivo: {e}")
-
-    print("📂 Cargando archivos existentes")  # Diagnóstico 6
-    archivos = ArchivoProceso.objects.order_by('-fecha_subida')
-
-    try:
-        print("🔗 Generando URLs públicas")  # Diagnóstico 7
-        storage = SupabaseStorage()
-        for a in archivos:
-            a.url_publica = storage.get_public_url(a.archivo.name)
-    except Exception as e:
-        print(f"❌ Error al generar URLs públicas: {e}")  # Diagnóstico 8
-        for a in archivos:
-            a.url_publica = '#'
-
-    print("✅ Renderizando plantilla procesos.html")  # Diagnóstico 9
     return render(request, 'procesos.html', {
-        'form': form,
-        'archivos': archivos
+        'form': None,
+        'archivos': []
     })
