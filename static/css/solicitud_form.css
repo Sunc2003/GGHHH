@@ -262,3 +262,57 @@ fieldset + fieldset {
   margin-bottom: 1rem;
   border-radius: 5px;
 }
+
+
+/* === NUEVO CSS === */
+
+.menu-botones {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.btn-cuadrado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 180px; /* más ancho */
+  height: 140px;
+  background-color: #f1f3f5; /* color plomo claro */
+  color: #212529;
+  text-align: center;
+  border: none;
+  border-radius: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.btn-cuadrado:hover {
+  background-color: #e2e6ea;
+  transform: scale(1.05);
+}
+
+.btn-cuadrado img {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 576px) {
+  .btn-cuadrado {
+    width: 120px;
+    height: 110px;
+    font-size: 0.75rem;
+  }
+
+  .btn-cuadrado img {
+    width: 32px;
+    height: 32px;
+  }
+}

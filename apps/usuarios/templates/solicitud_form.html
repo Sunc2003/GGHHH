@@ -4,30 +4,79 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/solicitud_form.css' %}">
 <style>
-  .btn-solicitar-codigo {
-    background:#232323;color:#fff!important;border:2px solid #232323;
-    border-radius:0.25rem;font-weight:700;letter-spacing:0.43px;
-    padding:0.8rem 2.6rem;font-size:1.12rem;
-    box-shadow:0 1.5px 8px rgba(40,40,40,0.10);transition:background 0.15s;
+  .menu-botones {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
   }
-  .btn-solicitar-codigo:hover {background:#000;border-color:#000;}
-  .formset-form {
-    border-left:5px solid #007bff;background-color:#f9f9f9;
-    padding:1rem;margin-bottom:1rem;border-radius:5px;
+
+  .btn-cuadrado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 180px; /* más ancho */
+    height: 140px;
+    background-color: #f1f3f5; /* color plomo claro */
+    color: #212529;
+    text-align: center;
+    border: none;
+    border-radius: 1rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
   }
-  .tabla-productos th,.tabla-productos td {font-size:0.9rem;vertical-align:middle;}
-  .tabla-productos .btn {padding:0.1rem 0.4rem;font-size:0.8rem;}
-  .error-msg {color:#d9534f;font-size:0.85rem;margin-top:3px;}
+
+  .btn-cuadrado:hover {
+    background-color: #e2e6ea;
+    transform: scale(1.05);
+  }
+
+  .btn-cuadrado img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 576px) {
+    .btn-cuadrado {
+      width: 120px;
+      height: 110px;
+      font-size: 0.75rem;
+    }
+
+    .btn-cuadrado img {
+      width: 32px;
+      height: 32px;
+    }
+  }
 </style>
 {% endblock %}
 
+
 {% block content %}
 <div class="container py-5">
-  <div id="menu-botones" class="mb-4 d-flex flex-wrap gap-3">
-    <button id="btn-mostrar-form" class="btn-solicitar-codigo">Solicitar Código</button>
-    <button id="btn-mostrar-enviadas" class="btn-solicitar-codigo">Solicitudes Enviadas</button>
-    <a href="{% url 'solicitudes_recibidas' %}" class="btn-solicitar-codigo">
-      <i class="fas fa-inbox"></i> Ver Solicitudes Recibidas
+
+  <!-- Botones principales -->
+  <div id="menu-botones" class="menu-botones">
+    <button id="btn-mostrar-form" class="btn-cuadrado">
+      <img src="{% static 'img/ggh.png' %}" alt="Recibidas">
+
+      Solicitar Código
+    </button>
+    <button id="btn-mostrar-enviadas" class="btn-cuadrado">
+      <img src="{% static 'img/ggh.png' %}" alt="Recibidas">
+
+      Enviadas
+    </button>
+    <a href="{% url 'solicitudes_recibidas' %}" class="btn-cuadrado">
+      <img src="{% static 'img/ggh.png' %}" alt="Recibidas">
+
+      Recibidas
     </a>
   </div>
 
@@ -62,8 +111,6 @@
             {{ form.cotizacion.label_tag }}{{ form.cotizacion }}
             {% for error in form.cotizacion.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
           </div>
-          
-          <!-- Nuevos campos múltiples -->
           <div class="col-md-6" id="campo_archivo" style="display:none;">
             {{ form.archivos.label_tag }}{{ form.archivos }}
             <small class="text-muted">Puedes seleccionar varios archivos</small>
@@ -77,25 +124,16 @@
         </div>
       </fieldset>
 
-      <!-- Tabla de productos -->
+      <!-- Tabla productos -->
       <fieldset class="border p-3 mb-4">
         <legend>Productos Agregados</legend>
         <div class="table-responsive">
           <table class="table table-striped tabla-productos" id="tabla-detalles">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Descripción</th>
-                <th>Marca</th>
-                <th>UDM</th>
-                <th>Origen</th>
-                <th>Proveedor</th>
-                <th>Dimensiones</th>
-                <th>Peso</th>
-                <th>Costo</th>
-                <th>SKU Prov.</th>
-                <th>SKU Fab.</th>
-                <th></th>
+                <th>#</th><th>Descripción</th><th>Marca</th><th>UDM</th>
+                <th>Origen</th><th>Proveedor</th><th>Dimensiones</th>
+                <th>Peso</th><th>Costo</th><th>SKU Prov.</th><th>SKU Fab.</th><th></th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -103,7 +141,7 @@
         </div>
       </fieldset>
 
-      <!-- Formulario visible para agregar productos -->
+      <!-- Formulario producto -->
       <fieldset class="border p-3 mb-4">
         <legend>Agregar Producto</legend>
         <div class="formset-form" id="formset-actual">
@@ -158,7 +196,7 @@
   </div>
 </div>
 
-<!-- JS dinámico -->
+<!-- JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const menu = document.getElementById('menu-botones');
@@ -173,17 +211,18 @@ document.addEventListener('DOMContentLoaded', () => {
   let index = parseInt(totalForms.value);
 
   document.getElementById('btn-mostrar-form').onclick = () => {
-    formContainer.style.display='block';
-    solicitudesContainer.style.display='none';
-    menu.style.display='none';
-  };
-  document.getElementById('btn-mostrar-enviadas').onclick = () => {
-    formContainer.style.display='none';
-    solicitudesContainer.style.display='block';
-    menu.style.display='none';
+    formContainer.style.display = 'block';
+    solicitudesContainer.style.display = 'none';
+    menu.style.display = 'none';
   };
 
-  if(cotSelect){
+  document.getElementById('btn-mostrar-enviadas').onclick = () => {
+    formContainer.style.display = 'none';
+    solicitudesContainer.style.display = 'block';
+    menu.style.display = 'none';
+  };
+
+  if (cotSelect) {
     cotSelect.addEventListener('change', () => {
       const val = cotSelect.value;
       campoArchivo.style.display = val === 'documento' ? 'block' : 'none';
@@ -207,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
         producto[input.name.split('-')[2]] = input.value;
       }
     });
+
     if (!valido) return;
 
     const marcaTexto = currentForm.querySelector('select[name$="-marca"]')?.selectedOptions[0].text || '';
