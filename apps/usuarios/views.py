@@ -316,14 +316,12 @@ def solicitudes_enviadas_view(request):
     return render(request, 'perfil.html', context)
 
 
-
-
-
 @login_required
 def procesos_view(request):
-    print("📌 Entrando a procesos_view")  # Confirmación de entrada
+    return render(request, 'procesos.html')
 
-    return render(request, 'procesos.html', {
-        'form': None,
-        'archivos': []
-    })
+
+
+
+
+
