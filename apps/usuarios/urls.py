@@ -17,6 +17,7 @@ from .views import (
     
 )
 from apps.organizaciones.views import cargos_por_area
+from .views import vista_procesos
 
 urlpatterns = [
     path('registro/', RegistroUsuarioView.as_view(), name='registro'),

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block title %}Gestión de Procesos{% endblock %}
 
 {% block content %}
@@ -8,7 +9,7 @@
     <i class="fas fa-folder-open"></i> Gestión de Documentos de Procesos
   </h2>
 
-  <!-- ✅ Mostrar mensajes de éxito o error -->
+  <!-- Mensajes de éxito o error -->
   {% if messages %}
     <div class="mb-4">
       {% for message in messages %}
@@ -68,8 +69,7 @@
               </td>
               <td class="text-dark">{{ archivo.fecha_subida|date:"d/m/Y H:i" }}</td>
               <td class="text-center">
-                <!-- Botón Ver -->
-                <a href="{{ archivo.url_publica }}" class="btn btn-outline-dark btn-sm me-1" target="_blank" title="Ver archivo">
+                <a href="{{ archivo.url_publica }}" class="btn btn-outline-dark btn-sm" target="_blank" title="Ver archivo">
                   <i class="fas fa-eye"></i>
                 </a>
               </td>
@@ -86,16 +86,4 @@
     </div>
   </div>
 </div>
-
-<!-- Script para descarga inmediata -->
-<script>
-function forzarDescarga(url, nombre) {
-  const enlace = document.createElement('a');
-  enlace.href = url;
-  enlace.download = nombre;
-  document.body.appendChild(enlace);
-  enlace.click();
-  document.body.removeChild(enlace);
-}
-</script>
 {% endblock %}

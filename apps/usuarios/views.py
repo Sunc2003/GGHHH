@@ -360,7 +360,7 @@ def procesos_view(request):
         print("🔗 Generando URLs públicas")  # Diagnóstico 7
         storage = SupabaseStorage()
         for a in archivos:
-            a.url_publica = storage.get_public_url(a.archivo)
+            a.url_publica = storage.get_public_url(a.archivo.name)
     except Exception as e:
         print(f"❌ Error al generar URLs públicas: {e}")  # Diagnóstico 8
         for a in archivos:
