@@ -32,19 +32,13 @@ from django.db import models
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from .forms import ArchivoProcesoForm
-from .models import ArchivoProceso
+
 from apps.utils.supabase_storage import SupabaseStorage
 import os
 
 
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from apps.utils.supabase_storage import SupabaseStorage
-from .forms import ArchivoProcesoForm
-from .models import ArchivoProceso
-import os
+
 
 class IniciarSesionView(LoginView):
     template_name = 'login.html'  # Ruta al template
@@ -316,9 +310,7 @@ def solicitudes_enviadas_view(request):
     return render(request, 'perfil.html', context)
 
 
-@login_required
-def procesos_view(request):
-    return render(request, 'procesos.html')
+
 
 
 
