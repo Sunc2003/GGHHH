@@ -294,3 +294,5 @@ def solicitudes_enviadas_view(request):
         'solicitudes': solicitudes
     }
     return render(request, 'perfil.html', context)
+
+

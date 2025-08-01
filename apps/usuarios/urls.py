@@ -38,3 +38,4 @@ urlpatterns = [
  
     path('api/cargos_por_area/<int:area_id>/', cargos_por_area, name='cargos_por_area'),
 ]
+
