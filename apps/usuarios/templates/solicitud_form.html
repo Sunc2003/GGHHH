@@ -84,10 +84,18 @@
           <table class="table table-striped tabla-productos" id="tabla-detalles">
             <thead>
               <tr>
-                <th>#</th><th>Descripción</th><th>Marca</th><th>UDM</th>
-                <th>Origen</th><th>Proveedor</th>
-                <th>Dimensiones</th><th>Peso</th><th>Costo</th>
-                <th>SKU Prov.</th><th>SKU Fab.</th><th></th>
+                <th>#</th>
+                <th>Descripción</th>
+                <th>Marca</th>
+                <th>UDM</th>
+                <th>Origen</th>
+                <th>Proveedor</th>
+                <th>Dimensiones</th>
+                <th>Peso</th>
+                <th>Costo</th>
+                <th>SKU Prov.</th>
+                <th>SKU Fab.</th>
+                <th></th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -114,7 +122,7 @@
 
       <!-- Mensaje -->
       <fieldset class="border p-3 mb-4">
-        <legend>Mensaje al Receptor</legend>
+        <legend>Mensaje</legend>
         <div class="mb-3">
           {{ form.mensaje.label_tag }}{{ form.mensaje }}
           {% for error in form.mensaje.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
