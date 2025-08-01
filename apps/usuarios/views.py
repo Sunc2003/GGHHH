@@ -38,14 +38,13 @@ from apps.utils.supabase_storage import SupabaseStorage
 import os
 
 
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from apps.utils.supabase_storage import SupabaseStorage
 from .forms import ArchivoProcesoForm
 from .models import ArchivoProceso
-from apps.utils.supabase_storage import SupabaseStorage
 import os
-
-
 
 class IniciarSesionView(LoginView):
     template_name = 'login.html'  # Ruta al template
@@ -322,41 +321,9 @@ def solicitudes_enviadas_view(request):
 
 @login_required
 def procesos_view(request):
-    form = ArchivoProcesoForm(request.POST or None, request.FILES or None)
-
-    if request.method == 'POST' and form.is_valid():
-        archivo = form.cleaned_data['archivo']
-        ext = os.path.splitext(archivo.name)[1].lower()
-
-        if ext not in ['.pdf', '.ppt', '.pptx']:
-            form.add_error('archivo', 'Solo se permiten archivos PDF o PPT.')
-        else:
-            try:
-                storage = SupabaseStorage()
-                ruta = f"procesos/{archivo.name}"
-                storage._save(ruta, archivo)
-
-                ArchivoProceso.objects.create(
-                    nombre=archivo.name,
-                    archivo=ruta,
-                    tipo='pdf' if ext == '.pdf' else 'ppt',
-                    subido_por=request.user
-                )
-
-                return redirect('procesos')
-            except Exception as e:
-                form.add_error(None, f"Error al subir archivo: {e}")
-
-    archivos = ArchivoProceso.objects.order_by('-fecha_subida')
-    try:
-        storage = SupabaseStorage()
-        for a in archivos:
-            a.url_publica = storage.get_public_url(a.archivo)
-    except Exception as e:
-        for a in archivos:
-            a.url_publica = '#'
+    print("📌 Entrando a procesos_view")  # Confirmación de entrada
 
     return render(request, 'procesos.html', {
-        'form': form,
-        'archivos': archivos
+        'form': None,
+        'archivos': []
     })

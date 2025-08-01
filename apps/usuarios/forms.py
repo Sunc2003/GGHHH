@@ -223,9 +223,3 @@ class CambiarEstadoForm(forms.ModelForm):
 # forms.py
 
 
-
-class ArchivoProcesoForm(forms.Form):
-    archivo = forms.FileField(
-        label="Archivo PDF o PPT",
-        widget=forms.ClearableFileInput(attrs={'class': 'form-control'})
-    )
