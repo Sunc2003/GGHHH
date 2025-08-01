@@ -220,3 +220,10 @@ class CambiarEstadoForm(forms.ModelForm):
 
 
 
+
+
+class ArchivoProcesoForm(forms.Form):
+    archivo = forms.FileField(
+        label='Archivo PDF o PPT',
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control'})
+    )
