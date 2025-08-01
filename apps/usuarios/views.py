@@ -316,14 +316,6 @@ def solicitudes_enviadas_view(request):
     return render(request, 'perfil.html', context)
 
 
-@login_required
-def procesos_view(request):
-    return render(request, 'procesos.html')
-
-
-
-
-
 
 
 @login_required
