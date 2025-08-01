@@ -1,4 +1,3 @@
-
 from django.urls import reverse_lazy
 from apps.usuarios.forms import CustomUserCreationForm
 from apps.usuarios.models import CustomUser
@@ -14,7 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from apps.organizaciones.models import Area, Cargo
 from django.utils.decorators import method_decorator
-from apps.permisos.decorators import permiso_requerido 
+from apps.permisos.decorators import permiso_requerido
 from .forms import CambiarEstadoForm
 import os
 from apps.utils.supabase_storage import SupabaseStorage
@@ -25,21 +24,8 @@ from django.views.generic.base import TemplateResponseMixin
 from django.forms import formset_factory
 from django.db.models import Q
 from django.core.files.storage import default_storage
-from django.conf import settings
-from django.db import models
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.conf import settings
-
-from apps.utils.supabase_storage import SupabaseStorage
-import os
-
-
-
-
-
+ 
+ 
 class IniciarSesionView(LoginView):
     template_name = 'login.html'  # Ruta al template
     
@@ -55,80 +41,80 @@ class RegistroUsuarioView(CreateView):
     form_class = CustomUserCreationForm
     template_name = 'registro.html'
     success_url = reverse_lazy('login')  # Redirige al login después de registrarse
-
+ 
 class CerrarSesionView(LogoutView):
     next_page = reverse_lazy('login')
-
+ 
 def es_admin(user):
     return user.is_authenticated and user.tipo_usuario == 'admin'
-
+ 
 ##@user_passes_test(es_admin)
 def panel_admin_usuarios(request):
     usuarios = CustomUser.objects.all()
     ahora = timezone.now()
     minutos_activo = 5
-
+ 
     for u in usuarios:
         u.en_linea = False
         if u.last_login and (ahora - u.last_login) < timedelta(minutes=minutos_activo):
             u.en_linea = True
-
+ 
     # Lógica para solicitudes
     ##solicitudes_enviadas = SolicitudCodigo.objects.filter(solicitante=request.user)
     solicitudes_recibidas = SolicitudCodigo.objects.filter(receptor=request.user)
-
+ 
     context = {
         'usuarios': usuarios,
         ##'solicitudes_enviadas': solicitudes_enviadas,
         'solicitudes_recibidas': solicitudes_recibidas,
     }
-
+ 
     return render(request, 'panel_admin.html', context)
-
-
-
+ 
+ 
+ 
 @method_decorator(permiso_requerido('SOLICITUD_CODIGO'), name='dispatch')    
 class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
     template_name = 'solicitud_form.html'
     success_url = reverse_lazy('panel_admin_usuarios')
-
+ 
     def get(self, request):
         """Mostrar formulario y formset vacío"""
         form = SolicitudCodigoForm()
         DetalleCodigoFormSet = formset_factory(DetalleCodigoForm, extra=0, can_delete=False)
         formset = DetalleCodigoFormSet()
-
+ 
         solicitudes_enviadas = SolicitudCodigo.objects.filter(
             solicitante=request.user
         ).order_by('-fecha_creacion')
-
+ 
         return render(request, self.template_name, {
             'form': form,
             'formset': formset,
             'solicitudes_enviadas': solicitudes_enviadas,
             'usuario': request.user
         })
-
+ 
     def post(self, request):
         """Guardar solicitud, adjuntos y productos en Supabase"""
         DetalleCodigoFormSet = formset_factory(DetalleCodigoForm, extra=0, can_delete=False)
         form = SolicitudCodigoForm(request.POST, request.FILES)
         formset = DetalleCodigoFormSet(request.POST)
-
+ 
         archivos = request.FILES.getlist('archivos')
         imagenes = request.FILES.getlist('imagenes')
-
+ 
         print(f"➡️ Archivos (DOCUMENTOS): {len(archivos)} -> {archivos}")
         print(f"➡️ Archivos (IMÁGENES): {len(imagenes)} -> {imagenes}")
-
+ 
         if form.is_valid() and formset.is_valid():
             solicitud = form.save(commit=False)
             solicitud.solicitante = request.user
             solicitud.save()
-
+ 
             # 🔹 Usar Supabase Storage para subir archivos
             storage = SupabaseStorage()
-
+ 
             # 1️⃣ Documentos
             for archivo in archivos:
                 ruta = f"solicitudes/{solicitud.id}/documentos/{archivo.name}"
@@ -138,7 +124,7 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
                     tipo='documento',
                     archivo=ruta  # guardamos la ruta manualmente
                 )
-
+ 
             # 2️⃣ Imágenes
             for imagen in imagenes:
                 ruta = f"solicitudes/{solicitud.id}/imagenes/{imagen.name}"
@@ -148,9 +134,9 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
                     tipo='imagen',
                     archivo=ruta
                 )
-
+ 
             print(f"📂 {len(archivos)} documentos y 🖼️ {len(imagenes)} imágenes subidas a Supabase.")
-
+ 
             # 3️⃣ Guardar productos
             productos_guardados = 0
             for f in formset:
@@ -171,20 +157,20 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
                         sku_fabricante=f.cleaned_data.get('sku_fabricante'),
                     )
                     productos_guardados += 1
-
+ 
             print(f"📦 {productos_guardados} productos guardados.")
-
+ 
             messages.success(request, "✅ Solicitud registrada y subida a Supabase con éxito.")
             return redirect(self.success_url)
-
+ 
         # 🔹 Si hay errores re-renderizamos
         print("❌ Errores del formulario:", form.errors.as_data())
         print("❌ Errores del formset:", formset.errors)
-
+ 
         solicitudes_enviadas = SolicitudCodigo.objects.filter(
             solicitante=request.user
         ).order_by('-fecha_creacion')
-
+ 
         messages.error(request, "⚠️ Hay errores en el formulario. Revisa los campos.")
         return render(request, self.template_name, {
             'form': form,
@@ -192,12 +178,12 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
             'solicitudes_enviadas': solicitudes_enviadas,
             'usuario': request.user
         })
-
+ 
 class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
     model = SolicitudCodigo
     template_name = 'solicitudes_recibidas.html'
     context_object_name = 'solicitudes_recibidas'
-
+ 
     def get_queryset(self):
         qs = SolicitudCodigo.objects.filter(receptor=self.request.user)
         print("Filtradas antes:", qs.count())
@@ -208,54 +194,54 @@ class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
         return pendientes       
         
         
-
+ 
 class SolicitudDetailView(DetailView):
     model = SolicitudCodigo
     template_name = 'solicitud_detalle.html'
-
+ 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+ 
         # 🔹 Obtener los adjuntos organizados
         documentos = self.object.adjuntos.filter(tipo='documento')
         imagenes = self.object.adjuntos.filter(tipo='imagen')
-
+ 
         context['documentos'] = documentos
         context['imagenes'] = imagenes
-
+ 
         # 🔹 Obtener los productos asociados a esta solicitud
         productos = self.object.detalles.all()
-
+ 
         # 🔹 Calcular PMV y PVP por cada producto
         productos_con_calculo = []
         for p in productos:
             pmv = round(p.costo / Decimal('0.84'), 2) if p.costo and p.costo > 0 else None
             pvp = round(pmv / Decimal('0.6'), 2) if pmv else None
-
+ 
             productos_con_calculo.append({
                 'producto': p,
                 'pmv': pmv,
                 'pvp': pvp
             })
-
+ 
         context['productos'] = productos_con_calculo
         return context
-
+ 
 class CambiarEstadoView(UpdateView):
     model = SolicitudCodigo
     form_class = CambiarEstadoForm
     template_name = 'cambiar_estado.html'
-
+ 
     def form_valid(self, form):
         solicitud = form.save(commit=False)
         solicitud.estado = 'creado'
         solicitud.save()
         return super().form_valid(form)
-
+ 
     def get_success_url(self):
         return reverse_lazy('detalle_solicitud', kwargs={'pk': self.object.pk})
-
-
+ 
+ 
 class UsuariosADListView(ListView):
     model = CustomUser
     template_name = 'usuarios_ad.html'
@@ -288,7 +274,7 @@ class UsuariosADListView(ListView):
         context['filtro_cargo'] = self.request.GET.get('cargo', '')
         context['filtro_nombre'] = self.request.GET.get('q', '')  # Nuevo
         return context
-
+ 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['areas'] = Area.objects.all()
@@ -299,7 +285,7 @@ class UsuariosADListView(ListView):
     
 def perfil_usuario(request):
     return render(request, 'perfil.html', {'usuario': request.user})
-
+ 
 def solicitudes_enviadas_view(request):
     solicitudes = SolicitudCodigo.objects.filter(solicitante=request.user).order_by('-fecha_envio')
     
@@ -308,14 +294,3 @@ def solicitudes_enviadas_view(request):
         'solicitudes': solicitudes
     }
     return render(request, 'perfil.html', context)
-
-
-@login_required
-def procesos_view(request):
-    return render(request, 'procesos.html')
-
-
-
-
-
-
