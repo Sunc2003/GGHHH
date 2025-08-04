@@ -299,7 +299,7 @@ def solicitudes_enviadas_view(request):
 
 
 
-import re
+
 
 def procesos_view(request):
     url_archivo = None

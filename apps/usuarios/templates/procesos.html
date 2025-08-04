@@ -1,20 +1,118 @@
-<h1>Subir archivo a Supabase</h1>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="file" name="archivo" required>
-    <button type="submit">Subir</button>
-</form>
-{% if url_archivo %}
-    <p>Archivo subido: <a href="{{ url_archivo }}" target="_blank">{{ url_archivo }}</a></p>
-{% endif %}
+{% extends "base.html" %}
 
-<h2>Archivos subidos</h2>
-<ul>
-    {% for archivo in archivos %}
-        <li>
-            <a href="{{ archivo.url }}" target="_blank">{{ archivo.nombre }}</a>
-        </li>
-    {% empty %}
-        <li>No hay archivos subidos.</li>
-    {% endfor %}
-</ul>
+{% block content %}
+<div class="container py-5">
+
+  <h2 class="text-center mb-5" style="color: #000;">Gestión de Procesos</h2>
+
+  <!-- Botones -->
+  <div class="d-flex justify-content-center gap-4 mb-5 flex-wrap">
+    <button id="btn-subir" class="btn btn-toggle px-4 py-3">📤 Subir archivo</button>
+    <button id="btn-ver" class="btn btn-toggle px-4 py-3">📁 Ver archivos</button>
+  </div>
+
+  <!-- Formulario para subir archivos -->
+  <div id="formulario-subida" class="card shadow-sm border-0 mb-5" style="display: none;">
+    <div class="card-body bg-light">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="archivo" class="form-label fw-bold">Selecciona un archivo:</label>
+          <input type="file" name="archivo" id="archivo" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-dark w-100">Subir archivo nuevo</button>
+      </form>
+
+      {% if url_archivo %}
+        <div class="alert alert-success mt-4">
+          ✅ Archivo subido: <a href="{{ url_archivo }}" target="_blank">{{ url_archivo }}</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Lista de archivos -->
+<!-- Lista de archivos -->
+<div id="lista-archivos" class="card shadow-sm border-0" style="display: none;">
+  <div class="card-body bg-light">
+    <h4 class="mb-4 fw-bold text-dark">Archivos</span></h4>
+
+    {% if archivos %}
+      <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for archivo in archivos %}
+          <div class="col">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-file-earmark-text fs-3 text-dark me-3"></i>
+                  <div class="text-truncate" style="max-width: 250px;">
+                    <strong class="text-dark">{{ archivo.nombre }}</strong>
+                  </div>
+                </div>
+                <a href="{{ archivo.url }}" target="_blank" class="btn btn-outline-dark btn-sm">
+                  Ver
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted text-center">No hay archivos subidos.</p>
+    {% endif %}
+  </div>
+</div>
+
+
+</div>
+
+<!-- Estilos -->
+<style>
+  .btn-toggle {
+    transition: all 0.2s ease-in-out;
+    font-weight: bold;
+    border: 1px solid #000 !important;
+  }
+
+  .btn-toggle.active {
+    background-color: #000 !important;
+    color: #fff !important;
+  }
+
+  .btn-toggle:not(.active) {
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+</style>
+
+<!-- Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const btnSubir = document.getElementById('btn-subir');
+    const btnVer = document.getElementById('btn-ver');
+    const formulario = document.getElementById('formulario-subida');
+    const lista = document.getElementById('lista-archivos');
+
+    function activarBoton(activo, inactivo) {
+      activo.classList.add('active');
+      inactivo.classList.remove('active');
+    }
+
+    // Ocultar ambos al inicio
+    formulario.style.display = 'none';
+    lista.style.display = 'none';
+
+    btnSubir.addEventListener('click', function () {
+      formulario.style.display = 'block';
+      lista.style.display = 'none';
+      activarBoton(btnSubir, btnVer);
+    });
+
+    btnVer.addEventListener('click', function () {
+      formulario.style.display = 'none';
+      lista.style.display = 'block';
+      activarBoton(btnVer, btnSubir);
+    });
+  });
+</script>
+{% endblock %}
