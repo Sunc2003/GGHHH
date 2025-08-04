@@ -219,3 +219,33 @@ html {
         padding-bottom: 0.32rem !important;
     }
 }
+
+
+
+/* === RESPONSIVIDAD PARA PANTALLAS PEQUEÑAS === */
+
+/* Tabla con scroll horizontal si es necesario */
+.table-responsive-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+}
+
+/* Botón de registrar responsivo */
+@media (max-width: 768px) {
+  .btn.w-md-auto {
+    width: 100% !important;
+  }
+}
+
+/* Filtro adaptado */
+@media (max-width: 576px) {
+  #filtro-estado {
+    width: 100% !important;
+  }
+
+  .form-label {
+    text-align: center;
+  }
+}
