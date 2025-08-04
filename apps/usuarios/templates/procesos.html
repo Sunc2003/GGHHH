@@ -1,0 +1,9 @@
+<h1>Subir archivo a Supabase</h1>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="archivo" required>
+    <button type="submit">Subir</button>
+</form>
+{% if url_archivo %}
+    <p>Archivo subido: <a href="{{ url_archivo }}" target="_blank">{{ url_archivo }}</a></p>
+{% endif %}

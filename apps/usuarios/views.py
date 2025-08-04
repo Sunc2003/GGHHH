@@ -296,3 +296,13 @@ def solicitudes_enviadas_view(request):
     return render(request, 'perfil.html', context)
 
 
+
+def procesos_view(request):
+    url_archivo = None
+    if request.method == "POST" and request.FILES.get("archivo"):
+        archivo = request.FILES["archivo"]
+        storage = SupabaseStorage()
+        nombre = archivo.name
+        storage._save(nombre, archivo)
+        url_archivo = storage.get_public_url(nombre)
+    return render(request, "procesos.html", {"url_archivo": url_archivo})
