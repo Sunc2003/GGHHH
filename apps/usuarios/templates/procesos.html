@@ -7,3 +7,14 @@
 {% if url_archivo %}
     <p>Archivo subido: <a href="{{ url_archivo }}" target="_blank">{{ url_archivo }}</a></p>
 {% endif %}
+
+<h2>Archivos subidos</h2>
+<ul>
+    {% for archivo in archivos %}
+        <li>
+            <a href="{{ archivo.url }}" target="_blank">{{ archivo.nombre }}</a>
+        </li>
+    {% empty %}
+        <li>No hay archivos subidos.</li>
+    {% endfor %}
+</ul>

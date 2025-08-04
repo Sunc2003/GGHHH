@@ -24,6 +24,7 @@ from django.views.generic.base import TemplateResponseMixin
 from django.forms import formset_factory
 from django.db.models import Q
 from django.core.files.storage import default_storage
+import re
  
  
 class IniciarSesionView(LoginView):
@@ -297,12 +298,39 @@ def solicitudes_enviadas_view(request):
 
 
 
+
+import re
+
 def procesos_view(request):
     url_archivo = None
+    archivos = []
+    storage = SupabaseStorage()
+    carpeta = "procesos"
+
+    # Subir archivo si se envía el formulario
     if request.method == "POST" and request.FILES.get("archivo"):
         archivo = request.FILES["archivo"]
-        storage = SupabaseStorage()
-        nombre = archivo.name
-        storage._save(nombre, archivo)
-        url_archivo = storage.get_public_url(nombre)
-    return render(request, "procesos.html", {"url_archivo": url_archivo})
+        nombre_original = archivo.name
+        # Limpia el nombre: reemplaza espacios y caracteres no válidos por "_"
+        nombre = re.sub(r'[^\w\-.]', '_', nombre_original)
+        ruta = f"{carpeta}/{nombre}"  # Guardar en la carpeta 'procesos'
+        storage._save(ruta, archivo)
+        url_archivo = storage.get_public_url(ruta)
+
+    # Obtener lista de archivos subidos en la carpeta 'procesos'
+    try:
+        lista = storage.client.storage.from_(storage.bucket).list(carpeta)
+        archivos = [
+            {
+                "nombre": file["name"],
+                "url": storage.get_public_url(f"{carpeta}/{file['name']}")
+            }
+            for file in lista or []
+        ]
+    except Exception as e:
+        print("❌ Error al listar archivos:", e)
+
+    return render(request, "procesos.html", {
+        "url_archivo": url_archivo,
+        "archivos": archivos
+    })
