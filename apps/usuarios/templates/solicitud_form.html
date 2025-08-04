@@ -17,16 +17,16 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 180px; /* más ancho */
+    width: 180px;
     height: 140px;
-    background-color: #f1f3f5; /* color plomo claro */
+    background-color: #f1f3f5;
     color: #212529;
-    text-align: center;
     border: none;
     border-radius: 1rem;
     font-weight: 600;
     font-size: 0.95rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     transition: all 0.2s ease-in-out;
     text-decoration: none;
   }
@@ -40,6 +40,12 @@
     width: 80px;
     height: 80px;
     margin-bottom: 10px;
+  }
+
+  .error-msg {
+    color: #d9534f;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
   }
 
   @media (max-width: 576px) {
@@ -57,26 +63,18 @@
 </style>
 {% endblock %}
 
-
 {% block content %}
 <div class="container py-5">
-
-  <!-- Botones principales -->
-  <div id="menu-botones" class="menu-botones">
+  <!-- Menú principal -->
+  <div class="menu-botones" id="menu-botones">
     <button id="btn-mostrar-form" class="btn-cuadrado">
-      <img src="{% static 'img/ggh.png' %}" alt="Recibidas">
-
-      Solicitar Código
+      <img src="{% static 'img/ggh.png' %}" alt="Nuevo">Solicitar Código
     </button>
     <button id="btn-mostrar-enviadas" class="btn-cuadrado">
-      <img src="{% static 'img/ggh.png' %}" alt="Recibidas">
-
-      Enviadas
+      <img src="{% static 'img/ggh.png' %}" alt="Enviadas">Enviadas
     </button>
     <a href="{% url 'solicitudes_recibidas' %}" class="btn-cuadrado">
-      <img src="{% static 'img/ggh.png' %}" alt="Recibidas">
-
-      Recibidas
+      <img src="{% static 'img/ggh.png' %}" alt="Recibidas">Recibidas
     </a>
   </div>
 
@@ -88,115 +86,110 @@
     {% endfor %}
   {% endif %}
 
+  <!-- Formulario Solicitud -->
   <div id="formulario-container" style="display:none;">
-    <h2 class="mb-4"><i class="fas fa-barcode"></i> Nueva Solicitud de Código SAP</h2>
-    <form method="post" enctype="multipart/form-data" id="solicitud-form">
-      {% csrf_token %}
-      <fieldset class="border p-3 mb-4">
-        <legend>Información General</legend>
-        <div class="row g-3">
-          <div class="col-md-4">
-            {{ form.receptor.label_tag }}{{ form.receptor }}
-            {% for error in form.receptor.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
-          </div>
-          <div class="col-md-4">
-            {{ form.empresa.label_tag }}{{ form.empresa }}
-            {% for error in form.empresa.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
-          </div>
-          <div class="col-md-4">
-            {{ form.tipo_solicitud.label_tag }}{{ form.tipo_solicitud }}
-            {% for error in form.tipo_solicitud.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
-          </div>
-          <div class="col-md-4">
-            {{ form.cotizacion.label_tag }}{{ form.cotizacion }}
-            {% for error in form.cotizacion.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
-          </div>
-          <div class="col-md-6" id="campo_archivo" style="display:none;">
-            {{ form.archivos.label_tag }}{{ form.archivos }}
-            <small class="text-muted">Puedes seleccionar varios archivos</small>
-            {% for error in form.archivos.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
-          </div>
-          <div class="col-md-6" id="campo_imagen" style="display:none;">
-            {{ form.imagenes.label_tag }}{{ form.imagenes }}
-            <small class="text-muted">Puedes seleccionar varias imágenes</small>
-            {% for error in form.imagenes.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
-          </div>
-        </div>
-      </fieldset>
+    <div class="card shadow-sm mx-auto" style="max-width: 1200px;">
+      <div class="card-body">
+        <h2 class="mb-4"><i class="fas fa-barcode"></i> Nueva Solicitud de Código SAP</h2>
+        <form method="post" enctype="multipart/form-data" id="solicitud-form">
+          {% csrf_token %}
 
-      <!-- Tabla productos -->
-      <fieldset class="border p-3 mb-4">
-        <legend>Productos Agregados</legend>
-        <div class="table-responsive">
-          <table class="table table-striped tabla-productos" id="tabla-detalles">
-            <thead>
-              <tr>
-                <th>#</th><th>Descripción</th><th>Marca</th><th>UDM</th>
-                <th>Origen</th><th>Proveedor</th><th>Dimensiones</th>
-                <th>Peso</th><th>Costo</th><th>SKU Prov.</th><th>SKU Fab.</th><th></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </fieldset>
-
-      <!-- Formulario producto -->
-      <fieldset class="border p-3 mb-4">
-        <legend>Agregar Producto</legend>
-        <div class="formset-form" id="formset-actual">
-          {% for field in formset.empty_form.visible_fields %}
-            <div class="mb-2">
-              {{ field.label_tag }}{{ field }}
-              {% for error in field.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+          <!-- Información General -->
+          <fieldset class="border rounded p-3 mb-4">
+            <legend class="w-auto px-2">Información General</legend>
+            <div class="row g-3">
+              <div class="col-md-4">{{ form.receptor.label_tag }}{{ form.receptor }}{% for error in form.receptor.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}</div>
+              <div class="col-md-4">{{ form.empresa.label_tag }}{{ form.empresa }}{% for error in form.empresa.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}</div>
+              <div class="col-md-4">{{ form.tipo_solicitud.label_tag }}{{ form.tipo_solicitud }}{% for error in form.tipo_solicitud.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}</div>
+              <div class="col-md-4">{{ form.cotizacion.label_tag }}{{ form.cotizacion }}{% for error in form.cotizacion.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}</div>
+              <div class="col-md-4" id="campo_archivo" style="display:none;">
+                {{ form.archivos.label_tag }}{{ form.archivos }}
+                <small class="text-muted">Puedes seleccionar varios archivos</small>
+              </div>
+              <div class="col-md-4" id="campo_imagen" style="display:none;">
+                {{ form.imagenes.label_tag }}{{ form.imagenes }}
+                <small class="text-muted">Puedes seleccionar varias imágenes</small>
+              </div>
             </div>
-          {% endfor %}
-        </div>
-        {{ formset.management_form }}
-        <button type="button" class="btn btn-outline-primary mt-2" id="add-product-btn">
-          + Agregar Producto
-        </button>
-      </fieldset>
+          </fieldset>
 
-      <!-- Mensaje -->
-      <fieldset class="border p-3 mb-4">
-        <legend>Mensaje</legend>
-        <div class="mb-3">
-          {{ form.mensaje.label_tag }}{{ form.mensaje }}
-          {% for error in form.mensaje.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
-        </div>
-      </fieldset>
+          <!-- Productos agregados -->
+          <fieldset class="border rounded p-3 mb-4">
+            <legend class="w-auto px-2">Productos Agregados</legend>
+            <div class="table-responsive">
+              <table class="table table-striped" id="tabla-detalles">
+                <thead>
+                  <tr>
+                    <th>#</th><th>Descripción</th><th>Marca</th><th>UDM</th><th>Origen</th>
+                    <th>Proveedor</th><th>Dimensiones</th><th>Peso</th><th>Costo</th>
+                    <th>SKU Prov.</th><th>SKU Fab.</th><th></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </fieldset>
 
-      <div class="d-flex justify-content-start">
-        <button type="submit" class="btn btn-success me-2">Enviar Solicitud</button>
+          <!-- Agregar producto -->
+          <fieldset class="border rounded p-3 mb-4">
+            <legend class="w-auto px-2">Agregar Producto</legend>
+            <div class="row g-3" id="formset-actual">
+              {% for field in formset.empty_form.visible_fields %}
+                <div class="col-md-3">
+                  {{ field.label_tag }}{{ field }}
+                  {% for error in field.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+                </div>
+              {% endfor %}
+            </div>
+            {{ formset.management_form }}
+            <button type="button" class="btn btn-outline-primary mt-2" id="add-product-btn">+ Agregar Producto</button>
+          </fieldset>
+
+          <!-- Mensaje -->
+          <fieldset class="border rounded p-3 mb-4">
+            <legend class="w-auto px-2">Mensaje</legend>
+            <div class="mb-3">
+              {{ form.mensaje.label_tag }}{{ form.mensaje }}
+              {% for error in form.mensaje.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+            </div>
+          </fieldset>
+
+          <button type="submit" class="btn btn-success px-4 py-2">
+            <i class="fas fa-paper-plane"></i> Enviar Solicitud
+          </button>
+        </form>
       </div>
-    </form>
+    </div>
   </div>
 
   <!-- Solicitudes enviadas -->
   <div id="solicitudes-enviadas" style="display:none;">
-    <h3>Solicitudes Enviadas</h3>
-    <table class="table table-hover">
-      <thead><tr><th>#</th><th>Empresa</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
-      <tbody>
-        {% for s in solicitudes_enviadas %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ s.get_empresa_display }}</td>
-          <td>{{ s.get_tipo_solicitud_display }}</td>
-          <td>{{ s.get_estado_display }}</td>
-          <td>{{ s.fecha_creacion|date:"d-m-Y H:i" }}</td>
-          <td><a href="{% url 'detalle_solicitud' s.id %}" class="btn btn-sm btn-outline-primary">Ver</a></td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="6" class="text-center">No has enviado solicitudes aún.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="card shadow-sm mx-auto" style="max-width: 1200px;">
+      <div class="card-body">
+        <h3>Solicitudes Enviadas</h3>
+        <table class="table table-hover">
+          <thead><tr><th>#</th><th>Empresa</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+          <tbody>
+            {% for s in solicitudes_enviadas %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ s.get_empresa_display }}</td>
+                <td>{{ s.get_tipo_solicitud_display }}</td>
+                <td>{{ s.get_estado_display }}</td>
+                <td>{{ s.fecha_creacion|date:"d-m-Y H:i" }}</td>
+                <td><a href="{% url 'detalle_solicitud' s.id %}" class="btn btn-sm btn-outline-primary">Ver</a></td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center">No has enviado solicitudes aún.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- JavaScript -->
+<!-- JS -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const menu = document.getElementById('menu-botones');
@@ -224,9 +217,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (cotSelect) {
     cotSelect.addEventListener('change', () => {
-      const val = cotSelect.value;
-      campoArchivo.style.display = val === 'documento' ? 'block' : 'none';
-      campoImagen.style.display = val === 'whatsapp' ? 'block' : 'none';
+      campoArchivo.style.display = cotSelect.value === 'documento' ? 'block' : 'none';
+      campoImagen.style.display = cotSelect.value === 'whatsapp' ? 'block' : 'none';
     });
     cotSelect.dispatchEvent(new Event('change'));
   }
@@ -249,19 +241,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!valido) return;
 
-    const marcaTexto = currentForm.querySelector('select[name$="-marca"]')?.selectedOptions[0].text || '';
-    const udmTexto = currentForm.querySelector('select[name$="-udm"]')?.selectedOptions[0].text || '';
-    const origenTexto = currentForm.querySelector('select[name$="-origen"]')?.selectedOptions[0].text || '';
-    const proveedorTexto = currentForm.querySelector('select[name$="-proveedor"]')?.selectedOptions[0].text || '';
-
     const fila = document.createElement('tr');
     fila.innerHTML = `
       <td>${index+1}</td>
       <td>${producto.descripcion}</td>
-      <td>${marcaTexto}</td>
-      <td>${udmTexto}</td>
-      <td>${origenTexto}</td>
-      <td>${proveedorTexto}</td>
+      <td>${currentForm.querySelector('select[name$="-marca"]').selectedOptions[0]?.text || ''}</td>
+      <td>${currentForm.querySelector('select[name$="-udm"]').selectedOptions[0]?.text || ''}</td>
+      <td>${currentForm.querySelector('select[name$="-origen"]').selectedOptions[0]?.text || ''}</td>
+      <td>${currentForm.querySelector('select[name$="-proveedor"]').selectedOptions[0]?.text || ''}</td>
       <td>${producto.largo}x${producto.ancho}x${producto.alto}</td>
       <td>${producto.peso}kg</td>
       <td>$${producto.costo}</td>
@@ -288,3 +275,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 {% endblock %}
+
+
