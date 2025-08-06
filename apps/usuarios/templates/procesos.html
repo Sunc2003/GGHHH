@@ -1,127 +1,110 @@
 {% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
 
 {% block content %}
 <div class="container py-5">
-<!-- Agrega esto en el <head> de base.html -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-<!-- ...existing code... -->
-<h2 class="text-center mb-5" style="color: #000;">
-  <i class="bi bi-diagram-3" style="font-size: 2.5rem; vertical-align: middle; margin-right: 10px;"></i>
-  <span style="vertical-align: middle; font-weight: bold;">
-    Procesos GGH
-  </span>
-  <i class="bi bi-diagram-3" style="font-size: 2.5rem; vertical-align: middle; margin-left: 10px;"></i>
-</h2>
-
-
-  <!-- Botones -->
-  <div class="d-flex justify-content-center gap-4 mb-5 flex-wrap">
-    <button id="btn-subir" class="btn btn-toggle px-4 py-3">📤 Subir archivo</button>
-    <button id="btn-ver" class="btn btn-toggle px-4 py-3">📁 Ver archivos</button>
+  <!-- 🔹 Encabezado -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold text-dark mb-0">Gestión de Documentos</h2>
+      {% if carpeta_actual %}
+        <small class="text-secondary">Ubicación: /{{ carpeta_actual }}</small>
+      {% endif %}
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-outline-dark" onclick="toggleForm('form-subida')">Subir archivo</button>
+      <button class="btn btn-outline-dark" onclick="toggleForm('form-carpeta')">Nueva carpeta</button>
+    </div>
   </div>
 
-  <!-- Formulario para subir archivos -->
-  <div id="formulario-subida" class="card shadow-sm border-0 mb-5" style="display: none;">
-    <div class="card-body bg-light">
-      <form method="post" enctype="multipart/form-data">
+  <!-- ✅ Alerta de archivo subido -->
+  {% if url_archivo %}
+    <div class="alert alert-success border border-success-subtle text-dark">
+      Archivo subido correctamente:
+      <a href="{{ url_archivo }}" target="_blank" class="text-dark text-decoration-underline">
+        {{ url_archivo }}
+      </a>
+    </div>
+  {% endif %}
+
+  <!-- 🗂️ Formulario: Crear nueva carpeta -->
+  <div id="form-carpeta" class="card border-0 shadow-sm mb-4 d-none">
+    <div class="card-body bg-white border border-dark-subtle">
+      <form method="post" action="">
+        {% csrf_token %}
+        <div class="row g-2">
+          <div class="col-md-10">
+            <input type="text" name="nueva_carpeta" class="form-control border-dark" placeholder="Nombre de la carpeta" required>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-dark w-100">Crear</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 📤 Formulario: Subir archivo -->
+  <div id="form-subida" class="card border-0 shadow-sm mb-4 d-none">
+    <div class="card-body bg-white border border-dark-subtle">
+      <form method="post" enctype="multipart/form-data" action="">
         {% csrf_token %}
         <div class="mb-3">
-          <label for="archivo" class="form-label fw-bold">Selecciona un archivo:</label>
-          <input type="file" name="archivo" id="archivo" class="form-control" required
-                 accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.jpg,.png">
+          <label class="form-label fw-semibold">Archivo:</label>
+          <input type="file" name="archivo" class="form-control border-dark" required>
         </div>
-        <button type="submit" class="btn btn-dark w-100">Subir archivo nuevo</button>
+        <button type="submit" class="btn btn-dark">Subir archivo</button>
       </form>
-
-      {% if url_archivo %}
-        <div class="alert alert-success mt-4">
-          ✅ Archivo subido: <a href="{{ url_archivo }}" target="_blank">{{ url_archivo }}</a>
-        </div>
-      {% endif %}
     </div>
   </div>
 
-  <!-- Lista de archivos -->
-  <div id="lista-archivos" class="card shadow-sm border-0" style="display: none;">
-    <div class="card-body bg-light">
-      <h4 class="mb-4 fw-bold text-dark">Archivos</h4>
-
-      {% if archivos %}
-        <div class="row row-cols-1 row-cols-md-2 g-4">
-          {% for archivo in archivos %}
-            <div class="col">
-              <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center">
-                    <i class="bi bi-file-earmark-text fs-3 text-dark me-3"></i>
-                    <div class="text-truncate" style="max-width: 250px;">
-                      <strong class="text-dark">{{ archivo.nombre }}</strong>
-                    </div>
-                  </div>
-                  <a href="{{ archivo.url }}" target="_blank" class="btn btn-outline-dark btn-sm">
-                    Ver
-                  </a>
-                </div>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <p class="text-muted text-center">No hay archivos subidos.</p>
-      {% endif %}
+  <!-- 🔙 Navegación (volver a carpeta anterior) -->
+  {% if carpeta_actual %}
+    <div class="mb-3">
+      <a href="?path={{ carpeta_padre }}" class="btn btn-sm btn-outline-secondary">← Volver</a>
     </div>
-  </div>
+  {% endif %}
+
+  <!-- 📁 Listado de carpetas -->
+  {% if carpetas %}
+    <h5 class="fw-semibold mt-4 text-dark">Carpetas</h5>
+    <ul class="list-group list-group-flush mb-4 border border-dark-subtle">
+      {% for carpeta in carpetas %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span class="text-dark">{{ carpeta }}</span>
+          <a href="?path={{ carpetas_full_paths|dict_get:carpeta }}" class="btn btn-sm btn-outline-dark">Abrir</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <!-- 📄 Listado de archivos -->
+  {% if archivos %}
+    <h5 class="fw-semibold mt-4 text-dark">Archivos</h5>
+    <ul class="list-group list-group-flush border border-dark-subtle">
+      {% for archivo in archivos %}
+        {% if archivo.nombre != ".emptyFolderPlaceholder" %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="text-dark">{{ archivo.nombre }}</span>
+            <a href="{{ archivo.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Ver</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  {% endif %}
 
 </div>
 
-<!-- Estilos -->
-<style>
-  .btn-toggle {
-    transition: all 0.2s ease-in-out;
-    font-weight: bold;
-    border: 1px solid #000 !important;
-  }
-
-  .btn-toggle.active {
-    background-color: #000 !important;
-    color: #fff !important;
-  }
-
-  .btn-toggle:not(.active) {
-    background-color: #fff !important;
-    color: #000 !important;
-  }
-</style>
-
-<!-- Script -->
+<!-- 📜 Script para alternar visibilidad de formularios -->
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const btnSubir = document.getElementById('btn-subir');
-    const btnVer = document.getElementById('btn-ver');
-    const formulario = document.getElementById('formulario-subida');
-    const lista = document.getElementById('lista-archivos');
-
-    function activarBoton(activo, inactivo) {
-      activo.classList.add('active');
-      inactivo.classList.remove('active');
-    }
-
-    // Ocultar ambos al inicio
-    formulario.style.display = 'none';
-    lista.style.display = 'none';
-
-    btnSubir.addEventListener('click', function () {
-      formulario.style.display = 'block';
-      lista.style.display = 'none';
-      activarBoton(btnSubir, btnVer);
+  function toggleForm(id) {
+    const forms = ['form-subida', 'form-carpeta'];
+    forms.forEach(f => {
+      const el = document.getElementById(f);
+      if (el) el.classList.toggle('d-none', f !== id || !el.classList.contains('d-none'));
     });
-
-    btnVer.addEventListener('click', function () {
-      formulario.style.display = 'none';
-      lista.style.display = 'block';
-      activarBoton(btnVer, btnSubir);
-    });
-  });
+  }
 </script>
 {% endblock %}

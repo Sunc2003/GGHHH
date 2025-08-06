@@ -25,6 +25,10 @@ from django.forms import formset_factory
 from django.db.models import Q
 from django.core.files.storage import default_storage
 import re
+from urllib.parse import quote
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files.base import ContentFile
+
  
  
 class IniciarSesionView(LoginView):
@@ -295,42 +299,69 @@ def solicitudes_enviadas_view(request):
         'solicitudes': solicitudes
     }
     return render(request, 'perfil.html', context)
-
-
-
-
+ 
+ 
 
 
 def procesos_view(request):
+    storage = SupabaseStorage()
+    carpeta_actual = request.GET.get("path", "").strip("/")
     url_archivo = None
     archivos = []
-    storage = SupabaseStorage()
-    carpeta = "procesos"
+    carpetas = []
 
-    # Subir archivo si se envía el formulario
-    if request.method == "POST" and request.FILES.get("archivo"):
-        archivo = request.FILES["archivo"]
-        nombre_original = archivo.name
-        # Limpia el nombre: reemplaza espacios y caracteres no válidos por "_"
-        nombre = re.sub(r'[^\w\-.]', '_', nombre_original)
-        ruta = f"{carpeta}/{nombre}"  # Guardar en la carpeta 'procesos'
-        storage._save(ruta, archivo)
-        url_archivo = storage.get_public_url(ruta)
+    # CREAR CARPETA o SUBIR ARCHIVO
+    if request.method == "POST":
+        # 📁 CREAR NUEVA CARPETA dentro de carpeta_actual
+        if "nueva_carpeta" in request.POST:
+            nombre_carpeta = request.POST["nueva_carpeta"].strip("/")
+            if nombre_carpeta:
+                ruta_carpeta = f"{carpeta_actual}/{nombre_carpeta}".strip("/")
+                placeholder = ContentFile(b"")
+                try:
+                    storage._save(f"{ruta_carpeta}/.emptyFolderPlaceholder", placeholder)
+                except Exception as e:
+                    print("❌ Error al crear carpeta:", e)
 
-    # Obtener lista de archivos subidos en la carpeta 'procesos'
+        # 📤 SUBIR ARCHIVO dentro de carpeta_actual
+        elif request.FILES.get("archivo"):
+            archivo = request.FILES["archivo"]
+            nombre_original = archivo.name
+            nombre = re.sub(r'[^\w\-.]', '_', nombre_original)
+            ruta = f"{carpeta_actual}/{nombre}" if carpeta_actual else nombre
+            try:
+                storage._save(ruta, archivo)
+                url_archivo = storage.get_public_url(ruta)
+            except Exception as e:
+                print("❌ Error al subir archivo:", e)
+
+    # LISTAR ARCHIVOS EN CARPETA ACTUAL
     try:
-        lista = storage.client.storage.from_(storage.bucket).list(carpeta)
-        archivos = [
-            {
-                "nombre": file["name"],
-                "url": storage.get_public_url(f"{carpeta}/{file['name']}")
-            }
-            for file in lista or []
-        ]
+        lista = storage.client.storage.from_(storage.bucket).list(carpeta_actual or "", {"limit": 9999})
+        for item in lista:
+            if item.get("metadata"):
+                archivos.append({
+                    "nombre": item["name"],
+                    "url": storage.get_public_url(f"{carpeta_actual}/{item['name']}" if carpeta_actual else item["name"]),
+                })
+            else:
+                if item["name"] != "solicitudes":
+                    carpetas.append(item["name"])
     except Exception as e:
         print("❌ Error al listar archivos:", e)
 
+    carpetas_full_paths = {
+        carpeta: f"{carpeta_actual}/{carpeta}".strip("/")
+        for carpeta in carpetas
+    }
+
+    carpeta_padre = "/".join(carpeta_actual.split("/")[:-1]) if carpeta_actual else ""
+
     return render(request, "procesos.html", {
+        "carpeta_actual": carpeta_actual,
+        "carpeta_padre": carpeta_padre,
         "url_archivo": url_archivo,
-        "archivos": archivos
+        "archivos": archivos,
+        "carpetas": carpetas,
+        "carpetas_full_paths": carpetas_full_paths,
     })
