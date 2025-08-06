@@ -65,7 +65,7 @@
               {% for doc in adjuntos %}
                 {% if doc.tipo == 'documento' %}
                   <li>
-                    📄 <a href="https://ygwafhrphrtjenwazsay.supabase.co/storage/v1/object/public/media/{{ doc.archivo.name }}" target="_blank">
+                    📄 <a href="https://otjcliklurucbuvqzxdg.supabase.co/storage/v1/object/public/media/{{ doc.archivo.name }}" target="_blank">
                       {{ doc.archivo.name|slice:"-50:" }}
                     </a>
                   </li>
@@ -78,8 +78,8 @@
             <div class="adjuntos-grid">
               {% for img in adjuntos %}
                 {% if img.tipo == 'imagen' %}
-                  <a href="https://ygwafhrphrtjenwazsay.supabase.co/storage/v1/object/public/media/{{ img.archivo.name }}" target="_blank">
-                    <img src="https://ygwafhrphrtjenwazsay.supabase.co/storage/v1/object/public/media/{{ img.archivo.name }}" alt="Imagen" class="img-preview">
+                  <a href="https://otjcliklurucbuvqzxdg.supabase.co/storage/v1/object/public/media/{{ img.archivo.name }}" target="_blank">
+                    <img src="https://otjcliklurucbuvqzxdg.supabase.co/storage/v1/object/public/media/{{ img.archivo.name }}" alt="Imagen" class="img-preview">
                   </a>
                 {% endif %}
               {% endfor %}
