@@ -28,7 +28,7 @@ import re
 from urllib.parse import quote
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.base import ContentFile
-
+from apps.utils.supabase_storage import SupabaseStorage
  
  
 class IniciarSesionView(LoginView):
@@ -247,18 +247,27 @@ class CambiarEstadoView(UpdateView):
         return reverse_lazy('detalle_solicitud', kwargs={'pk': self.object.pk})
  
  
+from django.views.generic import ListView
+from django.db.models import Q
+from apps.usuarios.models import CustomUser
+from apps.organizaciones.models import Area, Cargo
+
 class UsuariosADListView(ListView):
     model = CustomUser
     template_name = 'usuarios_ad.html'
     context_object_name = 'usuarios'
     paginate_by = 10
- 
+
     def get_queryset(self):
         qs = super().get_queryset()
+
+        # Filtros desde el formulario
         area_id = self.request.GET.get('area', '')
         cargo_id = self.request.GET.get('cargo', '')
-        filtro_nombre = self.request.GET.get('q', '').strip()  # Nuevo
- 
+        filtro_nombre = self.request.GET.get('q', '').strip()
+        filtro_usuario_ad = self.request.GET.get('usuario_ad', '').strip()
+
+        # Aplicar filtros si están presentes
         if area_id:
             qs = qs.filter(area_id=area_id)
         if cargo_id:
@@ -269,24 +278,22 @@ class UsuariosADListView(ListView):
                 Q(last_name__icontains=filtro_nombre) |
                 Q(username__icontains=filtro_nombre)
             )
+        if filtro_usuario_ad:
+            qs = qs.filter(usuario_ad__icontains=filtro_usuario_ad)
+
         return qs
- 
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['areas'] = Area.objects.all()
         context['cargos'] = Cargo.objects.all()
         context['filtro_area'] = self.request.GET.get('area', '')
         context['filtro_cargo'] = self.request.GET.get('cargo', '')
-        context['filtro_nombre'] = self.request.GET.get('q', '')  # Nuevo
+        context['filtro_nombre'] = self.request.GET.get('q', '')
+        context['filtro_usuario_ad'] = self.request.GET.get('usuario_ad', '')
         return context
- 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['areas'] = Area.objects.all()
-        context['cargos'] = Cargo.objects.all()
-        context['filtro_area'] = self.request.GET.get('area', '')
-        context['filtro_cargo'] = self.request.GET.get('cargo', '')
-        return context
+
+
     
 def perfil_usuario(request):
     return render(request, 'perfil.html', {'usuario': request.user})
