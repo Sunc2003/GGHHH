@@ -78,13 +78,7 @@
     </a>
   </div>
 
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
+
 
   <!-- Formulario Solicitud -->
   <div id="formulario-container" style="display:none;">
