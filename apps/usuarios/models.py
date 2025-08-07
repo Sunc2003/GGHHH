@@ -35,26 +35,26 @@ class SolicitudCodigo(models.Model):
         ('pendiente', 'Pendiente'),
         ('creado', 'Código Creado'),
     ]
-
+ 
     EMPRESAS = [
         ('asland', 'Asland'),
         ('marsella', 'Marsella'),
     ]
-
+ 
     TIPOS_SOLICITUD = [
         ('nuevo_articulo', 'Nuevo Artículo'),
         ('produccion', 'Producción'),
         ('activacion', 'Activación'),
         ('modificacion', 'Modificación'),
     ]
-
+ 
     OPCIONES_COTIZACION = [
         ('telefono', 'Por Teléfono'),
         ('documento', 'Por Documento'),
         ('lista_precios', 'Por Lista de Precios'),
         ('whatsapp', 'Por WhatsApp'),
     ]
-
+ 
     # Relaciones de usuarios
     solicitante = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -66,19 +66,21 @@ class SolicitudCodigo(models.Model):
         on_delete=models.CASCADE,
         related_name='solicitudes_recibidas'
     )
-
+ 
     # Datos generales de la solicitud
     empresa = models.CharField(max_length=20, choices=EMPRESAS, default='marsella')
     tipo_solicitud = models.CharField(max_length=20, choices=TIPOS_SOLICITUD, default='nuevo_articulo')
     cotizacion = models.CharField(max_length=20, choices=OPCIONES_COTIZACION, blank=True, null=True)
-
-
+ 
+ 
     # Estado y control
     titulo = models.CharField(max_length=100, null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
     fecha_creacion = models.DateTimeField(default=timezone.now)
     mensaje = models.TextField(blank=True, null=True, verbose_name="Mensaje al receptor")
-
+    comentario_estado = models.TextField(blank=True, null=True, verbose_name="Comentario de respuesta")
+ 
+ 
     def __str__(self):
         return f"{self.get_tipo_solicitud_display()} - {self.solicitante.username} → {self.receptor.username}"
 

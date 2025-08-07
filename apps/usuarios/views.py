@@ -29,7 +29,8 @@ from urllib.parse import quote
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.base import ContentFile
 from apps.utils.supabase_storage import SupabaseStorage
- 
+from django.views.generic import ListView
+
  
 class IniciarSesionView(LoginView):
     template_name = 'login.html'  # Ruta al template
@@ -238,19 +239,18 @@ class CambiarEstadoView(UpdateView):
     template_name = 'cambiar_estado.html'
  
     def form_valid(self, form):
-        solicitud = form.save(commit=False)
-        solicitud.estado = 'creado'
-        solicitud.save()
-        return super().form_valid(form)
+       solicitud = form.save(commit=False)
+       solicitud.estado = 'creado'
+       solicitud.comentario_estado = form.cleaned_data.get('comentario_estado')  # Aquí se guarda
+       solicitud.save()
+       return super().form_valid(form)
+ 
  
     def get_success_url(self):
         return reverse_lazy('detalle_solicitud', kwargs={'pk': self.object.pk})
  
  
-from django.views.generic import ListView
-from django.db.models import Q
-from apps.usuarios.models import CustomUser
-from apps.organizaciones.models import Area, Cargo
+
 
 class UsuariosADListView(ListView):
     model = CustomUser
@@ -309,7 +309,8 @@ def solicitudes_enviadas_view(request):
  
  
 
-
+@login_required
+@permiso_requerido('PROCESOS')
 def procesos_view(request):
     storage = SupabaseStorage()
     carpeta_actual = request.GET.get("path", "").strip("/")

@@ -165,27 +165,30 @@
   {% endif %}
  
   <!-- Estado de la Solicitud -->
-  <fieldset class="card-detalle">
-    <legend>Estado de la Solicitud</legend>
-    <p><strong>Estado actual:</strong>
-      <span class="badge {% if object.estado == 'pendiente' %}bg-warning text-dark{% else %}bg-success{% endif %}">
-        {{ object.get_estado_display }}
-      </span>
-    </p>
+<fieldset class="card-detalle">
+  <legend>Estado de la Solicitud</legend>
+  <p><strong>Estado actual:</strong>
+    <span class="badge {% if object.estado == 'pendiente' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+      {{ object.get_estado_display }}
+    </span>
+  </p>
  
-    {% if request.user == object.receptor and object.estado == 'pendiente' %}
-    <form method="post" action="{% url 'cambiar_estado' object.pk %}">
-      {% csrf_token %}
-      <div class="mb-3">
-        <label for="comentario_estado" class="form-label"><strong>Comentario:</strong></label>
-        <textarea name="comentario_estado" id="comentario_estado"
-                  class="form-control" rows="3" placeholder="Agregar un comentario (opcional)"></textarea>
-      </div>
-      <button type="submit" class="btn btn-success">
-        <i class="fas fa-check-circle"></i> Marcar como "Código Creado"
-      </button>
-    </form>
-    {% endif %}
-  </fieldset>
+  {% if request.user == object.receptor and object.estado == 'pendiente' %}
+  <form method="post" action="{% url 'cambiar_estado' object.pk %}">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+ 
+    <div class="mb-3">
+      {{ form.comentario_estado.label_tag }}
+      {{ form.comentario_estado }}
+    </div>
+ 
+    <button type="submit" class="btn btn-success">
+      <i class="fas fa-check-circle"></i> Marcar como "Código Creado"
+    </button>
+  </form>
+  {% endif %}
+</fieldset>
+ 
 </div>
-{% endblock %}
+{% endblock %} 

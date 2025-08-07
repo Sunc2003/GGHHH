@@ -1,18 +1,33 @@
 {% extends "base.html" %}
+{% load permisos_tags %}
 {% load static %}
  
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/panel_admin.css' %}">
+  <style>
+    .card-funcion {
+      min-height: 160px;
+      transition: transform 0.2s ease;
+    }
+    .card-funcion:hover {
+      transform: scale(1.02);
+    }
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+  </style>
 {% endblock %}
  
 {% block content %}
+{% if request.user.is_authenticated and request.user|tiene_permiso:"PANEL_ADMINISTRADOR" %}
 <div class="container py-5">
   <h2 class="mb-4">Panel de Administración de Usuarios</h2>
- 
+
   <div class="mb-3 text-end">
     <a href="{% url 'registro' %}" class="btn btn-success">Registrar nuevo usuario</a>
   </div>
- 
+
   <!-- Filtro de estado de usuarios -->
   <div class="mb-3">
     <label for="filtro-estado" class="form-label">Filtrar por estado:</label>
@@ -22,7 +37,7 @@
       <option value="desconectado">Desconectado</option>
     </select>
   </div>
- 
+
   <table class="table table-bordered table-hover align-middle">
     <thead class="table-dark">
       <tr>
@@ -48,11 +63,9 @@
     </tbody>
   </table>
 </div>
+{% endif %}
 
-
-
- 
-<!-- Filtro tabla usuarios por estado (JS vanilla) -->
+<!-- Script para filtro de estado -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const filtro = document.getElementById('filtro-estado');

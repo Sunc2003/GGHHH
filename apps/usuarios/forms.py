@@ -213,11 +213,8 @@ class CambiarEstadoForm(forms.ModelForm):
             'placeholder': 'Adjunta Código y Descripción...'
         })
     )
-
+ 
     class Meta:
         model = SolicitudCodigo
         fields = ['comentario_estado']
-
-
-
  
