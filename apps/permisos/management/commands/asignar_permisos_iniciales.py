@@ -19,16 +19,48 @@ class Command(BaseCommand):
         # Permisos a crear/asignar
         permisos_data = [
             {
+                "codigo": "CREACION_USUARIO",
+                "nombre": "Creación de Usuarios",
+                "descripcion": "Permite registrar nuevos usuarios en el sistema y asignarles permisos correspondientes."
+            },
+            {
+                "codigo": "ENVIAR_SOLICITUD",
+                "nombre": "Solicitar Códigos",
+                "descripcion": "Permite enviar solicitudes de creación de códigos SAP al área correspondiente."
+            },
+            {
                 "codigo": "GESTIONAR_PERMISOS",
                 "nombre": "Gestionar Permisos",
-                "descripcion": "Permite crear, asignar y visualizar todos los permisos"
+                "descripcion": "Permite crear, asignar, modificar y visualizar todos los permisos definidos en el sistema."
+            },
+            {
+                "codigo": "PANEL_USUARIO",
+                "nombre": "Acceso a Panel de Usuario",
+                "descripcion": "Permite acceder al dashboard de usuarios."
+            },
+            {
+                "codigo": "PROCESOS",
+                "nombre": "Gestión de Procesos",
+                "descripcion": "Permite visualizar, cargar y administrar procesos internos en la plataforma."
             },
             {
                 "codigo": "SOLICITUD_CODIGO",
-                "nombre": "Enviar solicitudes de creación de códigos",
-                "descripcion": "Permite a los vendedores enviar solicitudes al data master para la creación de nuevos códigos en SAP."
+                "nombre": "Enviar Solicitudes de Código",
+                "descripcion": "Permite a los usuarios enviar solicitudes al Data Master para la creación de nuevos códigos en SAP."
+            },
+            {
+                "codigo": "VER_SOLICITUDES",
+                "nombre": "Visualizar Solicitudes Enviadas",
+                "descripcion": "Permite consultar el estado y detalle de las solicitudes de código enviadas por el usuario."
+            },
+            {
+                "codigo": "VER_SOLICITUDES_RECIBIDAS",
+                "nombre": "Visualizar Solicitudes Recibidas",
+                "descripcion": "Permite al receptor revisar las solicitudes de creación de código asignadas a su área o usuario."
             }
         ]
+
+
 
         permisos_creados = []
         for data in permisos_data:

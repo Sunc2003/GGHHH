@@ -59,25 +59,29 @@ def panel_admin_usuarios(request):
     usuarios = CustomUser.objects.all()
     ahora = timezone.now()
     minutos_activo = 5
- 
+
     for u in usuarios:
         u.en_linea = False
         if u.last_login and (ahora - u.last_login) < timedelta(minutes=minutos_activo):
             u.en_linea = True
- 
-    # Lógica para solicitudes
-    ##solicitudes_enviadas = SolicitudCodigo.objects.filter(solicitante=request.user)
+
+    # Solicitudes recibidas para administradores
     solicitudes_recibidas = SolicitudCodigo.objects.filter(receptor=request.user)
- 
+
+    # ➕ NUEVO: Contadores para usuarios normales
+    solicitudes_enviadas_usuario = SolicitudCodigo.objects.filter(solicitante=request.user)
+    total_solicitudes = solicitudes_enviadas_usuario.count()
+    solicitudes_respondidas = solicitudes_enviadas_usuario.exclude(estado='pendiente').count()
+
     context = {
         'usuarios': usuarios,
-        ##'solicitudes_enviadas': solicitudes_enviadas,
         'solicitudes_recibidas': solicitudes_recibidas,
+        'total_solicitudes': total_solicitudes,
+        'solicitudes_respondidas': solicitudes_respondidas,
     }
- 
+
     return render(request, 'panel_admin.html', context)
- 
- 
+
  
 @method_decorator(permiso_requerido('SOLICITUD_CODIGO'), name='dispatch')    
 class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
@@ -184,7 +188,7 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
             'solicitudes_enviadas': solicitudes_enviadas,
             'usuario': request.user
         })
- 
+method_decorator(permiso_requerido('VER_SOLICITUDES_RECIBIDA'), name='dispatch')
 class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
     model = SolicitudCodigo
     template_name = 'solicitudes_recibidas.html'
@@ -200,7 +204,7 @@ class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
         return pendientes       
         
         
- 
+method_decorator(permiso_requerido('VER_SOLICITUDES_RECIBIDA'), name='dispatch')
 class SolicitudDetailView(DetailView):
     model = SolicitudCodigo
     template_name = 'solicitud_detalle.html'
@@ -208,17 +212,15 @@ class SolicitudDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
  
-        # 🔹 Obtener los adjuntos organizados
+        # Adjuntos
         documentos = self.object.adjuntos.filter(tipo='documento')
         imagenes = self.object.adjuntos.filter(tipo='imagen')
  
         context['documentos'] = documentos
         context['imagenes'] = imagenes
  
-        # 🔹 Obtener los productos asociados a esta solicitud
+        # Productos + cálculo
         productos = self.object.detalles.all()
- 
-        # 🔹 Calcular PMV y PVP por cada producto
         productos_con_calculo = []
         for p in productos:
             pmv = round(p.costo / Decimal('0.84'), 2) if p.costo and p.costo > 0 else None
@@ -229,25 +231,29 @@ class SolicitudDetailView(DetailView):
                 'pmv': pmv,
                 'pvp': pvp
             })
- 
         context['productos'] = productos_con_calculo
+ 
+        # ✅ Agregar el formulario si el usuario es el receptor y está pendiente
+        if self.request.user == self.object.receptor and self.object.estado == 'pendiente':
+            context['form'] = CambiarEstadoForm(instance=self.object)
+ 
         return context
  
 class CambiarEstadoView(UpdateView):
     model = SolicitudCodigo
     form_class = CambiarEstadoForm
     template_name = 'cambiar_estado.html'
- 
+
     def form_valid(self, form):
-       solicitud = form.save(commit=False)
-       solicitud.estado = 'creado'
-       solicitud.comentario_estado = form.cleaned_data.get('comentario_estado')  # Aquí se guarda
-       solicitud.save()
-       return super().form_valid(form)
- 
- 
+        solicitud = form.save(commit=False)
+        solicitud.estado = 'creado'
+        solicitud.comentario_estado = form.cleaned_data.get('comentario_estado')
+        solicitud.save()
+        return super().form_valid(form)
+
     def get_success_url(self):
-        return reverse_lazy('detalle_solicitud', kwargs={'pk': self.object.pk})
+        return reverse_lazy('detalle_solicitud', kwargs={'pk': self.object.pk})  # <-- CORRECTO
+
  
  
 
@@ -298,15 +304,17 @@ class UsuariosADListView(ListView):
 def perfil_usuario(request):
     return render(request, 'perfil.html', {'usuario': request.user})
  
+
+
+@login_required
+@permiso_requerido('VER_SOLICITUDES')
 def solicitudes_enviadas_view(request):
-    solicitudes = SolicitudCodigo.objects.filter(solicitante=request.user).order_by('-fecha_envio')
-    
-    context = {
-        'usuario': request.user,  # 👈 necesario para que funcione {{ usuario. ... }}
-        'solicitudes': solicitudes
-    }
-    return render(request, 'perfil.html', context)
- 
+    solicitudes = SolicitudCodigo.objects.filter(solicitante=request.user).order_by('-fecha_creacion')
+    return render(request, 'solicitud_enviadas.html', {
+        'usuario': request.user,
+        'solicitudes_enviadas': solicitudes
+    })
+
  
 
 @login_required

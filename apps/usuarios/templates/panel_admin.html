@@ -1,45 +1,64 @@
 {% extends "base.html" %}
 {% load permisos_tags %}
 {% load static %}
- 
+
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/panel_admin.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    .card-funcion {
-      min-height: 160px;
-      transition: transform 0.2s ease;
+    .card {
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     }
-    .card-funcion:hover {
-      transform: scale(1.02);
+    .card-body {
+      padding: 1.25rem;
     }
     .card-icon {
-      font-size: 2rem;
-      margin-bottom: 10px;
+      font-size: 1.4rem;
+      color: #444;
+      margin-bottom: 8px;
+    }
+    .fw-semibold {
+      font-weight: 600;
+    }
+    .bg-light {
+      background-color: #f9f9f9 !important;
+    }
+    .text-muted {
+      color: #6c757d !important;
+    }
+    select.form-select {
+      border-radius: 4px;
+    }
+    table th, table td {
+      font-size: 0.95rem;
     }
   </style>
 {% endblock %}
- 
+
 {% block content %}
-{% if request.user.is_authenticated and request.user|tiene_permiso:"PANEL_ADMINISTRADOR" %}
+
+{# PANEL ADMINISTRADOR #}
+{% if request.user.is_authenticated and request.user|tiene_permiso:"CREACION_USUARIO" %}
 <div class="container py-5">
-  <h2 class="mb-4">Panel de Administración de Usuarios</h2>
+  <h4 class="mb-4 text-dark">Administración de Usuarios</h4>
 
   <div class="mb-3 text-end">
-    <a href="{% url 'registro' %}" class="btn btn-success">Registrar nuevo usuario</a>
+    <a href="{% url 'registro' %}" class="btn btn-dark btn-sm">+ Registrar nuevo usuario</a>
   </div>
 
-  <!-- Filtro de estado de usuarios -->
   <div class="mb-3">
     <label for="filtro-estado" class="form-label">Filtrar por estado:</label>
-    <select id="filtro-estado" class="form-select" style="width:auto; display:inline-block; margin-left: 10px;">
+    <select id="filtro-estado" class="form-select d-inline-block" style="width: auto; margin-left: 10px;">
       <option value="todos">Todos</option>
       <option value="enlinea" selected>En línea</option>
       <option value="desconectado">Desconectado</option>
     </select>
   </div>
 
-  <table class="table table-bordered table-hover align-middle">
-    <thead class="table-dark">
+  <table class="table table-sm table-hover align-middle border">
+    <thead class="table-light">
       <tr>
         <th>Usuario</th>
         <th>Email</th>
@@ -65,26 +84,107 @@
 </div>
 {% endif %}
 
-<!-- Script para filtro de estado -->
+{# PANEL USUARIO NORMAL #}
+{% if request.user.is_authenticated and request.user|tiene_permiso:"PANEL_USUARIO" %}
+<div class="container py-4 mt-4">
+  <div class="row">
+    <div class="col-sm-6 mb-3">
+      <div class="card bg-light text-dark">
+        <div class="card-body text-center">
+          <div class="card-icon">
+            <i class="fas fa-paper-plane"></i>
+          </div>
+          <div class="text-muted small">Solicitudes Enviadas</div>
+          <h4 class="fw-semibold mt-1">{{ total_solicitudes }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 mb-3">
+      <div class="card bg-light text-dark">
+        <div class="card-body text-center">
+          <div class="card-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="text-muted small">Solicitudes Respondidas</div>
+          <h4 class="fw-semibold mt-1">{{ solicitudes_respondidas }}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-white p-3 mt-2">
+    <div style="max-width: 260px; margin: 0 auto;">
+      <canvas id="graficoSolicitudesUsuario" height="160"></canvas>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Gráfico donut usuario -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const filtro = document.getElementById('filtro-estado');
-    const filtrar = function () {
-        const rows = document.querySelectorAll('table tbody tr');
-        rows.forEach(row => {
-            const estado = row.querySelector('.badge')?.textContent?.trim();
-            if (filtro.value === 'todos') {
-                row.style.display = '';
-            } else if (filtro.value === 'enlinea') {
-                row.style.display = estado === 'En línea' ? '' : 'none';
-            } else if (filtro.value === 'desconectado') {
-                row.style.display = estado === 'Desconectado' ? '' : 'none';
+  const total = {{ total_solicitudes|default:0 }};
+  const respondidas = {{ solicitudes_respondidas|default:0 }};
+  const pendientes = total - respondidas;
+
+  const ctx = document.getElementById('graficoSolicitudesUsuario');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Respondidas', 'Pendientes'],
+        datasets: [{
+          data: [respondidas, pendientes],
+          backgroundColor: ['#2a9d8f', '#f4a261'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: '70%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#343a40',
+              font: {
+                size: 12
+              }
             }
-        });
-    };
-    filtro.addEventListener('change', filtrar);
-    filtrar(); // Ejecutar al cargar la página
+          }
+        }
+      }
+    });
+  }
 });
 </script>
- 
+
+<!-- Filtro de estado para tabla -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const filtro = document.getElementById('filtro-estado');
+  const filtrar = function () {
+    const rows = document.querySelectorAll('table tbody tr');
+    rows.forEach(row => {
+      const estado = row.querySelector('.badge')?.textContent?.trim();
+      if (filtro.value === 'todos') {
+        row.style.display = '';
+      } else if (filtro.value === 'enlinea') {
+        row.style.display = estado === 'En línea' ? '' : 'none';
+      } else if (filtro.value === 'desconectado') {
+        row.style.display = estado === 'Desconectado' ? '' : 'none';
+      }
+    });
+  };
+  if (filtro) {
+    filtro.addEventListener('change', filtrar);
+    filtrar();
+  }
+});
+</script>
+
 {% endblock %}

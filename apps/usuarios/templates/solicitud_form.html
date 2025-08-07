@@ -1,6 +1,7 @@
 {% extends "base.html" %}
+{% load permisos_tags %}
 {% load static %}
-
+ 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/solicitud_form.css' %}">
 <style>
@@ -11,7 +12,7 @@
     gap: 1.5rem;
     margin-bottom: 2rem;
   }
-
+ 
   .btn-cuadrado {
     display: flex;
     flex-direction: column;
@@ -30,31 +31,31 @@
     transition: all 0.2s ease-in-out;
     text-decoration: none;
   }
-
+ 
   .btn-cuadrado:hover {
     background-color: #e2e6ea;
     transform: scale(1.05);
   }
-
+ 
   .btn-cuadrado img {
     width: 80px;
     height: 80px;
     margin-bottom: 10px;
   }
-
+ 
   .error-msg {
     color: #d9534f;
     font-size: 0.85rem;
     margin-top: 0.25rem;
   }
-
+ 
   @media (max-width: 576px) {
     .btn-cuadrado {
       width: 120px;
       height: 110px;
       font-size: 0.75rem;
     }
-
+ 
     .btn-cuadrado img {
       width: 32px;
       height: 32px;
@@ -62,32 +63,38 @@
   }
 </style>
 {% endblock %}
-
+ 
 {% block content %}
 <div class="container py-5">
   <!-- Menú principal -->
   <div class="menu-botones" id="menu-botones">
+    {% if request.user.is_authenticated and request.user|tiene_permiso:"ENVIAR_SOLICITUD" %}
     <button id="btn-mostrar-form" class="btn-cuadrado">
       <img src="{% static 'img/ggh.png' %}" alt="Nuevo">Solicitar Código
     </button>
-    <button id="btn-mostrar-enviadas" class="btn-cuadrado">
+    {% endif %}
+    {% if request.user.is_authenticated and request.user|tiene_permiso:"VER_SOLICITUDES" %}
+    <a href="{% url 'solicitudes_enviadas' %}" class="btn-cuadrado">
       <img src="{% static 'img/ggh.png' %}" alt="Enviadas">Enviadas
-    </button>
+    </a>
+    {% endif %}
+    {% if request.user.is_authenticated and request.user|tiene_permiso:"VER_SOLICITUDES_RECIBIDAS" %}
     <a href="{% url 'solicitudes_recibidas' %}" class="btn-cuadrado">
       <img src="{% static 'img/ggh.png' %}" alt="Recibidas">Recibidas
     </a>
+    {% endif %}
   </div>
-
-
-
+ 
+ 
   <!-- Formulario Solicitud -->
+   
   <div id="formulario-container" style="display:none;">
     <div class="card shadow-sm mx-auto" style="max-width: 1200px;">
       <div class="card-body">
         <h2 class="mb-4"><i class="fas fa-barcode"></i> Nueva Solicitud de Código SAP</h2>
         <form method="post" enctype="multipart/form-data" id="solicitud-form">
           {% csrf_token %}
-
+ 
           <!-- Información General -->
           <fieldset class="border rounded p-3 mb-4">
             <legend class="w-auto px-2">Información General</legend>
@@ -106,7 +113,7 @@
               </div>
             </div>
           </fieldset>
-
+ 
           <!-- Productos agregados -->
           <fieldset class="border rounded p-3 mb-4">
             <legend class="w-auto px-2">Productos Agregados</legend>
@@ -123,7 +130,7 @@
               </table>
             </div>
           </fieldset>
-
+ 
           <!-- Agregar producto -->
           <fieldset class="border rounded p-3 mb-4">
             <legend class="w-auto px-2">Agregar Producto</legend>
@@ -138,7 +145,7 @@
             {{ formset.management_form }}
             <button type="button" class="btn btn-outline-primary mt-2" id="add-product-btn">+ Agregar Producto</button>
           </fieldset>
-
+ 
           <!-- Mensaje -->
           <fieldset class="border rounded p-3 mb-4">
             <legend class="w-auto px-2">Mensaje</legend>
@@ -147,7 +154,7 @@
               {% for error in form.mensaje.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
             </div>
           </fieldset>
-
+ 
           <button type="submit" class="btn btn-success px-4 py-2">
             <i class="fas fa-paper-plane"></i> Enviar Solicitud
           </button>
@@ -155,34 +162,11 @@
       </div>
     </div>
   </div>
+ 
+ 
 
-  <!-- Solicitudes enviadas -->
-  <div id="solicitudes-enviadas" style="display:none;">
-    <div class="card shadow-sm mx-auto" style="max-width: 1200px;">
-      <div class="card-body">
-        <h3>Solicitudes Enviadas</h3>
-        <table class="table table-hover">
-          <thead><tr><th>#</th><th>Empresa</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
-          <tbody>
-            {% for s in solicitudes_enviadas %}
-              <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ s.get_empresa_display }}</td>
-                <td>{{ s.get_tipo_solicitud_display }}</td>
-                <td>{{ s.get_estado_display }}</td>
-                <td>{{ s.fecha_creacion|date:"d-m-Y H:i" }}</td>
-                <td><a href="{% url 'detalle_solicitud' s.id %}" class="btn btn-sm btn-outline-primary">Ver</a></td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="6" class="text-center">No has enviado solicitudes aún.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
 </div>
-
+ 
 <!-- JS -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -196,19 +180,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const addBtn = document.getElementById('add-product-btn');
   const totalForms = document.getElementById('id_form-TOTAL_FORMS');
   let index = parseInt(totalForms.value);
-
+ 
   document.getElementById('btn-mostrar-form').onclick = () => {
     formContainer.style.display = 'block';
-    solicitudesContainer.style.display = 'none';
     menu.style.display = 'none';
   };
 
-  document.getElementById('btn-mostrar-enviadas').onclick = () => {
-    formContainer.style.display = 'none';
-    solicitudesContainer.style.display = 'block';
-    menu.style.display = 'none';
-  };
+ 
 
+ 
   if (cotSelect) {
     cotSelect.addEventListener('change', () => {
       campoArchivo.style.display = cotSelect.value === 'documento' ? 'block' : 'none';
@@ -216,13 +196,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     cotSelect.dispatchEvent(new Event('change'));
   }
-
+ 
   addBtn.addEventListener('click', () => {
     const currentForm = document.querySelector('#formset-actual');
     const inputs = currentForm.querySelectorAll('input, select, textarea');
     const producto = {};
     let valido = true;
-
+ 
     inputs.forEach(input => {
       if (!input.value && input.required !== false) {
         input.classList.add('is-invalid');
@@ -232,9 +212,9 @@ document.addEventListener('DOMContentLoaded', () => {
         producto[input.name.split('-')[2]] = input.value;
       }
     });
-
+ 
     if (!valido) return;
-
+ 
     const fila = document.createElement('tr');
     fila.innerHTML = `
       <td>${index+1}</td>
@@ -252,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     tabla.appendChild(fila);
     fila.querySelector('.eliminar-fila').addEventListener('click', () => fila.remove());
-
+ 
     const form = document.getElementById('solicitud-form');
     inputs.forEach(input => {
       const hidden = document.createElement('input');
@@ -261,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
       hidden.value = input.value;
       form.appendChild(hidden);
     });
-
+ 
     index++;
     totalForms.value = index;
     inputs.forEach(input => { input.value = ''; });
@@ -269,7 +249,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 {% endblock %}
-
-
-
-
+ 

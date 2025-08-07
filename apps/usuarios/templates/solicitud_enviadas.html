@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% load permisos_tags %}
+{% load static %}
+
+{% block extra_css %}
+
+{% load static %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4 text-center text-dark fw-bold">Solicitudes Enviadas</h2>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle text-center shadow-sm">
+      <thead class="table-light">
+        <tr class="text-uppercase small">
+          <th>ID</th>
+          <th>Empresa</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Mensaje</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for solicitud in solicitudes_enviadas %}
+        <tr>
+          <td>{{ solicitud.id }}</td>
+          <td>{{ solicitud.empresa }}</td>
+          <td>
+            <span class="badge {% if solicitud.estado == 'ENVIADO' %}bg-warning text-dark{% elif solicitud.estado == 'RESPONDIDO' %}bg-success{% else %}bg-secondary{% endif %}">
+              {{ solicitud.estado }}
+            </span>
+          </td>
+          <td>{{ solicitud.fecha_creacion|date:"d/m/Y" }}</td>
+          <td>{{ solicitud.fecha_creacion|date:"H:i" }}</td>
+          <td class="text-start">{{ solicitud.mensaje|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">No hay solicitudes enviadas.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
