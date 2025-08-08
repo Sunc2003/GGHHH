@@ -27,3 +27,12 @@ def basename(value, mode=None):
 @register.filter
 def dict_get(dictionary, key):
     return dictionary.get(key)
+
+@register.filter
+def formatear_tiempo(td):
+    if not td:
+        return "No disponible"
+    total_seconds = int(td.total_seconds())
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, _ = divmod(remainder, 60)
+    return f"{hours}h {minutes}min"

@@ -28,6 +28,7 @@ def buscar_productos_remoto(request):
 def buscador_productos_view(request):
     resultados = []
     termino = request.GET.get("q", "")
+    filtrar_stock = request.GET.get("con_stock", "") == "on"
 
     if termino:
         try:
@@ -41,11 +42,26 @@ def buscador_productos_view(request):
                 timeout=5
             )
             response.raise_for_status()
-            resultados = response.json()
+            productos = response.json()
+
+            if filtrar_stock:
+                resultados = [p for p in productos if p.get("Stock", 0) > 0]
+            else:
+                resultados = productos
+
         except requests.exceptions.RequestException as e:
-            resultados = [{"ItemCode": "Error", "ItemName": str(e), "OnHand": "N/A"}]
+            resultados = [{
+                "Codigo": "Error",
+                "Descripcion": str(e),
+                "Stock": "N/A",
+                "Disponible": "N/A",
+                "Comprometido": "N/A",
+                "Pedido": "N/A",
+                "PrecioMinVta": "N/A"
+            }]
 
     return render(request, "buscador_productos.html", {
         "termino": termino,
+        "filtrar_stock": filtrar_stock,
         "resultados": resultados
     })

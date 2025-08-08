@@ -30,7 +30,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.files.base import ContentFile
 from apps.utils.supabase_storage import SupabaseStorage
 from django.views.generic import ListView
-
+from django.utils.timezone import now
+from django import template
+from django.db.models import F, Avg, ExpressionWrapper, DurationField
  
 class IniciarSesionView(LoginView):
     template_name = 'login.html'  # Ruta al template
@@ -52,34 +54,70 @@ class CerrarSesionView(LogoutView):
     next_page = reverse_lazy('login')
  
 def es_admin(user):
-    return user.is_authenticated and user.tipo_usuario == 'admin'
+    return user.is_authenticated and user.has_perm('permisos.CREACION_USUARIO')
  
-##@user_passes_test(es_admin)
+register = template.Library()
+ 
+@register.filter
+def formatear_tiempo(td):
+    if not td:
+        return "No disponible"
+    total_seconds = int(td.total_seconds())
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, _ = divmod(remainder, 60)
+    return f"{hours}h {minutes}min"
+ 
+ 
+ 
+@user_passes_test(es_admin)
 def panel_admin_usuarios(request):
     usuarios = CustomUser.objects.all()
     ahora = timezone.now()
     minutos_activo = 5
-
+ 
+    # Marcar usuarios conectados
     for u in usuarios:
         u.en_linea = False
         if u.last_login and (ahora - u.last_login) < timedelta(minutes=minutos_activo):
             u.en_linea = True
-
-    # Solicitudes recibidas para administradores
+ 
+    # 🔹 Solicitudes recibidas por el administrador
     solicitudes_recibidas = SolicitudCodigo.objects.filter(receptor=request.user)
-
-    # ➕ NUEVO: Contadores para usuarios normales
+    total_recibidas = solicitudes_recibidas.count()
+    pendientes = solicitudes_recibidas.filter(estado='pendiente').count()
+    completadas = total_recibidas - pendientes
+ 
+    # 🔹 Tiempo promedio de respuesta (solo si fecha_respuesta está)
+    solicitudes_con_respuesta = solicitudes_recibidas.filter(
+        estado='creado',
+        fecha_creacion__isnull=False
+    ).annotate(
+        tiempo_respuesta=ExpressionWrapper(
+            F('fecha_respuesta') - F('fecha_creacion'),
+            output_field=DurationField()
+        )
+    )
+ 
+    promedio_respuesta = solicitudes_con_respuesta.aggregate(
+        promedio=Avg('tiempo_respuesta')
+    )['promedio'] if solicitudes_con_respuesta.exists() else None
+ 
+    # 🔹 KPI para usuarios normales
     solicitudes_enviadas_usuario = SolicitudCodigo.objects.filter(solicitante=request.user)
     total_solicitudes = solicitudes_enviadas_usuario.count()
     solicitudes_respondidas = solicitudes_enviadas_usuario.exclude(estado='pendiente').count()
-
+ 
     context = {
         'usuarios': usuarios,
         'solicitudes_recibidas': solicitudes_recibidas,
+        'total_recibidas': total_recibidas,
+        'pendientes': pendientes,
+        'completadas': completadas,
+        'promedio_respuesta': promedio_respuesta,
         'total_solicitudes': total_solicitudes,
         'solicitudes_respondidas': solicitudes_respondidas,
     }
-
+ 
     return render(request, 'panel_admin.html', context)
 
  
@@ -243,17 +281,19 @@ class CambiarEstadoView(UpdateView):
     model = SolicitudCodigo
     form_class = CambiarEstadoForm
     template_name = 'cambiar_estado.html'
-
+ 
+ 
     def form_valid(self, form):
         solicitud = form.save(commit=False)
         solicitud.estado = 'creado'
+        solicitud.fecha_respuesta = now()  # ✅ Guardamos fecha de respuesta
         solicitud.comentario_estado = form.cleaned_data.get('comentario_estado')
         solicitud.save()
         return super().form_valid(form)
-
+ 
+ 
     def get_success_url(self):
         return reverse_lazy('detalle_solicitud', kwargs={'pk': self.object.pk})  # <-- CORRECTO
-
  
  
 

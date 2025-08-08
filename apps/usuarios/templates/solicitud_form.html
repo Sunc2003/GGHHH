@@ -85,9 +85,7 @@
     {% endif %}
   </div>
  
- 
   <!-- Formulario Solicitud -->
-   
   <div id="formulario-container" style="display:none;">
     <div class="card shadow-sm mx-auto" style="max-width: 1200px;">
       <div class="card-body">
@@ -114,6 +112,21 @@
             </div>
           </fieldset>
  
+          <!-- Agregar producto -->
+          <fieldset class="border rounded p-3 mb-4">
+            <legend class="w-auto px-2">Agregar Producto</legend>
+            <div class="row g-3" id="formset-actual">
+              {% for field in formset.empty_form.visible_fields %}
+                <div class="col-md-3">
+                  {{ field.label_tag }}{{ field }}
+                  {% for error in field.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+                </div>
+              {% endfor %}
+            </div>
+            {{ formset.management_form }}
+            <button type="button" class="btn btn-outline-primary mt-2" id="add-product-btn">+ Agregar Producto</button>
+          </fieldset>
+ 
           <!-- Productos agregados -->
           <fieldset class="border rounded p-3 mb-4">
             <legend class="w-auto px-2">Productos Agregados</legend>
@@ -129,21 +142,6 @@
                 <tbody></tbody>
               </table>
             </div>
-          </fieldset>
- 
-          <!-- Agregar producto -->
-          <fieldset class="border rounded p-3 mb-4">
-            <legend class="w-auto px-2">Agregar Producto</legend>
-            <div class="row g-3" id="formset-actual">
-              {% for field in formset.empty_form.visible_fields %}
-                <div class="col-md-3">
-                  {{ field.label_tag }}{{ field }}
-                  {% for error in field.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
-                </div>
-              {% endfor %}
-            </div>
-            {{ formset.management_form }}
-            <button type="button" class="btn btn-outline-primary mt-2" id="add-product-btn">+ Agregar Producto</button>
           </fieldset>
  
           <!-- Mensaje -->
@@ -162,9 +160,6 @@
       </div>
     </div>
   </div>
- 
- 
-
 </div>
  
 <!-- JS -->
@@ -172,7 +167,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const menu = document.getElementById('menu-botones');
   const formContainer = document.getElementById('formulario-container');
-  const solicitudesContainer = document.getElementById('solicitudes-enviadas');
   const cotSelect = document.getElementById('id_cotizacion');
   const campoArchivo = document.getElementById('campo_archivo');
   const campoImagen = document.getElementById('campo_imagen');
@@ -185,9 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
     formContainer.style.display = 'block';
     menu.style.display = 'none';
   };
-
- 
-
  
   if (cotSelect) {
     cotSelect.addEventListener('change', () => {
@@ -245,8 +236,10 @@ document.addEventListener('DOMContentLoaded', () => {
     index++;
     totalForms.value = index;
     inputs.forEach(input => { input.value = ''; });
+ 
+    // Scroll a la tabla de productos agregados
+    document.querySelector('#tabla-detalles').scrollIntoView({ behavior: 'smooth' });
   });
 });
 </script>
 {% endblock %}
- 

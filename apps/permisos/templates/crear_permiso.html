@@ -52,30 +52,19 @@
 </div>
 </div>
  
-        <!-- LISTADO DE PERMISOS -->
-<div class="card shadow">
-<div class="card-body">
-<h5 class="card-title mb-3">Permisos existentes</h5>
-            {% if permisos %}
-<div class="table-responsive">
-<table class="table table-bordered table-hover align-middle">
-<thead class="table-light">
-<tr>
-<th scope="col">Código</th>
-<th scope="col">Nombre</th>
-<th scope="col">Descripción</th>
-</tr>
-</thead>
-<tbody>
-                    {% for permiso in permisos %}
-<tr>
-<td><code>{{ permiso.codigo }}</code></td>
-<td>{{ permiso.nombre }}</td>
-<td>{{ permiso.descripcion|default:"—" }}</td>
-</tr>
-                    {% endfor %}
-</tbody>
-</table>
+ <!-- PERMISOS -->
+      <hr class="my-4">
+      <h5><i class="fa-solid fa-key me-2"></i>Permisos asignados</h5>
+      <div class="card card-body">
+        {{ form.permisos_directos }}
+        {{ form.permisos_directos.errors }}
+      </div>
+ 
+      <div class="d-grid mt-4">
+        <button type="submit" class="btn btn-dark">Guardar cambios</button>
+      </div>
+    </form>
+  </div>
 </div>
             {% else %}
 <p class="text-muted">No hay permisos registrados aún.</p>

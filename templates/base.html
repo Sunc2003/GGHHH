@@ -36,6 +36,7 @@
           {% if request.user.is_authenticated and request.user|tiene_permiso:"PROCESOS" %}
           <li class="nav-item"><a class="nav-link" href="{% url 'procesos' %}">Procesos</a></li>
         {% endif %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'buscar_productos_ui' %}">Buscar Productos</a></li>
         </ul>
         <ul class="navbar-nav ms-auto">
           {% if user.is_authenticated %}

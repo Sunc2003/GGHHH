@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% load permisos_tags %}
+{% load custom_filters %}
 {% load static %}
-
+ 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/panel_admin.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -36,18 +37,18 @@
     }
   </style>
 {% endblock %}
-
+ 
 {% block content %}
-
-{# PANEL ADMINISTRADOR #}
-{% if request.user.is_authenticated and request.user|tiene_permiso:"CREACION_USUARIO" %}
+ 
+{# PANEL ADMINISTRADOR: CREAR USUARIOS #}
+{% if request.user|tiene_permiso:"CREACION_USUARIO" %}
 <div class="container py-5">
   <h4 class="mb-4 text-dark">Administración de Usuarios</h4>
-
+ 
   <div class="mb-3 text-end">
     <a href="{% url 'registro' %}" class="btn btn-dark btn-sm">+ Registrar nuevo usuario</a>
   </div>
-
+ 
   <div class="mb-3">
     <label for="filtro-estado" class="form-label">Filtrar por estado:</label>
     <select id="filtro-estado" class="form-select d-inline-block" style="width: auto; margin-left: 10px;">
@@ -56,7 +57,7 @@
       <option value="desconectado">Desconectado</option>
     </select>
   </div>
-
+ 
   <table class="table table-sm table-hover align-middle border">
     <thead class="table-light">
       <tr>
@@ -83,9 +84,64 @@
   </table>
 </div>
 {% endif %}
-
+ 
+{# DASHBOARD DE KPI: Tiempo de respuesta #}
+{% if request.user|tiene_permiso:"DASHBOARD_RESPUESTAKPI" %}
+<div class="container py-4">
+  <hr class="my-4">
+  <h4 class="mb-4 text-dark">Estadísticas de Solicitudes</h4>
+  <div class="row text-center">
+    <div class="col-md-3 mb-3">
+      <div class="card bg-light text-dark">
+        <div class="card-body">
+          <i class="fas fa-inbox card-icon"></i>
+          <div class="text-muted small">Solicitudes Recibidas</div>
+          <h4 class="fw-semibold mt-1">{{ total_recibidas }}</h4>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="col-md-3 mb-3">
+      <div class="card bg-light text-dark">
+        <div class="card-body">
+          <i class="fas fa-hourglass-half card-icon"></i>
+          <div class="text-muted small">Pendientes</div>
+          <h4 class="fw-semibold mt-1">{{ pendientes }}</h4>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="col-md-3 mb-3">
+      <div class="card bg-light text-dark">
+        <div class="card-body">
+          <i class="fas fa-check-circle card-icon"></i>
+          <div class="text-muted small">Completadas</div>
+          <h4 class="fw-semibold mt-1">{{ completadas }}</h4>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="col-md-3 mb-3">
+      <div class="card bg-light text-dark">
+        <div class="card-body">
+          <i class="fas fa-clock card-icon"></i>
+          <div class="text-muted small">Promedio Respuesta</div>
+          <h4 class="fw-semibold mt-1">
+            {% if promedio_respuesta %}
+              {{ promedio_respuesta|formatear_tiempo }}
+            {% else %}
+              No disponible
+            {% endif %}
+          </h4>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+ 
 {# PANEL USUARIO NORMAL #}
-{% if request.user.is_authenticated and request.user|tiene_permiso:"PANEL_USUARIO" %}
+{% if request.user|tiene_permiso:"PANEL_USUARIO" %}
 <div class="container py-4 mt-4">
   <div class="row">
     <div class="col-sm-6 mb-3">
@@ -99,7 +155,7 @@
         </div>
       </div>
     </div>
-
+ 
     <div class="col-sm-6 mb-3">
       <div class="card bg-light text-dark">
         <div class="card-body text-center">
@@ -112,7 +168,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="card bg-white p-3 mt-2">
     <div style="max-width: 260px; margin: 0 auto;">
       <canvas id="graficoSolicitudesUsuario" height="160"></canvas>
@@ -120,17 +176,17 @@
   </div>
 </div>
 {% endif %}
-
+ 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+ 
 <!-- Gráfico donut usuario -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const total = {{ total_solicitudes|default:0 }};
   const respondidas = {{ solicitudes_respondidas|default:0 }};
   const pendientes = total - respondidas;
-
+ 
   const ctx = document.getElementById('graficoSolicitudesUsuario');
   if (ctx) {
     new Chart(ctx, {
@@ -162,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
-
+ 
 <!-- Filtro de estado para tabla -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -186,5 +242,5 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
-
+ 
 {% endblock %}

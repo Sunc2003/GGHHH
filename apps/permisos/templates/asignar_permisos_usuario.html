@@ -2,89 +2,58 @@
 {% load static %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/editar_perfil_usuario.css' %}">
+  <link rel="stylesheet" href="{% static 'css/editar_usuario.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container my-5">
-  <div class="card shadow-sm p-4">
-    <h4 class="text-center mb-4"><i class="fa-solid fa-user-pen me-2"></i>Editar Perfil</h4>
-    <form method="post">
-      {% csrf_token %}
-      <div class="row g-3">
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
 
-        <!-- ÁREA y CARGO -->
-        <div class="col-md-6">
-          <label><strong>Área:</strong></label>
-          {{ form.area }}
-        </div>
-        <div class="col-md-6">
-          <label><strong>Cargo:</strong></label>
-          {{ form.cargo }}
-        </div>
+      <!-- Panel de edición de perfil -->
+      <div class="card shadow mb-4">
+        <div class="card-body">
+          <h4 class="card-title mb-4"><i class="fa-solid fa-user-pen me-2"></i>Editar perfil de usuario</h4>
+          <form method="post" novalidate>
+            {% csrf_token %}
 
-        <!-- USERNAME y NOMBRE COMPLETO -->
-        <div class="col-md-6">
-          <label><strong>Username:</strong></label>
-          <input type="text" class="form-control" value="{{ object.username }}" disabled>
-        </div>
-        <div class="col-md-6">
-          <label><strong>Nombre completo:</strong></label>
-          {{ form.first_name }} {{ form.last_name }}
-        </div>
+            <!-- Campos del formulario de perfil -->
+            {% for field in form %}
+              <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                  <div class="text-danger small">{{ field.errors.0 }}</div>
+                {% endif %}
+              </div>
+            {% endfor %}
 
-        <!-- USUARIO AD y OFFICE -->
-        <div class="col-md-6">
-          <label><strong>Usuario AD:</strong></label>
-          {{ form.usuario_ad }}
-        </div>
-        <div class="col-md-6">
-          <label><strong>Usuario Office:</strong></label>
-          {{ form.usuario_office }}
-        </div>
+            <!-- Permisos -->
+            <div class="mb-4">
+              <label class="form-label">Permisos asignados</label>
+              <div class="form-check">
+                {% for permiso in permisos_disponibles %}
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="permisos" value="{{ permiso.id }}"
+                      id="permiso_{{ permiso.id }}"
+                      {% if permiso.id in permisos_usuario %}checked{% endif %}>
+                    <label class="form-check-label" for="permiso_{{ permiso.id }}">
+                      {{ permiso.nombre }} <small class="text-muted">({{ permiso.codigo }})</small>
+                    </label>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
 
-        <!-- USUARIO SAP y EQUIPO -->
-        <div class="col-md-6">
-          <label><strong>Usuario SAP:</strong></label>
-          {{ form.usuario_sap }}
+            <!-- Botón -->
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success">Guardar cambios</button>
+            </div>
+          </form>
         </div>
-        <div class="col-md-6">
-          <label><strong>Equipo a cargo:</strong></label>
-          {{ form.equipo_a_cargo }}
-        </div>
-
-        <!-- IMPRESORA y MÓVIL -->
-        <div class="col-md-6">
-          <label><strong>Impresora a cargo:</strong></label>
-          {{ form.impresora_a_cargo }}
-        </div>
-        <div class="col-md-6">
-          <label><strong>Móvil:</strong></label>
-          {{ form.movil }}
-        </div>
-
       </div>
 
-      <!-- PERMISOS -->
-      <hr class="my-4">
-      <h5><i class="fa-solid fa-key me-2"></i>Permisos asignados</h5>
-      <div class="row">
-        {% for permiso in form.permisos %}
-          <div class="col-md-4">
-            <label class="form-check">
-              {{ permiso.tag }}
-              {{ permiso.choice_label }}
-            </label>
-          </div>
-        {% empty %}
-          <p class="text-muted">No hay permisos disponibles.</p>
-        {% endfor %}
-      </div>
-
-      <div class="d-grid mt-4">
-        <button type="submit" class="btn btn-dark">Guardar cambios</button>
-      </div>
-    </form>
+    </div>
   </div>
 </div>
 {% endblock %}

@@ -5,34 +5,41 @@
 <div class="container mt-4">
   <h3>Buscador de productos SAP</h3>
 
-  <form method="get" class="mb-4">
-    <div class="input-group">
-      <input type="text" name="q" class="form-control" placeholder="Descripción del producto" value="{{ termino }}">
-      <button class="btn btn-primary" type="submit">Buscar</button>
-    </div>
+  <form method="get" class="mb-3">
+    <input type="text" name="q" placeholder="Buscar producto..." value="{{ termino }}">
+    <label><input type="checkbox" name="con_stock" {% if filtrar_stock %}checked{% endif %}> Solo con stock</label>
+    <button type="submit">Buscar</button>
   </form>
-
+  
   {% if resultados %}
-    <table class="table table-striped">
-      <thead>
+  <table border="1" class="table table-striped">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Descripción</th>
+        <th>Stock</th>
+        <th>Disponible</th>
+        <th>Comprometido</th>
+        <th>Pedido</th>
+        <th>PMV</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for producto in resultados %}
         <tr>
-          <th>Código</th>
-          <th>Descripción</th>
-          <th>Stock</th>
+          <td>{{ producto.Codigo }}</td>
+          <td>{{ producto.Descripcion }}</td>
+          <td>{{ producto.Stock }}</td>
+          <td>{{ producto.Disponible }}</td>
+          <td>{{ producto.Comprometido }}</td>
+          <td>{{ producto.Pedido }}</td>
+          <td>${{ producto.PrecioMinVta|floatformat:0 }}</td>
         </tr>
-      </thead>
-      <tbody>
-        {% for producto in resultados %}
-          <tr>
-            <td>{{ producto.ItemCode }}</td>
-            <td>{{ producto.ItemName }}</td>
-            <td>{{ producto.OnHand }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% elif termino %}
-    <div class="alert alert-warning">No se encontraron resultados para "{{ termino }}"</div>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>No hay resultados.</p>
   {% endif %}
-</div>
-{% endblock %}
+
+{%endblock%}
