@@ -25,3 +25,27 @@ def buscar_productos_remoto(request):
     except requests.exceptions.RequestException as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+def buscador_productos_view(request):
+    resultados = []
+    termino = request.GET.get("q", "")
+
+    if termino:
+        try:
+            response = requests.get(
+                NGROK_API_URL,
+                params={"q": termino},
+                headers={
+                    "ngrok-skip-browser-warning": "true",
+                    "User-Agent": "DjangoClient/1.0"
+                },
+                timeout=5
+            )
+            response.raise_for_status()
+            resultados = response.json()
+        except requests.exceptions.RequestException as e:
+            resultados = [{"ItemCode": "Error", "ItemName": str(e), "OnHand": "N/A"}]
+
+    return render(request, "buscador_productos.html", {
+        "termino": termino,
+        "resultados": resultados
+    })
