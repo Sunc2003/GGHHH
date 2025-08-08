@@ -1,61 +1,90 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/asignar_permisos_usuario.css' %}">
+  <link rel="stylesheet" href="{% static 'css/editar_perfil_usuario.css' %}">
 {% endblock %}
- 
+
 {% block content %}
- 
-<div id="asignar-permisos-panel">
-<div class="container mt-5 mb-5">
-<div class="row justify-content-center">
-<div class="col-12">
-<div class="card">
-<div class="card-body">
-<h4 class="card-title text-center mb-4">Asignar Permisos a {{ object.get_full_name|default:object.username }}</h4>
-<form method="post">
-{% csrf_token %}
- 
-<label class="form-label fw-bold">
-  <i class="fa-solid fa-key" style="color: #222; margin-right: 7px;"></i>
-  Permisos disponibles
-</label>
-{% for permiso in form.permisos_directos %}
-<label class="custom-checkbox">
-{{ permiso.tag }}
-<span class="checkmark"></span>
-<span class="form-check-label" for="{{ permiso.id_for_label }}">
-{{ permiso.choice_label }}
-</span>
-</label>
-{% empty %}
-<p class="text-muted">No hay permisos disponibles.</p>
-{% endfor %}
-</div>
-{% if form.permisos_directos.errors %}
-<div class="text-danger small">{{ form.permisos_directos.errors.0 }}</div>
-                
-{% endif %}
-</div>
- 
-              
-<div class="d-grid">
-<button type="submit" class="btn btn-black">Guardar cambios</button>
-</div>
-</form>
-</div>
-</div>
- 
-<div class="text-center mt-4">
-  <a href="{% url 'usuarios_ad' %}" class="btn btn-black">
-    
-    <i class="fa-solid fa-arrow-left" style="margin-right: 6px;"></i>
-    Volver
-  </a>
-</div>
-</div>
-</div>
-</div>
-</div>
+<div class="container my-5">
+  <div class="card shadow-sm p-4">
+    <h4 class="text-center mb-4"><i class="fa-solid fa-user-pen me-2"></i>Editar Perfil</h4>
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+
+        <!-- ÁREA y CARGO -->
+        <div class="col-md-6">
+          <label><strong>Área:</strong></label>
+          {{ form.area }}
+        </div>
+        <div class="col-md-6">
+          <label><strong>Cargo:</strong></label>
+          {{ form.cargo }}
+        </div>
+
+        <!-- USERNAME y NOMBRE COMPLETO -->
+        <div class="col-md-6">
+          <label><strong>Username:</strong></label>
+          <input type="text" class="form-control" value="{{ object.username }}" disabled>
+        </div>
+        <div class="col-md-6">
+          <label><strong>Nombre completo:</strong></label>
+          {{ form.first_name }} {{ form.last_name }}
+        </div>
+
+        <!-- USUARIO AD y OFFICE -->
+        <div class="col-md-6">
+          <label><strong>Usuario AD:</strong></label>
+          {{ form.usuario_ad }}
+        </div>
+        <div class="col-md-6">
+          <label><strong>Usuario Office:</strong></label>
+          {{ form.usuario_office }}
+        </div>
+
+        <!-- USUARIO SAP y EQUIPO -->
+        <div class="col-md-6">
+          <label><strong>Usuario SAP:</strong></label>
+          {{ form.usuario_sap }}
+        </div>
+        <div class="col-md-6">
+          <label><strong>Equipo a cargo:</strong></label>
+          {{ form.equipo_a_cargo }}
+        </div>
+
+        <!-- IMPRESORA y MÓVIL -->
+        <div class="col-md-6">
+          <label><strong>Impresora a cargo:</strong></label>
+          {{ form.impresora_a_cargo }}
+        </div>
+        <div class="col-md-6">
+          <label><strong>Móvil:</strong></label>
+          {{ form.movil }}
+        </div>
+
+      </div>
+
+      <!-- PERMISOS -->
+      <hr class="my-4">
+      <h5><i class="fa-solid fa-key me-2"></i>Permisos asignados</h5>
+      <div class="row">
+        {% for permiso in form.permisos %}
+          <div class="col-md-4">
+            <label class="form-check">
+              {{ permiso.tag }}
+              {{ permiso.choice_label }}
+            </label>
+          </div>
+        {% empty %}
+          <p class="text-muted">No hay permisos disponibles.</p>
+        {% endfor %}
+      </div>
+
+      <div class="d-grid mt-4">
+        <button type="submit" class="btn btn-dark">Guardar cambios</button>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}

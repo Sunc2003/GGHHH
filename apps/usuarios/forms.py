@@ -6,7 +6,8 @@ from django.core.files.storage import default_storage
 
 from .models import CustomUser, SolicitudCodigo, DetalleCodigo
 from apps.organizaciones.models import Area, Cargo
-
+from apps.permisos.models import Permiso
+from .models import CustomUser
 
 # =========================
 #   MultiFileInput Widget
@@ -27,6 +28,7 @@ class MultiFileField(forms.FileField):
         if data in self.empty_values:
             return []
         return data
+    
 # =========================
 #   Formulario de Usuario
 # =========================
@@ -218,3 +220,21 @@ class CambiarEstadoForm(forms.ModelForm):
         model = SolicitudCodigo
         fields = ['comentario_estado']
  
+ 
+ 
+class PerfilYPermisosUsuarioForm(forms.ModelForm):
+    permisos_directos = forms.ModelMultipleChoiceField(
+    queryset=Permiso.objects.all(),
+    widget=forms.CheckboxSelectMultiple,
+    required=False,
+    label="Permisos"
+)
+    
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name',
+                  'email', 'area',
+                  'cargo', 'usuario_ad',
+                  'usuario_office', 'usuario_sap',
+                  'equipo_a_cargo', 'impresora_a_cargo', 
+                  'movil', 'permisos_directos']

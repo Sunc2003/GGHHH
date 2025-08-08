@@ -75,7 +75,7 @@
             <td class="text-start">{{ usuario.impresora_a_cargo|default:"-" }}</td>
             <td class="text-start">{{ usuario.movil|default:"-" }}</td>
             <td class="text-center">
-              <a href="{% url 'asignar_permisos_usuario' usuario.pk %}" class="btn btn-sm btn-outline-dark">Permisos</a>
+              <a href="{% url 'editar_perfil_usuario' usuario.pk %}" class="btn btn-sm btn-outline-dark">Perfil</a>
             </td>
           </tr>
         {% empty %}

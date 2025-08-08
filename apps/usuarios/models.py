@@ -8,6 +8,8 @@ from django.conf import settings
 
 
 
+
+
 class CustomUser(AbstractUser):
     area = models.ForeignKey(Area, on_delete=models.SET_NULL, null=True, blank=True)
     cargo = models.ForeignKey(Cargo, on_delete=models.SET_NULL, null=True, blank=True)
@@ -145,6 +147,7 @@ class SolicitudAdjunto(models.Model):
 
     def __str__(self):
         return f"{self.get_tipo_display()} - {self.archivo.name}"
+
 
 
 

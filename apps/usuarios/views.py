@@ -14,7 +14,7 @@ from django.views import View
 from apps.organizaciones.models import Area, Cargo
 from django.utils.decorators import method_decorator
 from apps.permisos.decorators import permiso_requerido
-from .forms import CambiarEstadoForm
+from .forms import CambiarEstadoForm, PerfilYPermisosUsuarioForm
 import os
 from apps.utils.supabase_storage import SupabaseStorage
 from decimal import Decimal
@@ -381,3 +381,15 @@ def procesos_view(request):
         "carpetas": carpetas,
         "carpetas_full_paths": carpetas_full_paths,
     })
+
+class EditarPerfilYPermisosUsuarioView(LoginRequiredMixin, UpdateView):
+    model = CustomUser
+    form_class = PerfilYPermisosUsuarioForm
+    template_name = 'asignar_permisos_usuario.html'
+    context_object_name = 'usuario'
+    success_url = reverse_lazy('usuarios_ad')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        form.instance.permisos_directos.set(form.cleaned_data['permisos_directos'])  # Actualiza los permisos
+        return response

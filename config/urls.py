@@ -28,6 +28,8 @@ urlpatterns = [
     path('', lambda request: redirect('login', permanent=False)),
     path('permisos/', include('apps.permisos.urls')),
     path('utils/', include('apps.utils.urls')),
+    path('sap/' , include('apps.sap.urls')),
+    
 ]
 
 
