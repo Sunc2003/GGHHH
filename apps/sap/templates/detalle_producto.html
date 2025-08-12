@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3>Detalles del Producto</h3>
+
+  <!-- Tabla con los detalles del producto -->
+  <table class="table table-bordered">
+    <tr>
+      <th>Código</th>
+      <td>{{ producto.Codigo }}</td>
+    </tr>
+    <tr>
+      <th>Descripción</th>
+      <td>{{ producto.Descripcion }}</td>
+    </tr>
+    <tr>
+      <th>Precio Mínimo de Venta</th>
+      <td>${{ producto.PrecioMinVta|floatformat:0 }}</td>
+    </tr>
+    <tr>
+      <th>Proveedor</th>
+      <td>{{ producto.ProveedorPredeterminado }}</td>
+    </tr>
+    <tr>
+      <th>SKU del Proveedor</th>
+      <td>{{ producto.SKUProveedor }}</td>
+    </tr>
+    <tr>
+      <th>Nombre del Proveedor</th>
+      <td>{{ producto.NombreProveedor }}</td>
+    </tr>
+    <tr>
+      <th>Unidad de medida</th>
+      <td>{{ producto.UnidadMedida }}</td>
+    </tr>
+    <tr>
+      <th>Codigo de barra del producto</th>
+      <td>{{ producto.CodigoBarra }}</td>
+    </tr>
+    <tr>
+        <th>Origen del articulo</th>
+        <td>{{ producto.OrigenArticulo }}</td>
+      </tr>
+  </table>
+
+  <!-- Tabla con los almacenes y stock -->
+  <h4>Stock por Almacén</h4>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Almacén</th>
+        <th>Stock</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for almacen, stock in producto.Almacenes.items %}
+        <tr>
+          <td>{{ almacen }}</td>
+          <td>{{ stock }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="2">No hay almacenes disponibles para este producto.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="{% url 'buscar_productos_ui' %}" class="btn btn-primary">Volver a la lista</a>
+</div>
+{% endblock %}

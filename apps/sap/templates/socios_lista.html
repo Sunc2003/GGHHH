@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+  <h4 class="mb-3">Socios de Negocio (Clientes)</h4>
+
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-sm-6">
+      <input type="text" name="q" class="form-control" placeholder="Buscar por código o nombre" value="{{ q }}">
+    </div>
+    <div class="col-sm-3">
+      <button class="btn btn-primary w-100" type="submit">Buscar</button>
+    </div>
+  </form>
+
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  {% if socios %}
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Límite Crédito</th>
+            <th>Saldo</th>
+            <th>Crédito Disp.</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in socios %}
+            <tr>
+              <td><code>{{ s.CardCode }}</code></td>
+              <td>{{ s.CardName }}</td>
+              <td>${{ s.CreditLine|floatformat:0 }}</td>
+              <td>${{ s.Balance|floatformat:0 }}</td>
+              <td><strong>${{ s.CreditoDisponible|floatformat:0 }}</strong></td>
+              <td>
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{% url 'socio_detalle' s.CardCode %}">
+                  Ver detalle
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif q %}
+    <div class="alert alert-warning">Sin resultados para “{{ q }}”.</div>
+  {% else %}
+    <p class="text-muted">Ingresa un término de búsqueda para listar clientes.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -33,6 +33,13 @@ from django.views.generic import ListView
 from django.utils.timezone import now
 from django import template
 from django.db.models import F, Avg, ExpressionWrapper, DurationField
+from django.views.generic import CreateView, ListView
+from django.urls import reverse_lazy
+from apps.permisos.models import Permiso
+from apps.permisos.forms import PermisoForm
+ 
+ 
+ 
  
 class IniciarSesionView(LoginView):
     template_name = 'login.html'  # Ruta al template
@@ -119,7 +126,7 @@ def panel_admin_usuarios(request):
     }
  
     return render(request, 'panel_admin.html', context)
-
+ 
  
 @method_decorator(permiso_requerido('SOLICITUD_CODIGO'), name='dispatch')    
 class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
@@ -226,20 +233,51 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
             'solicitudes_enviadas': solicitudes_enviadas,
             'usuario': request.user
         })
-method_decorator(permiso_requerido('VER_SOLICITUDES_RECIBIDA'), name='dispatch')
+        
+        
+@method_decorator(permiso_requerido('VER_SOLICITUDES_RECIBIDAS'), name='dispatch')
 class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
     model = SolicitudCodigo
     template_name = 'solicitudes_recibidas.html'
     context_object_name = 'solicitudes_recibidas'
- 
+    paginate_by = 25  # opcional
+
     def get_queryset(self):
-        qs = SolicitudCodigo.objects.filter(receptor=self.request.user)
-        print("Filtradas antes:", qs.count())
-        pendientes = qs.filter(estado='pendiente')
-        print("Solo pendientes:", pendientes.count())
-        for s in pendientes:
-            print(s.id, s.estado)
-        return pendientes       
+        qs = SolicitudCodigo.objects.filter(
+            receptor=self.request.user,
+            estado='pendiente'
+        )
+
+        # --- filtros desde GET ---
+        solicitante_id = self.request.GET.get('solicitante', '').strip()
+        orden = self.request.GET.get('orden', 'antiguas')  # 'antiguas' (default) o 'recientes'
+
+        # Filtro por solicitante (si viene)
+        if solicitante_id:
+            qs = qs.filter(solicitante_id=solicitante_id)
+
+        # Orden
+        if orden == 'recientes':
+            qs = qs.order_by('-fecha_creacion')
+        else:
+            qs = qs.order_by('fecha_creacion')  # antiguas primero
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Para el select de solicitantes: solo los que te han enviado algo
+        solicitantes_ids = (SolicitudCodigo.objects
+                            .filter(receptor=self.request.user)
+                            .values_list('solicitante_id', flat=True)
+                            .distinct())
+        solicitantes = CustomUser.objects.filter(id__in=solicitantes_ids).order_by('first_name', 'last_name', 'username')
+
+        context['solicitantes'] = solicitantes
+        context['filtro_solicitante'] = self.request.GET.get('solicitante', '')
+        context['filtro_orden'] = self.request.GET.get('orden', 'antiguas')
+        return context  
         
         
 method_decorator(permiso_requerido('VER_SOLICITUDES_RECIBIDA'), name='dispatch')
@@ -296,23 +334,23 @@ class CambiarEstadoView(UpdateView):
         return reverse_lazy('detalle_solicitud', kwargs={'pk': self.object.pk})  # <-- CORRECTO
  
  
-
-
+ 
+ 
 class UsuariosADListView(ListView):
     model = CustomUser
     template_name = 'usuarios_ad.html'
     context_object_name = 'usuarios'
     paginate_by = 10
-
+ 
     def get_queryset(self):
         qs = super().get_queryset()
-
+ 
         # Filtros desde el formulario
         area_id = self.request.GET.get('area', '')
         cargo_id = self.request.GET.get('cargo', '')
         filtro_nombre = self.request.GET.get('q', '').strip()
         filtro_usuario_ad = self.request.GET.get('usuario_ad', '').strip()
-
+ 
         # Aplicar filtros si están presentes
         if area_id:
             qs = qs.filter(area_id=area_id)
@@ -326,9 +364,9 @@ class UsuariosADListView(ListView):
             )
         if filtro_usuario_ad:
             qs = qs.filter(usuario_ad__icontains=filtro_usuario_ad)
-
+ 
         return qs
-
+ 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['areas'] = Area.objects.all()
@@ -338,14 +376,14 @@ class UsuariosADListView(ListView):
         context['filtro_nombre'] = self.request.GET.get('q', '')
         context['filtro_usuario_ad'] = self.request.GET.get('usuario_ad', '')
         return context
-
-
+ 
+ 
     
 def perfil_usuario(request):
     return render(request, 'perfil.html', {'usuario': request.user})
  
-
-
+ 
+ 
 @login_required
 @permiso_requerido('VER_SOLICITUDES')
 def solicitudes_enviadas_view(request):
@@ -354,9 +392,9 @@ def solicitudes_enviadas_view(request):
         'usuario': request.user,
         'solicitudes_enviadas': solicitudes
     })
-
  
-
+ 
+ 
 @login_required
 @permiso_requerido('PROCESOS')
 def procesos_view(request):
@@ -365,7 +403,7 @@ def procesos_view(request):
     url_archivo = None
     archivos = []
     carpetas = []
-
+ 
     # CREAR CARPETA o SUBIR ARCHIVO
     if request.method == "POST":
         # 📁 CREAR NUEVA CARPETA dentro de carpeta_actual
@@ -378,7 +416,7 @@ def procesos_view(request):
                     storage._save(f"{ruta_carpeta}/.emptyFolderPlaceholder", placeholder)
                 except Exception as e:
                     print("❌ Error al crear carpeta:", e)
-
+ 
         # 📤 SUBIR ARCHIVO dentro de carpeta_actual
         elif request.FILES.get("archivo"):
             archivo = request.FILES["archivo"]
@@ -390,7 +428,7 @@ def procesos_view(request):
                 url_archivo = storage.get_public_url(ruta)
             except Exception as e:
                 print("❌ Error al subir archivo:", e)
-
+ 
     # LISTAR ARCHIVOS EN CARPETA ACTUAL
     try:
         lista = storage.client.storage.from_(storage.bucket).list(carpeta_actual or "", {"limit": 9999})
@@ -405,14 +443,14 @@ def procesos_view(request):
                     carpetas.append(item["name"])
     except Exception as e:
         print("❌ Error al listar archivos:", e)
-
+ 
     carpetas_full_paths = {
         carpeta: f"{carpeta_actual}/{carpeta}".strip("/")
         for carpeta in carpetas
     }
-
+ 
     carpeta_padre = "/".join(carpeta_actual.split("/")[:-1]) if carpeta_actual else ""
-
+ 
     return render(request, "procesos.html", {
         "carpeta_actual": carpeta_actual,
         "carpeta_padre": carpeta_padre,
@@ -421,15 +459,54 @@ def procesos_view(request):
         "carpetas": carpetas,
         "carpetas_full_paths": carpetas_full_paths,
     })
-
+ 
 class EditarPerfilYPermisosUsuarioView(LoginRequiredMixin, UpdateView):
     model = CustomUser
     form_class = PerfilYPermisosUsuarioForm
     template_name = 'asignar_permisos_usuario.html'
     context_object_name = 'usuario'
     success_url = reverse_lazy('usuarios_ad')
-
+ 
     def form_valid(self, form):
         response = super().form_valid(form)
         form.instance.permisos_directos.set(form.cleaned_data['permisos_directos'])  # Actualiza los permisos
         return response
+    
+ 
+ 
+ 
+ 
+class CrearPermisoView(CreateView):
+    model = Permiso
+    form_class = PermisoForm
+    template_name = 'crear_permiso.html'
+    success_url = reverse_lazy('lista_permisos')
+ 
+    def form_valid(self, form):
+        codigo = form.cleaned_data.get('codigo')
+        if Permiso.objects.filter(codigo__iexact=codigo).exists():
+            form.add_error('codigo', 'Ya existe un permiso con este código.')
+            return self.form_invalid(form)
+        messages.success(self.request, "✅ Permiso creado correctamente.")
+        return super().form_valid(form)
+ 
+ 
+class ListaPermisosView(ListView):
+    model = Permiso
+    template_name = 'lista_permisos.html'
+    context_object_name = 'permisos'
+ 
+    def get_queryset(self):
+        q = self.request.GET.get('q', '').strip()
+        permisos = Permiso.objects.all()
+        if q:
+            permisos = permisos.filter(
+                Q(codigo__icontains=q) |
+                Q(nombre__icontains=q)
+            )
+        return permisos.order_by('codigo')
+ 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['q'] = self.request.GET.get('q', '').strip()
+        return ctx

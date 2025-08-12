@@ -90,6 +90,7 @@ class SolicitudCodigo(models.Model):
 
 class DetalleCodigo(models.Model):
     ORIGENES = [
+        ('sin origen', 'Sin origen'),
         ('nacional', 'Nacional'),
         ('importado', 'Importado'),
         ('mixto', 'Mixto'),
@@ -101,7 +102,7 @@ class DetalleCodigo(models.Model):
     udm = models.ForeignKey('sap.UDM', on_delete=models.PROTECT)
 
     # NUEVOS CAMPOS
-    origen = models.CharField(max_length=20, choices=ORIGENES, default='nacional')
+    origen = models.CharField(max_length=20, choices=ORIGENES, default='sin origen')
     proveedor = models.ForeignKey('sap.Proveedor', on_delete=models.PROTECT, related_name='detalles')
 
     largo = models.DecimalField(max_digits=10, decimal_places=2)

@@ -17,7 +17,7 @@ class Command(BaseCommand):
         ]
 
         # Permisos a crear/asignar
-        permisos_data = [
+        permisos_data =[
             {
                 "codigo": "CREACION_USUARIO",
                 "nombre": "Creación de Usuarios",
@@ -57,7 +57,13 @@ class Command(BaseCommand):
                 "codigo": "VER_SOLICITUDES_RECIBIDAS",
                 "nombre": "Visualizar Solicitudes Recibidas",
                 "descripcion": "Permite al receptor revisar las solicitudes de creación de código asignadas a su área o usuario."
+            },
+            {
+                "codigo": "VER_AD",
+                "nombre": "Visualizar todos los usuarios del AD",
+                "descripcion": "Permite ver la lista de todos los usuarios y poder acceder a su apartado de perfil y permisos."
             }
+            
         ]
 
 

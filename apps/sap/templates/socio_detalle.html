@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+  <a href="{% url 'socios_lista' %}" class="btn btn-link">&larr; Volver</a>
+
+  <h4 class="mb-3">Detalle del Cliente</h4>
+
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  {% if detalle %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="mb-2">
+          <code>{{ detalle.socio.CardCode }}</code> — {{ detalle.socio.CardName }}
+        </h5>
+        <div class="row">
+          <div class="col-md-4">Límite de crédito: <strong>${{ detalle.socio.CreditLine|floatformat:0 }}</strong></div>
+          <div class="col-md-4">Saldo: <strong>${{ detalle.socio.Balance|floatformat:0 }}</strong></div>
+          <div class="col-md-4">Crédito disponible: <strong>${{ detalle.socio.CreditoDisponible|floatformat:0 }}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <h6>Direcciones</h6>
+    {% if detalle.direcciones %}
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered">
+          <thead class="table-light">
+            <tr>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Calle</th>
+              <th>Ciudad</th>
+              <th>Comuna</th>
+              <th>Región</th>
+              <th>País</th>
+              <th>Zip</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in detalle.direcciones %}
+              <tr>
+                <td>{{ d.NombreDireccion }}</td>
+                <td>{% if d.Tipo == 'B' %}Facturación{% elif d.Tipo == 'S' %}Despacho{% else %}{{ d.Tipo }}{% endif %}</td>
+                <td>{{ d.Calle }}</td>
+                <td>{{ d.Ciudad }}</td>
+                <td>{{ d.Comuna }}</td>
+                <td>{{ d.Region }}</td>
+                <td>{{ d.Pais }}</td>
+                <td>{{ d.ZipCode }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted">Sin direcciones registradas.</p>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

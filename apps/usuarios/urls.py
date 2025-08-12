@@ -16,11 +16,11 @@ from .views import (
 )
 from apps.organizaciones.views import cargos_por_area
 from .views import procesos_view
-
-
-
-
-
+from .views import CrearPermisoView
+ 
+ 
+ 
+ 
 urlpatterns = [
     path('registro/', RegistroUsuarioView.as_view(), name='registro'),
     path('login/', IniciarSesionView.as_view(), name='login'),
@@ -35,9 +35,11 @@ urlpatterns = [
     path('solicitudes/enviadas/', solicitudes_enviadas_view, name='solicitudes_enviadas'),
     path('procesos/', procesos_view, name='procesos'),
     path('usuarios/<int:pk>/editar/', EditarPerfilYPermisosUsuarioView.as_view(), name='editar_perfil_usuario'),
-
+    path('permisos/nuevo/', CrearPermisoView.as_view(), name='crear_permiso'),
+    # path('permisos/', PermisosListView.as_view(), name='lista_permisos'),  # si usas success_url
+ 
+ 
     # API para carga dinámica de cargos
  
     path('api/cargos_por_area/<int:area_id>/', cargos_por_area, name='cargos_por_area'),
 ]
-

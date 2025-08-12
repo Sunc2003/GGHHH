@@ -18,10 +18,8 @@
         <th>Código</th>
         <th>Descripción</th>
         <th>Stock</th>
-        <th>Disponible</th>
-        <th>Comprometido</th>
-        <th>Pedido</th>
         <th>PMV</th>
+        <th>Detalles</th> <!-- Nueva columna para el botón -->
       </tr>
     </thead>
     <tbody>
@@ -29,11 +27,12 @@
         <tr>
           <td>{{ producto.Codigo }}</td>
           <td>{{ producto.Descripcion }}</td>
-          <td>{{ producto.Stock }}</td>
-          <td>{{ producto.Disponible }}</td>
-          <td>{{ producto.Comprometido }}</td>
-          <td>{{ producto.Pedido }}</td>
+          <td>{{ producto.StockTotal }}</td>
           <td>${{ producto.PrecioMinVta|floatformat:0 }}</td>
+          <td>
+            <!-- Botón o enlace para ver los detalles del producto -->
+            <a href="{% url 'obtener_detalle_producto' producto.Codigo %}" class="btn btn-info">Ver detalles</a>
+          </td>
         </tr>
       {% endfor %}
     </tbody>
@@ -41,5 +40,5 @@
   {% else %}
     <p>No hay resultados.</p>
   {% endif %}
-
-{%endblock%}
+</div>
+{% endblock %}

@@ -36,7 +36,12 @@
           {% if request.user.is_authenticated and request.user|tiene_permiso:"PROCESOS" %}
           <li class="nav-item"><a class="nav-link" href="{% url 'procesos' %}">Procesos</a></li>
         {% endif %}
+          {% if request.user.is_authenticated and request.user|tiene_permiso:"BUSCAR_PRODUCTOS_SAP" %}
           <li class="nav-item"><a class="nav-link" href="{% url 'buscar_productos_ui' %}">Buscar Productos</a></li>
+          {% endif %}
+          {% if request.user.is_authenticated and request.user|tiene_permiso:"BUSCAR_SOCIOS" %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'socios_lista' %}">Socios</a></li>
+          {% endif %}
         </ul>
         <ul class="navbar-nav ms-auto">
           {% if user.is_authenticated %}
