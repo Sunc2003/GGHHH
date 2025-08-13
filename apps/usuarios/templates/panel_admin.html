@@ -2,53 +2,33 @@
 {% load permisos_tags %}
 {% load custom_filters %}
 {% load static %}
- 
+
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/panel_admin.css' %}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    .card {
-      border-radius: 6px;
-      border: 1px solid #e0e0e0;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    }
-    .card-body {
-      padding: 1.25rem;
-    }
-    .card-icon {
-      font-size: 1.4rem;
-      color: #444;
-      margin-bottom: 8px;
-    }
-    .fw-semibold {
-      font-weight: 600;
-    }
-    .bg-light {
-      background-color: #f9f9f9 !important;
-    }
-    .text-muted {
-      color: #6c757d !important;
-    }
-    select.form-select {
-      border-radius: 4px;
-    }
-    table th, table td {
-      font-size: 0.95rem;
-    }
-  </style>
+<link rel="stylesheet" href="{% static 'css/panel_admin.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  .card { border-radius: 6px; border: 1px solid #e0e0e0; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .card-body { padding: 1.25rem; }
+  .card-icon { font-size: 1.4rem; color: #444; margin-bottom: 8px; }
+  .fw-semibold { font-weight: 600; }
+  .bg-light { background-color: #f9f9f9 !important; }
+  .text-muted { color: #6c757d !important; }
+  select.form-select { border-radius: 4px; }
+  table th, table td { font-size: .95rem; }
+</style>
 {% endblock %}
- 
+
 {% block content %}
- 
-{# PANEL ADMINISTRADOR: CREAR USUARIOS #}
+
+
 {% if request.user|tiene_permiso:"CREACION_USUARIO" %}
 <div class="container py-5">
   <h4 class="mb-4 text-dark">Administración de Usuarios</h4>
- 
+
   <div class="mb-3 text-end">
     <a href="{% url 'registro' %}" class="btn btn-dark btn-sm">+ Registrar nuevo usuario</a>
   </div>
- 
+
   <div class="mb-3">
     <label for="filtro-estado" class="form-label">Filtrar por estado:</label>
     <select id="filtro-estado" class="form-select d-inline-block" style="width: auto; margin-left: 10px;">
@@ -57,7 +37,7 @@
       <option value="desconectado">Desconectado</option>
     </select>
   </div>
- 
+
   <table class="table table-sm table-hover align-middle border">
     <thead class="table-light">
       <tr>
@@ -84,8 +64,8 @@
   </table>
 </div>
 {% endif %}
- 
-{# DASHBOARD DE KPI: Tiempo de respuesta #}
+
+
 {% if request.user|tiene_permiso:"DASHBOARD_RESPUESTAKPI" %}
 <div class="container py-4">
   <hr class="my-4">
@@ -96,31 +76,31 @@
         <div class="card-body">
           <i class="fas fa-inbox card-icon"></i>
           <div class="text-muted small">Solicitudes Recibidas</div>
-          <h4 class="fw-semibold mt-1">{{ total_recibidas }}</h4>
+          <h4 class="fw-semibold mt-1">{{ total_recibidas|default_if_none:"0" }}</h4>
         </div>
       </div>
     </div>
- 
+
     <div class="col-md-3 mb-3">
       <div class="card bg-light text-dark">
         <div class="card-body">
           <i class="fas fa-hourglass-half card-icon"></i>
           <div class="text-muted small">Pendientes</div>
-          <h4 class="fw-semibold mt-1">{{ pendientes }}</h4>
+          <h4 class="fw-semibold mt-1">{{ pendientes|default_if_none:"0" }}</h4>
         </div>
       </div>
     </div>
- 
+
     <div class="col-md-3 mb-3">
       <div class="card bg-light text-dark">
         <div class="card-body">
           <i class="fas fa-check-circle card-icon"></i>
           <div class="text-muted small">Completadas</div>
-          <h4 class="fw-semibold mt-1">{{ completadas }}</h4>
+          <h4 class="fw-semibold mt-1">{{ completadas|default_if_none:"0" }}</h4>
         </div>
       </div>
     </div>
- 
+
     <div class="col-md-3 mb-3">
       <div class="card bg-light text-dark">
         <div class="card-body">
@@ -139,56 +119,57 @@
   </div>
 </div>
 {% endif %}
- 
-{# PANEL USUARIO NORMAL #}
+
 {% if request.user|tiene_permiso:"PANEL_USUARIO" %}
 <div class="container py-4 mt-4">
   <div class="row">
     <div class="col-sm-6 mb-3">
       <div class="card bg-light text-dark">
         <div class="card-body text-center">
-          <div class="card-icon">
-            <i class="fas fa-paper-plane"></i>
-          </div>
+          <div class="card-icon"><i class="fas fa-paper-plane"></i></div>
           <div class="text-muted small">Solicitudes Enviadas</div>
-          <h4 class="fw-semibold mt-1">{{ total_solicitudes }}</h4>
+          <h4 class="fw-semibold mt-1">{{ total_solicitudes|default_if_none:"0" }}</h4>
         </div>
       </div>
     </div>
- 
+
     <div class="col-sm-6 mb-3">
       <div class="card bg-light text-dark">
         <div class="card-body text-center">
-          <div class="card-icon">
-            <i class="fas fa-check-circle"></i>
-          </div>
-          <div class="text-muted small">Solicitudes Respondidas</div>
-          <h4 class="fw-semibold mt-1">{{ solicitudes_respondidas }}</h4>
+          <div class="card-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="text-muted small">Solicitudes Respondidas</div>
+          <h4 class="fw-semibold mt-1">{{ solicitudes_respondidas|default_if_none:"0" }}</h4>
         </div>
       </div>
     </div>
   </div>
- 
+
+  {# Pasamos datos al JS sin usar {{ }} dentro del script #}
+  <div id="kpi-data"
+       data-total="{{ total_solicitudes|default:0 }}"
+       data-respondidas="{{ solicitudes_respondidas|default:0 }}"></div>
+
   <div class="card bg-white p-3 mt-2">
-    <div style="max-width: 260px; margin: 0 auto;">
+    <div style="max-width:260px;margin:0 auto;">
       <canvas id="graficoSolicitudesUsuario" height="160"></canvas>
     </div>
   </div>
 </div>
 {% endif %}
- 
+
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
- 
-<!-- Gráfico donut usuario -->
+
+<!-- Gráfico (sin variables Django dentro del JS) -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  const total = {{ total_solicitudes|default:0 }};
-  const respondidas = {{ solicitudes_respondidas|default:0 }};
-  const pendientes = total - respondidas;
- 
+  const el = document.getElementById('kpi-data');
+  const total = Number(el?.dataset.total ?? 0);
+  const respondidas = Number(el?.dataset.respondidas ?? 0);
+  const pendientes = Math.max(total - respondidas, 0);
+
   const ctx = document.getElementById('graficoSolicitudesUsuario');
-  if (ctx) {
+  if (ctx && window.Chart) {
     new Chart(ctx, {
       type: 'doughnut',
       data: {
@@ -205,12 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
         plugins: {
           legend: {
             position: 'bottom',
-            labels: {
-              color: '#343a40',
-              font: {
-                size: 12
-              }
-            }
+            labels: { color: '#343a40', font: { size: 12 } }
           }
         }
       }
@@ -218,8 +194,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
- 
-<!-- Filtro de estado para tabla -->
+
+<!-- Filtro de estado -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const filtro = document.getElementById('filtro-estado');
@@ -227,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const rows = document.querySelectorAll('table tbody tr');
     rows.forEach(row => {
       const estado = row.querySelector('.badge')?.textContent?.trim();
-      if (filtro.value === 'todos') {
+      if (!filtro || filtro.value === 'todos') {
         row.style.display = '';
       } else if (filtro.value === 'enlinea') {
         row.style.display = estado === 'En línea' ? '' : 'none';
@@ -242,5 +218,5 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
- 
+
 {% endblock %}
