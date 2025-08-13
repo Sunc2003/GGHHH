@@ -5,62 +5,16 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/solicitud_form.css' %}">
 <style>
-  .menu-botones {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+  .menu-botones{display:flex;justify-content:center;flex-wrap:wrap;gap:1.5rem;margin-bottom:2rem;}
+  .btn-cuadrado{display:flex;flex-direction:column;align-items:center;justify-content:center;width:180px;height:140px;background:#f1f3f5;color:#212529;border:none;border-radius:1rem;font-weight:600;font-size:.95rem;text-align:center;box-shadow:0 4px 8px rgba(0,0,0,.1);transition:all .2s;text-decoration:none;}
+  .btn-cuadrado:hover{background:#e2e6ea;transform:scale(1.05);}
+  .btn-cuadrado img{width:80px;height:80px;margin-bottom:10px;}
+  .error-msg{color:#d9534f;font-size:.85rem;margin-top:.25rem;}
+  @media (max-width:576px){
+    .btn-cuadrado{width:120px;height:110px;font-size:.75rem;}
+    .btn-cuadrado img{width:32px;height:32px;}
   }
- 
-  .btn-cuadrado {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 180px;
-    height: 140px;
-    background-color: #f1f3f5;
-    color: #212529;
-    border: none;
-    border-radius: 1rem;
-    font-weight: 600;
-    font-size: 0.95rem;
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: all 0.2s ease-in-out;
-    text-decoration: none;
-  }
- 
-  .btn-cuadrado:hover {
-    background-color: #e2e6ea;
-    transform: scale(1.05);
-  }
- 
-  .btn-cuadrado img {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 10px;
-  }
- 
-  .error-msg {
-    color: #d9534f;
-    font-size: 0.85rem;
-    margin-top: 0.25rem;
-  }
- 
-  @media (max-width: 576px) {
-    .btn-cuadrado {
-      width: 120px;
-      height: 110px;
-      font-size: 0.75rem;
-    }
- 
-    .btn-cuadrado img {
-      width: 32px;
-      height: 32px;
-    }
-  }
+  .is-invalid{border-color:#dc3545 !important;}
 </style>
 {% endblock %}
  
@@ -162,84 +116,164 @@
   </div>
 </div>
  
-<!-- JS -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const menu = document.getElementById('menu-botones');
   const formContainer = document.getElementById('formulario-container');
+  const formEl = document.getElementById('solicitud-form');
+ 
   const cotSelect = document.getElementById('id_cotizacion');
   const campoArchivo = document.getElementById('campo_archivo');
   const campoImagen = document.getElementById('campo_imagen');
+  const inputArchivos = campoArchivo ? campoArchivo.querySelector('input[type="file"]') : null;
+  const inputImagenes = campoImagen ? campoImagen.querySelector('input[type="file"]') : null;
+ 
   const tabla = document.querySelector('#tabla-detalles tbody');
   const addBtn = document.getElementById('add-product-btn');
   const totalForms = document.getElementById('id_form-TOTAL_FORMS');
   let index = parseInt(totalForms.value);
  
-  document.getElementById('btn-mostrar-form').onclick = () => {
-    formContainer.style.display = 'block';
-    menu.style.display = 'none';
-  };
+  const REQUIRED_KEYS = [
+    'descripcion','marca','udm','origen','proveedor',
+    'largo','ancho','alto','peso','costo',
+    'sku_proveedor','sku_fabricante'
+  ];
+ 
+  const btnMostrar = document.getElementById('btn-mostrar-form');
+  if (btnMostrar) {
+    btnMostrar.onclick = () => { formContainer.style.display = 'block'; menu.style.display = 'none'; };
+  }
+ 
+  const isVisible = (el) => !!(el.offsetParent || el.getClientRects().length);
+  const trimVal = (v) => (typeof v === 'string' ? v.trim() : v);
  
   if (cotSelect) {
-    cotSelect.addEventListener('change', () => {
-      campoArchivo.style.display = cotSelect.value === 'documento' ? 'block' : 'none';
-      campoImagen.style.display = cotSelect.value === 'whatsapp' ? 'block' : 'none';
+    const toggleArchivosImagenes = () => {
+      const v = cotSelect.value;
+      const doc = v === 'documento';
+      const img = v === 'whatsapp';
+      if (campoArchivo) campoArchivo.style.display = doc ? 'block' : 'none';
+      if (inputArchivos) inputArchivos.required = doc;
+      if (campoImagen)  campoImagen.style.display  = img ? 'block' : 'none';
+      if (inputImagenes) inputImagenes.required = img;
+    };
+    cotSelect.addEventListener('change', toggleArchivosImagenes);
+    toggleArchivosImagenes();
+  }
+ 
+  const showError = (el, msg='Campo obligatorio') => {
+    el.classList.add('is-invalid');
+    let help = el.parentElement.querySelector('.error-msg');
+    if (!help) {
+      help = document.createElement('div');
+      help.className = 'error-msg';
+      el.parentElement.appendChild(help);
+    }
+    help.textContent = msg;
+  };
+  const clearError = (el) => {
+    el.classList.remove('is-invalid');
+    const help = el.parentElement.querySelector('.error-msg');
+    if (help) help.remove();
+  };
+ 
+  formEl.addEventListener('submit', (e) => {
+    const requiredEls = formEl.querySelectorAll('[required]');
+    let firstInvalid = null, valid = true;
+    requiredEls.forEach(el => {
+      if (!isVisible(el)) return;
+      const val = trimVal(el.value);
+      const ok = val !== '' && !(el.type === 'select-one' && (val === '' || val === null));
+      if (!ok) { showError(el); if (!firstInvalid) firstInvalid = el; valid = false; }
+      else { clearError(el); }
     });
-    cotSelect.dispatchEvent(new Event('change'));
+    if (!valid) { e.preventDefault(); if (firstInvalid) firstInvalid.focus(); }
+  });
+ 
+  // 💡 Hacer que el campo peso acepte decimales
+  const pesoInput = document.querySelector('[name$="-peso"]');
+  if (pesoInput) {
+    pesoInput.type = 'number';
+    pesoInput.step = '0.01';
   }
  
   addBtn.addEventListener('click', () => {
     const currentForm = document.querySelector('#formset-actual');
-    const inputs = currentForm.querySelectorAll('input, select, textarea');
-    const producto = {};
-    let valido = true;
  
-    inputs.forEach(input => {
-      if (!input.value && input.required !== false) {
-        input.classList.add('is-invalid');
+    let valido = true, firstInvalid = null;
+    const values = {};
+ 
+    for (const key of REQUIRED_KEYS) {
+      const el = currentForm.querySelector(`[name$="-${key}"]`);
+      if (!el) continue;
+      const raw = trimVal(el.value);
+      const empty = (el.tagName === 'SELECT') ? (raw === '' || el.selectedIndex === 0) : (raw === '');
+      if (empty) {
+        showError(el);
+        if (!firstInvalid) firstInvalid = el;
         valido = false;
       } else {
-        input.classList.remove('is-invalid');
-        producto[input.name.split('-')[2]] = input.value;
+        clearError(el);
+        const type = (el.type || '').toLowerCase();
+        if (['text','textarea','search','tel','url','email'].includes(type)) {
+          el.value = raw.toUpperCase();
+          values[key] = el.value;
+        } else {
+          values[key] = raw;
+        }
       }
-    });
+      el.addEventListener('input', () => clearError(el), { once: true });
+      el.addEventListener('change', () => clearError(el), { once: true });
+    }
  
-    if (!valido) return;
+    if (!valido) { if (firstInvalid) firstInvalid.focus(); return; }
+ 
+    const txt = (nameEnd) =>
+      currentForm.querySelector(`select[name$="-${nameEnd}"]`)?.selectedOptions[0]?.text?.toUpperCase() || '';
+ 
+    const txtMarca  = txt('marca');
+    const txtUdm    = txt('udm');
+    const txtOrigen = txt('origen');
+    const txtProv   = txt('proveedor');
  
     const fila = document.createElement('tr');
     fila.innerHTML = `
-      <td>${index+1}</td>
-      <td>${producto.descripcion}</td>
-      <td>${currentForm.querySelector('select[name$="-marca"]').selectedOptions[0]?.text || ''}</td>
-      <td>${currentForm.querySelector('select[name$="-udm"]').selectedOptions[0]?.text || ''}</td>
-      <td>${currentForm.querySelector('select[name$="-origen"]').selectedOptions[0]?.text || ''}</td>
-      <td>${currentForm.querySelector('select[name$="-proveedor"]').selectedOptions[0]?.text || ''}</td>
-      <td>${producto.largo}x${producto.ancho}x${producto.alto}</td>
-      <td>${producto.peso}kg</td>
-      <td>$${producto.costo}</td>
-      <td>${producto.sku_proveedor}</td>
-      <td>${producto.sku_fabricante}</td>
+      <td>${index + 1}</td>
+      <td>${values.descripcion || ''}</td>
+      <td>${txtMarca}</td>
+      <td>${txtUdm}</td>
+      <td>${txtOrigen}</td>
+      <td>${txtProv}</td>
+      <td>${(values.largo||'')}x${(values.ancho||'')}x${(values.alto||'')}</td>
+      <td>${values.peso ? (parseFloat(values.peso).toFixed(2) + 'kg') : ''}</td>
+      <td>${values.costo ? ('$' + values.costo) : ''}</td>
+      <td>${values.sku_proveedor || ''}</td>
+      <td>${values.sku_fabricante || ''}</td>
       <td><button type="button" class="btn btn-sm btn-danger eliminar-fila">✕</button></td>
     `;
     tabla.appendChild(fila);
     fila.querySelector('.eliminar-fila').addEventListener('click', () => fila.remove());
  
-    const form = document.getElementById('solicitud-form');
-    inputs.forEach(input => {
+    for (const key of Object.keys(values)) {
       const hidden = document.createElement('input');
       hidden.type = 'hidden';
-      hidden.name = `form-${index}-${input.name.split('-')[2]}`;
-      hidden.value = input.value;
-      form.appendChild(hidden);
-    });
+      hidden.name = `form-${index}-${key}`;
+      hidden.value = values[key];
+      formEl.appendChild(hidden);
+    }
  
     index++;
     totalForms.value = index;
-    inputs.forEach(input => { input.value = ''; });
  
-    // Scroll a la tabla de productos agregados
+    currentForm.querySelectorAll('input, select, textarea').forEach(el => {
+      if (el.tagName === 'SELECT') el.selectedIndex = 0;
+      else el.value = '';
+      clearError(el);
+    });
+ 
     document.querySelector('#tabla-detalles').scrollIntoView({ behavior: 'smooth' });
   });
 });
 </script>
+ 
 {% endblock %}

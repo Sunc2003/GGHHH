@@ -3,46 +3,70 @@
 {% load custom_filters %}
  
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/solicitud_detalle.css' %}">
-  <style>
-    .card-detalle {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 1.2rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-    legend {
-      font-size: 1.2rem;
-      font-weight: bold;
-      padding: 0 6px;
-      color: #444;
-    }
-    .table th, .table td {
-      vertical-align: middle;
-      font-size: 0.95rem;
-      text-align: center;
-    }
-    img.img-preview {
-      max-width: 120px;
-      margin: 4px;
-      border-radius: 6px;
-      border: 1px solid #ddd;
-    }
-    .adjuntos-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-  </style>
+<link rel="stylesheet" href="{% static 'css/solicitud_detalle.css' %}">
+<style>
+  .card-detalle {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+    width: 95%; /* O el valor que prefieras */
+    max-width: none; /* Quita límites si los hubiera */
+}
+ 
+ 
+  
+  legend{font-size:1.2rem;font-weight:bold;padding:0 6px;color:#444;}
+  .table th,.table td{vertical-align:middle;font-size:.95rem;text-align:center;}
+  img.img-preview{max-width:120px;margin:4px;border-radius:6px;border:1px solid #ddd;}
+  .adjuntos-grid{display:flex;flex-wrap:wrap;gap:10px;}
+ 
+  /* Botón copiar */
+  .copy-wrap{display:inline-flex;align-items:center;gap:.4rem;justify-content:center;}
+  .copy-text{display:inline-block;max-width:18ch;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;}
+  .copy-btn{--btn-bd:#dee2e6;--btn-bg:#f8f9fa;--btn-tx:#212529;padding:.2rem .45rem;border:1px solid var(--btn-bd);background:var(--btn-bg);color:var(--btn-tx);border-radius:.35rem;font-size:.75rem;line-height:1;}
+  .copy-btn:hover{background:#eef1f3;}
+  .copy-btn.copied{background:#d1e7dd;border-color:#bcd0c7;}
+  .copy-btn i{font-size:.85em;}
+ 
+  /* Tabla responsive a full ancho */
+  .table-responsive{overflow-x:auto;}
+  .table{width:100%;min-width:900px;}
+  @media (max-width:768px){ .copy-text{max-width:12ch;} }
+ 
+ 
+  /* Hacer la tabla más ancha y con celdas espaciosas */
+.table.table-striped.table-bordered {
+  width: 100%;
+  min-width: 2000px; /* fuerza a que se vea más ancha en pantallas grandes */
+}
+ 
+.table.table-striped.table-bordered th,
+.table.table-striped.table-bordered td {
+  padding: 0.8rem 1.5rem; /* más espacio horizontal */
+  font-size: 0.95rem;
+  white-space: nowrap; /* evita que se corte el texto */
+  text-align: left; /* más legible que centrado para texto largo */
+}
+ 
+/* Ajustar contenedor para permitir scroll horizontal suave si no cabe */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* scroll suave en móvil */
+}
+ 
+ 
+ 
+</style>
 {% endblock %}
  
 {% block content %}
-<div class="container my-5">
+ 
  
   <h2 class="mb-4 text-center">
-    <i class="fas fa-barcode"></i> Solicitud de Creación de Código SAP
+    <i class="fas fa-barcode"></i> SOLICITUD DE CREACIÓN DE CÓDIGO SAP
   </h2>
  
   <!-- Información General -->
@@ -50,30 +74,28 @@
     <legend>Información General</legend>
     <div class="row g-3">
       <div class="col-md-6">
-        <p><strong>Tipo de Solicitud:</strong> {{ object.get_tipo_solicitud_display }}</p>
-        <p><strong>Solicitado por:</strong> {{ object.solicitante }}</p>
-        <p><strong>Empresa:</strong> {{ object.get_empresa_display }}</p>
-        <p><strong>Tipo de Cotización:</strong> {{ object.get_cotizacion_display }}</p>
+        <p><strong>Tipo de Solicitud:</strong> {{ object.get_tipo_solicitud_display|upper }}</p>
+        <p><strong>Solicitado por:</strong> {{ object.solicitante|upper }}</p>
+        <p><strong>Empresa:</strong> {{ object.get_empresa_display|upper }}</p>
+        <p><strong>Tipo de Cotización:</strong> {{ object.get_cotizacion_display|upper }}</p>
       </div>
  
       <div class="col-md-6">
         {% with adjuntos=object.adjuntos.all %}
           {% if adjuntos %}
-            <!-- Documentos -->
             <p><strong>Documentos:</strong></p>
             <ul>
               {% for doc in adjuntos %}
                 {% if doc.tipo == 'documento' %}
-                  <li>
-                    📄 <a href="https://otjcliklurucbuvqzxdg.supabase.co/storage/v1/object/public/media/{{ doc.archivo.name }}" target="_blank">
-                      {{ doc.archivo.name|slice:"-50:" }}
+                  <li>📄
+                    <a href="https://otjcliklurucbuvqzxdg.supabase.co/storage/v1/object/public/media/{{ doc.archivo.name }}" target="_blank">
+                      {{ doc.archivo.name|slice:"-50:"|upper }}
                     </a>
                   </li>
                 {% endif %}
               {% endfor %}
             </ul>
  
-            <!-- Imágenes -->
             <p class="mt-3"><strong>Imágenes WhatsApp:</strong></p>
             <div class="adjuntos-grid">
               {% for img in adjuntos %}
@@ -85,7 +107,7 @@
               {% endfor %}
             </div>
           {% else %}
-            <div class="text-muted">No hay adjuntos para esta solicitud.</div>
+            <div class="text-muted">NO HAY ADJUNTOS PARA ESTA SOLICITUD.</div>
           {% endif %}
         {% endwith %}
       </div>
@@ -94,7 +116,7 @@
     {% if object.mensaje %}
       <div class="mt-3">
         <p><strong>Mensaje:</strong></p>
-        <div class="alert alert-secondary p-2">{{ object.mensaje|linebreaks }}</div>
+        <div class="alert alert-secondary p-2">{{ object.mensaje|upper|linebreaks }}</div>
       </div>
     {% endif %}
   </fieldset>
@@ -125,34 +147,134 @@
         </thead>
         <tbody>
           {% for p in productos %}
-            <tr>
-              <td>{{ p.producto.descripcion }}</td>
-              <td>{{ p.producto.marca }}</td>
-              <td>{{ p.producto.udm }}</td>
-              <td>{{ p.producto.get_origen_display }}</td>
-              <td>{{ p.producto.proveedor }}</td>
-              <td>{{ p.producto.largo }}</td>
-              <td>{{ p.producto.ancho }}</td>
-              <td>{{ p.producto.alto }}</td>
-              <td>{{ p.producto.peso }}</td>
-              <td>${{ p.producto.costo }}</td>
-              <td>
-                {% if p.pmv %}
-                  ${{ p.pmv|floatformat:2 }}
-                {% else %}
-                  -
-                {% endif %}
-              </td>
-              <td>
-                {% if p.pvp %}
-                  ${{ p.pvp|floatformat:2 }}
-                {% else %}
-                  -
-                {% endif %}
-              </td>
-              <td>{{ p.producto.sku_proveedor }}</td>
-              <td>{{ p.producto.sku_fabricante }}</td>
-            </tr>
+          <tr>
+            <!-- Descripción -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{{ p.producto.descripcion|upper }}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar descripción">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- Marca -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{{ p.producto.marca|upper }}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar marca">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- UDM -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{{ p.producto.udm|upper }}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar UDM">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- Origen -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{{ p.producto.get_origen_display|upper }}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar origen">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- Proveedor -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{{ p.producto.proveedor|upper }}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar proveedor">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- Largo -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{{ p.producto.largo }}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar largo">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- Ancho -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{{ p.producto.ancho }}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar ancho">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- Alto -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{{ p.producto.alto }}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar alto">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- Peso -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{{ p.producto.peso }}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar peso">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- Costo -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">${{ p.producto.costo }}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar costo">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- PMV -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{% if p.pmv %}${{ p.pmv|floatformat:2 }}{% else %}-{% endif %}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar PMV">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- PVP -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{% if p.pvp %}${{ p.pvp|floatformat:2 }}{% else %}-{% endif %}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar PVP">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- SKU Proveedor -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{{ p.producto.sku_proveedor|upper }}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar SKU Proveedor">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+            <!-- SKU Fabricante -->
+            <td>
+              <span class="copy-wrap">
+                <span class="copy-text">{{ p.producto.sku_fabricante|upper }}</span>
+                <button type="button" class="copy-btn" title="Copiar" aria-label="Copiar SKU Fabricante">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </span>
+            </td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
@@ -160,35 +282,59 @@
   </fieldset>
   {% else %}
     <div class="alert alert-warning text-center">
-      <i class="fas fa-info-circle"></i> Esta solicitud no tiene productos asociados.
+      <i class="fas fa-info-circle"></i> ESTA SOLICITUD NO TIENE PRODUCTOS ASOCIADOS.
     </div>
   {% endif %}
  
   <!-- Estado de la Solicitud -->
-<fieldset class="card-detalle">
-  <legend>Estado de la Solicitud</legend>
-  <p><strong>Estado actual:</strong>
-    <span class="badge {% if object.estado == 'pendiente' %}bg-warning text-dark{% else %}bg-success{% endif %}">
-      {{ object.get_estado_display }}
-    </span>
-  </p>
+  <fieldset class="card-detalle">
+    <legend>Estado de la Solicitud</legend>
+    <p><strong>Estado actual:</strong>
+      <span class="badge {% if object.estado == 'pendiente' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+        {{ object.get_estado_display|upper }}
+      </span>
+    </p>
  
-  {% if request.user == object.receptor and object.estado == 'pendiente' %}
-  <form method="post" action="{% url 'cambiar_estado' object.pk %}">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
+    {% if request.user == object.receptor and object.estado == 'pendiente' %}
+    <form method="post" action="{% url 'cambiar_estado' object.pk %}">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
  
-    <div class="mb-3">
-      {{ form.comentario_estado.label_tag }}
-      {{ form.comentario_estado }}
-    </div>
+      <div class="mb-3">
+        {{ form.comentario_estado.label_tag }}
+        {{ form.comentario_estado }}
+      </div>
  
-    <button type="submit" class="btn btn-success">
-      <i class="fas fa-check-circle"></i> Marcar como "Código Creado"
-    </button>
-  </form>
-  {% endif %}
-</fieldset>
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-check-circle"></i> MARCAR COMO "CÓDIGO CREADO"
+      </button>
+    </form>
+    {% endif %}
+  </fieldset>
  
 </div>
+ 
+<script>
+  // Copiar al portapapeles (delegación)
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.copy-btn');
+    if (!btn) return;
+    const textEl = btn.parentElement.querySelector('.copy-text');
+    if (!textEl) return;
+    const value = (textEl.innerText || '').trim();
+    try {
+      await navigator.clipboard.writeText(value);
+      const original = btn.innerHTML;
+      btn.classList.add('copied'); btn.innerHTML = 'Copiado';
+      setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = original; }, 1200);
+    } catch {
+      const area = document.createElement('textarea');
+      area.value = value; area.style.position = 'fixed'; area.style.left = '-9999px';
+      document.body.appendChild(area); area.select(); document.execCommand('copy'); document.body.removeChild(area);
+      const original = btn.innerHTML;
+      btn.classList.add('copied'); btn.innerHTML = 'Copiado';
+      setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = original; }, 1200);
+    }
+  });
+</script>
 {% endblock %}

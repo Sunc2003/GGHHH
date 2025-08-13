@@ -5,8 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from apps.permisos.decorators import permiso_requerido
  
-NGROK_API_URL = "https://37dcb17bfe10.ngrok-free.app/api/productos"
-NGROK_API_SOCIOS = "https://37dcb17bfe10.ngrok-free.app/api/socios"
+NGROK_API_URL = "https://77bd810b6bd6.ngrok-free.app/api/productos"
+NGROK_API_SOCIOS = "https://77bd810b6bd6.ngrok-free.app/api/socios"
  
 HEADERS_NGROK = {
     "ngrok-skip-browser-warning": "true",
@@ -98,53 +98,50 @@ def buscador_productos_view(request):
 
 def obtener_detalle_producto(request, itemcode):
     try:
-        # Realizamos la solicitud para obtener el producto de la API externa
+        # Solicitud a la API externa
         response = requests.get(
-            f"{NGROK_API_URL}/{itemcode}",  # Usamos el itemcode para buscar el detalle
+            f"{NGROK_API_URL}/{itemcode}",
             headers={
                 "ngrok-skip-browser-warning": "true",
                 "User-Agent": "DjangoClient/1.0"
             },
-            timeout=5  # Tiempo de espera de 5 segundos
+            timeout=5
         )
-        response.raise_for_status()  # Si la respuesta tiene errores, lanzará una excepción
-
-        # Extraemos el JSON de la respuesta
+        response.raise_for_status()
         productos = response.json()
 
-        # Si la respuesta es una lista y está vacía, regresamos un error
         if not productos:
             return JsonResponse({'error': 'Producto no encontrado'}, status=404)
 
-        # Crear un diccionario para organizar los almacenes de un producto
+        # Diccionario para organizar los almacenes
         detalles_producto = {}
         for producto in productos:
-            # Si el producto ya está en el diccionario, agregamos el almacén a la lista
-            if producto["Codigo"] not in detalles_producto:
-                detalles_producto[producto["Codigo"]] = {
-                    'Codigo': producto.get("Codigo"),
+            codigo = producto["Codigo"]
+            if codigo not in detalles_producto:
+                detalles_producto[codigo] = {
+                    'Codigo': codigo,
                     'Descripcion': producto.get("Descripcion"),
                     'PrecioMinVta': producto.get("PrecioMinVta"),
                     'ProveedorPredeterminado': producto.get("ProveedorPredeterminado", "N/A"),
                     'SKUProveedor': producto.get("SKUProveedor", "N/A"),
                     'NombreProveedor': producto.get("NombreProveedor", "N/A"),
                     'UnidadMedida': producto.get("UnidadMedida", "N/A"),
-                    'CodigoBarra': producto.get("CodigoBarra", "N/A"),
                     'OrigenArticulo': producto.get("OrigenArticulo", "N/A"),
-                    'Almacenes': {}  # Iniciamos un diccionario vacío para los almacenes
+                    'Almacenes': {}  # Diccionario de almacenes
                 }
-            
-            # Agregar el almacén y el stock al diccionario de almacenes
-            detalles_producto[producto["Codigo"]]["Almacenes"][producto["Almacen"]] = producto["Stock"]
 
-        # Convertir el diccionario de detalles_producto en una lista de valores (solo el primer producto)
+            # Guardamos un diccionario por cada almacén
+            detalles_producto[codigo]["Almacenes"][producto["Almacen"]] = {
+                'NombreAlmacen': producto.get("NombreAlmacen", "N/A"),
+                'Stock': producto.get("Stock", 0),
+                'Compromiso': producto.get("Compromiso", 0),
+                'Pedido': producto.get("Pedido", 0)
+            }
+
         producto_detalles = list(detalles_producto.values())[0]
-
-        # Renderizar el template con los detalles del producto y los almacenes
         return render(request, "detalle_producto.html", {'producto': producto_detalles})
 
     except requests.exceptions.RequestException as e:
-        # Si ocurre un error en la solicitud, mostramos un mensaje de error
         return JsonResponse({'error': str(e)}, status=500)
 
  

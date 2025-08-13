@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load humanize %}
 {% block content %}
 <div class="container mt-4">
   <h3>Detalles del Producto</h3>
@@ -35,10 +35,6 @@
       <td>{{ producto.UnidadMedida }}</td>
     </tr>
     <tr>
-      <th>Codigo de barra del producto</th>
-      <td>{{ producto.CodigoBarra }}</td>
-    </tr>
-    <tr>
         <th>Origen del articulo</th>
         <td>{{ producto.OrigenArticulo }}</td>
       </tr>
@@ -50,18 +46,24 @@
     <thead>
       <tr>
         <th>Almacén</th>
+        <th>Nombre Almacén</th>
         <th>Stock</th>
+        <th>Comprometido</th>
+        <th>Pedido</th>
       </tr>
     </thead>
     <tbody>
-      {% for almacen, stock in producto.Almacenes.items %}
+      {% for almacen, datos in producto.Almacenes.items %}
         <tr>
           <td>{{ almacen }}</td>
-          <td>{{ stock }}</td>
+          <td>{{ datos.NombreAlmacen }}</td>
+          <td>{{ datos.Stock|intcomma }}</td>
+          <td>{{ datos.Compromiso|intcomma }}</td>
+          <td>{{ datos.Pedido|intcomma }}</td>
         </tr>
       {% empty %}
         <tr>
-          <td colspan="2">No hay almacenes disponibles para este producto.</td>
+          <td colspan="5">No hay almacenes disponibles para este producto.</td>
         </tr>
       {% endfor %}
     </tbody>

@@ -36,3 +36,12 @@ def formatear_tiempo(td):
     hours, remainder = divmod(total_seconds, 3600)
     minutes, _ = divmod(remainder, 60)
     return f"{hours}h {minutes}min"
+
+
+@register.filter
+def puntos_miles(value):
+    """Formatea un número con separador de miles"""
+    try:
+        return "{:,.0f}".format(float(value)).replace(",", ".")
+    except (ValueError, TypeError):
+        return value
