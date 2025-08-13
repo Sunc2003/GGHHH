@@ -1,74 +1,92 @@
 {% extends "base.html" %}
-{% load humanize %}
+{% load custom_filters %}
+
+{% block extra_css %}
+<style>
+  :root{ --ink:#111; --muted:#555; --line:#dcdcdc; --fill:#fff; --fill-soft:#f5f5f5; }
+  body{ color:var(--ink); background:#fff; }
+
+  .page-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-bottom:.75rem; margin-bottom:1.25rem; border-bottom:2px solid var(--line);
+  }
+  .page-title{ margin:0; font-weight:800; font-size:1.6rem; letter-spacing:.2px; }
+  .ghost-btn{
+    display:inline-flex; align-items:center; gap:.5rem; padding:.4rem .75rem;
+    border:1px solid var(--line); background:var(--fill); color:var(--ink);
+    text-decoration:none; border-radius:0;
+  }
+  .ghost-btn:hover{ background:var(--fill-soft); }
+
+  .card{ background:var(--fill); border:1px solid var(--line); padding:1rem; margin-bottom:1.5rem; border-radius:0; }
+  .section-title{ margin:0 0 .75rem 0; font-weight:700; font-size:1rem; color:var(--muted); text-transform:uppercase; }
+
+  .kv-table{ width:100%; border-collapse:collapse; }
+  .kv-table th, .kv-table td{ border:1px solid var(--line); padding:.55rem .65rem; vertical-align:middle; }
+  .kv-table th{ width:28%; color:var(--muted); font-weight:700; background:var(--fill-soft); text-align:left; }
+  .kv-table td{ font-weight:600; color:var(--ink); text-align:left; }
+
+  .data-table{ width:100%; border-collapse:collapse; background:var(--fill); }
+  .data-table thead th{ background:var(--fill-soft); color:var(--ink); font-weight:700; border:1px solid var(--line); padding:.55rem .65rem; text-align:center; }
+  .data-table tbody td{ border:1px solid var(--line); padding:.55rem .65rem; text-align:center; }
+  .data-table tbody tr:nth-child(odd){ background:#fafafa; }
+  .num{ text-align:right; font-variant-numeric:tabular-nums; }
+
+  .btn-primary{ background:#000; border:1px solid #000; color:#fff; padding:.5rem .9rem; border-radius:0; }
+  .btn-primary:hover{ background:#333; border-color:#333; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-  <h3>Detalles del Producto</h3>
 
-  <!-- Tabla con los detalles del producto -->
-  <table class="table table-bordered">
-    <tr>
-      <th>Código</th>
-      <td>{{ producto.Codigo }}</td>
-    </tr>
-    <tr>
-      <th>Descripción</th>
-      <td>{{ producto.Descripcion }}</td>
-    </tr>
-    <tr>
-      <th>Precio Mínimo de Venta</th>
-      <td>${{ producto.PrecioMinVta|floatformat:0 }}</td>
-    </tr>
-    <tr>
-      <th>Proveedor</th>
-      <td>{{ producto.ProveedorPredeterminado }}</td>
-    </tr>
-    <tr>
-      <th>SKU del Proveedor</th>
-      <td>{{ producto.SKUProveedor }}</td>
-    </tr>
-    <tr>
-      <th>Nombre del Proveedor</th>
-      <td>{{ producto.NombreProveedor }}</td>
-    </tr>
-    <tr>
-      <th>Unidad de medida</th>
-      <td>{{ producto.UnidadMedida }}</td>
-    </tr>
-    <tr>
-        <th>Origen del articulo</th>
-        <td>{{ producto.OrigenArticulo }}</td>
-      </tr>
-  </table>
+  <div class="page-header">
+    <h3 class="page-title">Detalles del Producto</h3>
+    {# ⬇️ Conservamos exactamente el querystring con el que llegaste #}
+    <a href="{% url 'buscar_productos_ui' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="ghost-btn">← Volver</a>
+  </div>
 
-  <!-- Tabla con los almacenes y stock -->
-  <h4>Stock por Almacén</h4>
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Almacén</th>
-        <th>Nombre Almacén</th>
-        <th>Stock</th>
-        <th>Comprometido</th>
-        <th>Pedido</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for almacen, datos in producto.Almacenes.items %}
+  <div class="card">
+    <h6 class="section-title">Ficha</h6>
+    <table class="kv-table">
+      <tr><th>Código</th><td>{{ producto.Codigo }}</td></tr>
+      <tr><th>Descripción</th><td>{{ producto.Descripcion }}</td></tr>
+      <tr><th>Precio Mínimo de Venta</th><td>$ {{ producto.PrecioMinVta|puntos_miles }}</td></tr>
+      <tr><th>Proveedor</th><td>{{ producto.ProveedorPredeterminado }}</td></tr>
+      <tr><th>SKU del Proveedor</th><td>{{ producto.SKUProveedor }}</td></tr>
+      <tr><th>Nombre del Proveedor</th><td>{{ producto.NombreProveedor }}</td></tr>
+      <tr><th>Unidad de Medida</th><td>{{ producto.UnidadMedida }}</td></tr>
+      <tr><th>Origen del Artículo</th><td>{{ producto.OrigenArticulo }}</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h6 class="section-title">Stock por Almacén</h6>
+    <table class="data-table">
+      <thead>
         <tr>
-          <td>{{ almacen }}</td>
-          <td>{{ datos.NombreAlmacen }}</td>
-          <td>{{ datos.Stock|intcomma }}</td>
-          <td>{{ datos.Compromiso|intcomma }}</td>
-          <td>{{ datos.Pedido|intcomma }}</td>
+          <th>Almacén</th>
+          <th>Nombre Almacén</th>
+          <th>Stock</th>
+          <th>Comprometido</th>
+          <th>Pedido</th>
         </tr>
-      {% empty %}
-        <tr>
-          <td colspan="5">No hay almacenes disponibles para este producto.</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% for almacen, datos in producto.Almacenes.items %}
+          <tr>
+            <td>{{ almacen }}</td>
+            <td>{{ datos.NombreAlmacen }}</td>
+            <td class="num">{{ datos.Stock|puntos_miles }}</td>
+            <td class="num">{{ datos.Compromiso|puntos_miles }}</td>
+            <td class="num">{{ datos.Pedido|puntos_miles }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">No hay almacenes disponibles para este producto.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-  <a href="{% url 'buscar_productos_ui' %}" class="btn btn-primary">Volver a la lista</a>
 </div>
 {% endblock %}
