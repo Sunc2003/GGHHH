@@ -5,8 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from apps.permisos.decorators import permiso_requerido
  
-NGROK_API_URL = "https://77bd810b6bd6.ngrok-free.app/api/productos"
-NGROK_API_SOCIOS = "https://77bd810b6bd6.ngrok-free.app/api/socios"
+NGROK_API_URL = "https://804103bbd425.ngrok-free.app/api/productos"
+NGROK_API_SOCIOS = "https://804103bbd425.ngrok-free.app/api/socios" 
  
 HEADERS_NGROK = {
     "ngrok-skip-browser-warning": "true",

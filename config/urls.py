@@ -20,7 +20,8 @@ from django.shortcuts import redirect
 from django.conf import settings
 from django.conf.urls.static import static
 
-
+# config/urls.py
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,6 +30,8 @@ urlpatterns = [
     path('permisos/', include('apps.permisos.urls')),
     path('utils/', include('apps.utils.urls')),
     path('sap/' , include('apps.sap.urls')),
+
+     path("", include("apps.usuarios.urls")),
     
 ]
 

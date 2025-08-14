@@ -510,3 +510,44 @@ class ListaPermisosView(ListView):
         ctx = super().get_context_data(**kwargs)
         ctx['q'] = self.request.GET.get('q', '').strip()
         return ctx
+    
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_GET
+
+@require_GET
+@login_required
+def api_contador_solicitudes_pendientes(request):
+    """
+    Devuelve:
+      - count: total pendientes para el receptor actual
+      - remitente: nombre del solicitante de la ÚLTIMA solicitud pendiente creada
+      - ultimo_id: id de esa última solicitud (para linkear)
+      - titulo: título de la última solicitud (opcional)
+    """
+    qs = (SolicitudCodigo.objects
+          .filter(receptor=request.user, estado='pendiente')
+          .select_related('solicitante')
+          .order_by('-id'))  # más confiable que fecha
+
+    count = qs.count()
+    data = {"count": count, "remitente": None, "ultimo_id": None, "titulo": None}
+
+    if count:
+        s = qs[0]
+        u = s.solicitante
+        # nombre “bonito” con varios fallbacks
+        nombre = (f"{(u.first_name or '').strip()} {(u.last_name or '').strip()}").strip()
+        if not nombre:
+            nombre = (u.get_full_name() or "").strip()
+        if not nombre:
+            nombre = u.username
+
+        data.update({
+            "remitente": nombre,
+            "ultimo_id": s.id,
+            "titulo": s.titulo or s.get_tipo_solicitud_display(),
+        })
+
+    return JsonResponse(data)

@@ -17,6 +17,7 @@ from .views import (
 from apps.organizaciones.views import cargos_por_area
 from .views import procesos_view
 from .views import CrearPermisoView
+from .views import api_contador_solicitudes_pendientes
  
  
  
@@ -38,8 +39,15 @@ urlpatterns = [
     path('permisos/nuevo/', CrearPermisoView.as_view(), name='crear_permiso'),
     # path('permisos/', PermisosListView.as_view(), name='lista_permisos'),  # si usas success_url
  
- 
+
     # API para carga dinámica de cargos
  
     path('api/cargos_por_area/<int:area_id>/', cargos_por_area, name='cargos_por_area'),
+     path(
+    "api/solicitudes/pendientes/count/",
+    views.api_contador_solicitudes_pendientes,
+    name="api_solicitudes_pendientes_count",
+),
+
+
 ]
