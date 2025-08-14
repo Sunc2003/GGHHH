@@ -1,0 +1,39 @@
+.card {
+    border-radius: 0;
+    border: 1px solid #000000;
+    background-color: #ffffff;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-3px);
+  }
+  
+  .card strong {
+    color: #000000;
+    font-weight: 600;
+  }
+  
+  .card .col-md-6 {
+    background-color: #f8f9fa;
+    border-radius: 0;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid #000000;
+  }
+  
+  h2 {
+    color: #000000;
+    font-weight: 700;
+  }
+  
+  .container {
+    max-width: 900px;
+  }
+  
+  @media (max-width: 768px) {
+    .card .col-md-6 {
+      font-size: 0.95rem;
+    }
+  }

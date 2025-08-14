@@ -1,0 +1,318 @@
+/* === TÍTULO PRINCIPAL === */
+h2.mb-4 {
+  text-align: center;
+  font-size: 2.3rem;
+  font-weight: 900;
+  color: #222;
+  letter-spacing: 0.8px;
+  margin-bottom: 2.5rem !important;
+  border-bottom: 3px solid #000000;
+  display: inline-block;
+  padding-bottom: 0.6rem;
+  width: 100%;
+}
+
+/* === FIELDSETS Y LEYENDAS === */
+fieldset {
+  border: none !important;
+  background: none;
+  margin-bottom: 2.7rem;
+  padding: 2.2rem 1.4rem 1.25rem 1.4rem !important;
+  box-shadow: none;
+  position: relative;
+}
+
+legend {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #222;
+  background: none;
+  padding: 0 10px;
+  border: none;
+  position: relative;
+  margin-left: 2px;
+  letter-spacing: 0.13px;
+}
+
+legend::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 20px;
+  background: #000000;
+  border-radius: 8px;
+  margin-right: 8px;
+  vertical-align: -3px;
+}
+
+/* === SEPARADORES === */
+hr {
+  border: none;
+  height: 1px;
+  background: #ddd;
+  margin: 32px 0;
+}
+
+/* === ETIQUETAS Y CAMPOS === */
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: #232323;
+  margin-bottom: 0.27rem;
+  letter-spacing: 0.23px;
+  text-align: left;
+}
+
+.form-control, select, input, textarea {
+  border-radius: 0.25rem;
+  border: 1.5px solid #232323;
+  font-size: 1rem;
+  padding: 0.56rem 0.8rem;
+  background: #f6f8f9;
+  color: #1a1a1a;
+  transition: border 0.13s, background 0.11s;
+  box-shadow: none;
+  min-height: 44px;
+  width: 100%;
+}
+
+.form-control:focus, select:focus, input:focus, textarea:focus {
+  border-color: #168039;
+  background: #fff;
+  outline: none;
+}
+
+.form-control.is-valid, select.is-valid, input.is-valid, textarea.is-valid {
+  border-color: #1fa259 !important;
+  background: #f6fff8;
+}
+
+.form-control.is-invalid, select.is-invalid, input.is-invalid, textarea.is-invalid {
+  border-color: #c0392b !important;
+  background: #fff8f8;
+}
+
+.text-danger {
+  font-size: 0.99rem;
+  color: #c0392b !important;
+}
+
+.form-text {
+  font-size: 0.94rem;
+  color: #555;
+  margin-bottom: 0.22rem;
+}
+
+/* === FILAS Y COLUMNAS === */
+.row.g-3 {
+  margin-bottom: 0.8rem;
+}
+.col-md-6, .col-md-3, .col-12, .col-md-4 {
+  margin-bottom: 1.23rem;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+@media (min-width: 992px) {
+  .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-md-3 { flex: 0 0 25%; max-width: 25%; }
+}
+
+/* === BOTONES === */
+.mt-4.d-flex {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 16px;
+  margin-bottom: 2rem;
+}
+
+.btn-success {
+  background: #168039;
+  color: #fff;
+  border: 2px solid #168039;
+  border-radius: 0.25rem;
+  font-weight: 700;
+  letter-spacing: 0.43px;
+  padding: 0.68rem 2.3rem;
+  font-size: 1.12rem;
+  box-shadow: 0 1.5px 8px rgba(22,128,57,0.10);
+  transition: background 0.15s, border 0.15s;
+}
+.btn-success:hover, .btn-success:focus {
+  background: #12652f;
+  border-color: #12652f;
+  color: #fff;
+}
+.btn-secondary {
+  background: #232323;
+  color: #fff;
+  border: 2px solid #232323;
+  border-radius: 0.25rem;
+  font-weight: 700;
+  padding: 0.68rem 1.75rem;
+  font-size: 1.12rem;
+  transition: background 0.13s, border 0.13s;
+}
+.btn-secondary:hover, .btn-secondary:focus {
+  background: #181818;
+  border-color: #181818;
+  color: #fff;
+}
+
+/* === MENSAJE DE ERROR (Django) === */
+ul.errorlist {
+  list-style: none;
+  color: #c0392b;
+  padding-left: 0.2rem;
+  font-size: 0.97rem;
+  margin: 0.15rem 0 0.19rem;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 991px) {
+  .container.mt-5 {
+    padding: 1.2rem 0.6rem;
+    margin-top: 19px;
+    margin-bottom: 80px;
+    max-width: 99vw;
+  }
+  fieldset {
+    padding: 1.2rem 0.7rem 0.7rem 0.7rem !important;
+  }
+  h2.mb-4 {
+    font-size: 1.5rem;
+    padding-bottom: 0.4rem;
+  }
+  .row.g-3 { margin-bottom: 0.2rem; }
+}
+
+@media (max-width: 767px) {
+  .col-md-6, .col-md-3, .col-12, .col-md-4 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 1rem;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+  .container.mt-5 {
+    padding: 0.85rem 0.3rem;
+    margin-top: 11px;
+    margin-bottom: 60px;
+  }
+}
+
+/* === SEPARADOR ENTRE FIELDSETS === */
+fieldset + fieldset {
+  margin-top: 2.2rem;
+  border-top: 2.5px solid #eee;
+  padding-top: 2.1rem !important;
+}
+
+/* === BOTONES MENÚ === */
+#solicitud-form-contenedor, #solicitudes-enviadas-contenedor {
+  display: none;
+}
+
+.btn-solicitar-codigo, .btn-solicitudes-enviadas {
+  background: #232323;
+  color: #fff;
+  border: 2px solid #232323;
+  border-radius: 0.25rem;
+  font-weight: 700;
+  letter-spacing: 0.43px;
+  padding: 0.8rem 2.6rem;
+  font-size: 1.12rem;
+  box-shadow: 0 1.5px 8px rgba(40,40,40,0.10);
+  transition: background 0.15s, border 0.15s, color 0.13s;
+  outline: none;
+  margin: 0.5rem;
+}
+
+.btn-solicitar-codigo:hover, .btn-solicitar-codigo:focus,
+.btn-solicitudes-enviadas:hover, .btn-solicitudes-enviadas:focus {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.solicitud-centrado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  width: 100%;
+}
+
+/* === DETALLES DE TABLA DE PRODUCTOS === */
+.tabla-productos th, .tabla-productos td {
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.tabla-productos .btn {
+  padding: 0.1rem 0.4rem;
+  font-size: 0.8rem;
+}
+
+/* === FORMSET === */
+.formset-form {
+  border-left: 5px solid #007bff;
+  background-color: #f9f9f9;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+}
+
+
+/* === NUEVO CSS === */
+
+.menu-botones {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.btn-cuadrado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 180px; /* más ancho */
+  height: 140px;
+  background-color: #f1f3f5; /* color plomo claro */
+  color: #212529;
+  text-align: center;
+  border: none;
+  border-radius: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.btn-cuadrado:hover {
+  background-color: #e2e6ea;
+  transform: scale(1.05);
+}
+
+.btn-cuadrado img {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 576px) {
+  .btn-cuadrado {
+    width: 120px;
+    height: 110px;
+    font-size: 0.75rem;
+  }
+
+  .btn-cuadrado img {
+    width: 32px;
+    height: 32px;
+  }
+}
