@@ -95,6 +95,7 @@
   </main>
 
   <!-- Footer -->
+
   <footer class="site-footer bg-dark text-white mt-auto">
     <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between py-4">
       <div class="footer-logo mb-3 mb-md-0">
@@ -118,6 +119,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Toast (único aviso visual) -->
+{% if request.user.is_authenticated and request.user|tiene_permiso:"VER_SOLICITUDES_RECIBIDAS" %}
   <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
     <div id="toast-nueva-solicitud" class="toast" role="alert" aria-live="assertive" aria-atomic="true"
          data-bs-autohide="true" data-bs-delay="3000">
@@ -134,7 +136,7 @@
       </div>
     </div>
   </div>
-
+  {% endif %}
   <!-- Sonido (opcional) -->
   <audio id="snd-nueva-solicitud" preload="auto">
     <source src="{% static 'sonidos/notify.mp3' %}" type="audio/mpeg">

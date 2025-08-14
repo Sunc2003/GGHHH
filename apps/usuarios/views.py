@@ -37,7 +37,9 @@ from django.views.generic import CreateView, ListView
 from django.urls import reverse_lazy
 from apps.permisos.models import Permiso
 from apps.permisos.forms import PermisoForm
- 
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_GET
  
  
  
@@ -512,12 +514,11 @@ class ListaPermisosView(ListView):
         return ctx
     
 
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_GET
+
 
 @require_GET
 @login_required
+@permiso_requerido('VER_SOLICITUDES_PENDIENTES')
 def api_contador_solicitudes_pendientes(request):
     """
     Devuelve:
