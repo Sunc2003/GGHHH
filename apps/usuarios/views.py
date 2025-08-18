@@ -518,7 +518,7 @@ class ListaPermisosView(ListView):
 
 @require_GET
 @login_required
-@permiso_requerido('VER_SOLICITUDES_PENDIENTES')
+@permiso_requerido('VER_SOLICITUDES_RECIBIDAS')
 def api_contador_solicitudes_pendientes(request):
     """
     Devuelve:
