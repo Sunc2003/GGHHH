@@ -54,17 +54,23 @@
     #offcanvasMenu .nav-link .fas, .navbar .nav-link .fas{ width:1.15em; text-align:center; opacity:.95; }
 
     /* ====== LOGOS ====== */
-    .navbar .navbar-brand img{
-      height:80px; width:auto;               /* ← tamaño del logo GGH */
+    /* Tamaño por defecto (desktop) */
+    .navbar .navbar-brand img.logo-ggh{
+      height:110px !important; width:auto !important;
       filter: drop-shadow(2px 2px 10px #232323);
     }
+    /* Tablet */
+    @media (min-width: 576px) and (max-width: 991.98px){
+      .navbar .navbar-brand img.logo-ggh{ height:100px !important; }
+    }
+    /* Móvil */
     @media (max-width:575.98px){
-      .navbar .navbar-brand img{ height:72px; } /* un poco menor en phone */
+      .navbar .navbar-brand img.logo-ggh{ height:90px !important; }
     }
     #offcanvasMenu .offcanvas-title img{
-      height:60px; width:auto;                /* logo en cabecera del offcanvas */
+      height:60px; width:auto;
     }
-    .navbar{ padding-top:.25rem; padding-bottom:.25rem; }
+    .navbar{ padding-top:.5rem; padding-bottom:.5rem; }
 
     /* ====== Logout dentro de <form>: mismo estilo que <a.nav-link> ====== */
     #offcanvasMenu .nav-item form{ width:100%; margin:0; }
@@ -80,33 +86,13 @@
     }
     #offcanvasMenu .nav-item form .nav-link:active{ transform:scale(0.99); }
 
-/* Tamaño por defecto (aplica a desktop también) */
-.navbar .navbar-brand img.logo-ggh{
-  height: 110px !important;   /* ← agranda en computador */
-  width: auto !important;
-}
-
-/* Tablets (opcional) */
-@media (min-width: 576px) and (max-width: 991.98px){
-  .navbar .navbar-brand img.logo-ggh{
-    height: 100px !important;
-  }
-}
-
-/* Móviles (ya lo tenías; ajusta si quieres) */
-@media (max-width: 575.98px){
-  .navbar .navbar-brand img.logo-ggh{
-    height: 90px !important;
-  }
-}
-
-/* (opcional) si pones el logo muy grande, da más aire a la barra */
-.navbar{
-  padding-top: .5rem;
-  padding-bottom: .5rem;
-}
-
-
+    /* ====== Zona de borde para gesto de swipe (solo móvil/tablet) ====== */
+    #offcanvas-edge{
+      position:fixed; top:0; left:0; bottom:0;
+      width:24px; background:transparent; z-index:1040;
+      touch-action: pan-y; /* deja desplazar vertical */
+    }
+    @media (min-width: 992px){ #offcanvas-edge{ display:none; } }
   </style>
 
   {% block extra_css %}{% endblock %}
@@ -117,10 +103,8 @@
   <nav class="navbar navbar-dark bg-dark">
     <div class="container d-flex justify-content-between align-items-center">
       <a class="navbar-brand" href="/">
-      <img class="logo-ggh" src="{% static 'img/ggh.png' %}" alt="GGH">
-    </a>
-
-
+        <img class="logo-ggh" src="{% static 'img/ggh.png' %}" alt="GGH">
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
               data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu" aria-label="Menú">
         <span class="navbar-toggler-icon"></span>
@@ -379,6 +363,77 @@
 
     refresh();
     start();
+  })();
+  </script>
+
+  <!-- Capturador de gesto desde el borde izquierdo (móvil/tablet) -->
+  <div id="offcanvas-edge" aria-hidden="true"></div>
+
+  <!-- Script: swipe para abrir/cerrar offcanvas en móvil/tablet -->
+  <script>
+  (function(){
+    const offcanvasEl = document.getElementById('offcanvasMenu');
+    if (!offcanvasEl) return;
+    const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
+
+    // Abrir con swipe desde el borde izquierdo
+    const edge = document.getElementById('offcanvas-edge');
+    let startX = 0, startY = 0, swiping = false;
+    const OPEN_THRESHOLD = 60; // px
+    const MAX_OFFAXIS = 40;    // px
+
+    function onTouchStartEdge(e){
+      if (!e.touches || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      startX = t.clientX; startY = t.clientY; swiping = true;
+    }
+    function onTouchMoveEdge(e){
+      if (!swiping || !e.touches || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      const dx = t.clientX - startX;
+      const dy = Math.abs(t.clientY - startY);
+      if (dx > OPEN_THRESHOLD && dy < MAX_OFFAXIS){
+        swiping = false;
+        try { e.preventDefault(); } catch(_) {}
+        offcanvas.show();
+      }
+    }
+    function onTouchEndEdge(){ swiping = false; }
+
+    if (edge){
+      edge.addEventListener('touchstart', onTouchStartEdge, { passive: true });
+      edge.addEventListener('touchmove',  onTouchMoveEdge,  { passive: false });
+      edge.addEventListener('touchend',   onTouchEndEdge,   { passive: true });
+      edge.addEventListener('touchcancel',onTouchEndEdge,   { passive: true });
+    }
+
+    // Cerrar con swipe hacia la izquierda dentro del offcanvas
+    let cStartX = 0, cStartY = 0, cSwiping = false;
+    const CLOSE_THRESHOLD = 60;
+    const CLOSE_MAX_OFFAXIS = 40;
+
+    function onTouchStartCanvas(e){
+      if (!e.touches || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      cStartX = t.clientX; cStartY = t.clientY; cSwiping = true;
+    }
+    function onTouchMoveCanvas(e){
+      if (!cSwiping || !e.touches || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      const dx = t.clientX - cStartX;
+      const dy = Math.abs(t.clientY - cStartY);
+      if (dx < -CLOSE_THRESHOLD && dy < CLOSE_MAX_OFFAXIS){
+        cSwiping = false;
+        try { e.preventDefault(); } catch(_) {}
+        offcanvas.hide();
+      }
+    }
+    function onTouchEndCanvas(){ cSwiping = false; }
+
+    offcanvasEl.addEventListener('touchstart', onTouchStartCanvas, { passive: true });
+    offcanvasEl.addEventListener('touchmove',  onTouchMoveCanvas,  { passive: false });
+    offcanvasEl.addEventListener('touchend',   onTouchEndCanvas,   { passive: true });
+    offcanvasEl.addEventListener('touchcancel',onTouchEndCanvas,   { passive: true });
   })();
   </script>
 
