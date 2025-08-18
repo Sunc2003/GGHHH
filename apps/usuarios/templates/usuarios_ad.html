@@ -2,27 +2,39 @@
 {% load static %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'usuarios/usuarios_ad.css' %}">
 <style>
-  body {
-    background-color: #e4e8ed;
-  }
-  .table th,
-  .table td {
-    vertical-align: middle;
-    font-size: 0.95rem;
-  }
-  .form-label {
-    font-weight: 500;
-  }
+/* Paginación: estilos negro/blanco */
+.pagination .page-item .page-link {
+  color: #000 !important;
+  background-color: #fff !important;
+  border: 1px solid #000 !important;
+  transition: background 0.2s, color 0.2s;
+}
+
+.pagination .page-item.active .page-link,
+.pagination .page-item .page-link:hover,
+.pagination .page-item .page-link:focus {
+  color: #fff !important;
+  background-color: #000 !important;
+  border-color: #000 !important;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #aaa !important;
+  background-color: #fff !important;
+  border-color: #ddd !important;
+  cursor: not-allowed;
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-  <h3 class="text-center mb-4" style="font-weight: bold; font-size: 1.8rem;">Listado de Usuarios AD</h3>
+  <h3 class="text-center mb-4">Listado de Usuarios AD</h3>
 
   <!-- Filtros -->
-  <form method="get" class="row mb-4 g-3 align-items-end" style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+  <form method="get" class="row mb-4 g-3 align-items-end">
     <div class="col-md-4">
       <label for="q" class="form-label">Nombre o Username</label>
       <input type="text" class="form-control" name="q" id="q" value="{{ filtro_nombre|default_if_none:'' }}" placeholder="Ej: juanperez">

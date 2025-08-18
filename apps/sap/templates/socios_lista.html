@@ -3,44 +3,44 @@
 
 {% block content %}
 <div class="container py-4">
-  <h4 class="mb-3">Socios de Negocio (Clientes)</h4>
+  <h4 class="mb-3 fw-semibold text-dark">Socios de Negocio <small class="text-muted">(Clientes)</small></h4>
 
   <form method="get" class="row g-2 mb-3">
     <div class="col-sm-6">
-      <input type="text" name="q" class="form-control" placeholder="Buscar por código o nombre" value="{{ q }}">
+      <input type="text" name="q" class="form-control border-dark" placeholder="Buscar por código o nombre" value="{{ q }}">
     </div>
     <div class="col-sm-3">
-      <button class="btn btn-primary w-100" type="submit">Buscar</button>
+      <button class="btn btn-dark w-100" type="submit">Buscar</button>
     </div>
   </form>
 
   {% if error %}
-    <div class="alert alert-danger">{{ error }}</div>
+    <div class="alert alert-dark border-dark">{{ error }}</div>
   {% endif %}
 
   {% if socios %}
     <div class="table-responsive">
-      <table class="table table-striped align-middle">
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Límite Crédito</th>
-            <th>Saldo</th>
-            <th>Crédito Disp.</th>
+      <table class="table table-hover table-bordered align-middle">
+        <thead class="table-light border-dark" style="position: sticky; top: 0; z-index: 1;">
+          <tr class="text-dark">
+            <th class="fw-semibold">Código</th>
+            <th class="fw-semibold">Nombre</th>
+            <th class="text-end fw-semibold">Límite Crédito</th>
+            <th class="text-end fw-semibold">Saldo</th>
+            <th class="text-end fw-semibold">Crédito Disp.</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           {% for s in socios %}
             <tr>
-              <td><code>{{ s.CardCode }}</code></td>
+              <td class="font-monospace fw-semibold">{{ s.CardCode }}</td>
               <td>{{ s.CardName }}</td>
-              <td>${{ s.CreditLine|floatformat:0 }}</td>
-              <td>${{ s.Balance|floatformat:0 }}</td>
-              <td><strong>${{ s.CreditoDisponible|floatformat:0 }}</strong></td>
-              <td>
-                <a class="btn btn-sm btn-outline-secondary"
+              <td class="text-end">${{ s.CreditLine|floatformat:0 }}</td>
+              <td class="text-end">${{ s.Balance|floatformat:0 }}</td>
+              <td class="text-end"><strong>${{ s.CreditoDisponible|floatformat:0 }}</strong></td>
+              <td class="text-center">
+                <a class="btn btn-sm btn-outline-dark"
                    href="{% url 'socio_detalle' s.CardCode %}">
                   Ver detalle
                 </a>
@@ -51,9 +51,28 @@
       </table>
     </div>
   {% elif q %}
-    <div class="alert alert-warning">Sin resultados para “{{ q }}”.</div>
+    <div class="alert alert-secondary border-dark">Sin resultados para “{{ q }}”.</div>
   {% else %}
-    <p class="text-muted">Ingresa un término de búsqueda para listar clientes.</p>
+    <p class="text-muted fst-italic">Ingresa un término de búsqueda para listar clientes.</p>
   {% endif %}
 </div>
+
+<style>
+  /* Estilo blanco y negro profesional */
+  .table th, .table td { vertical-align: middle; }
+  .table-hover tbody tr:hover { background-color: #f5f5f5; }
+  .table-bordered { border-color: #000; }
+  thead.table-light th {
+    background-color: #e9ecef;
+    color: #000;
+  }
+  .btn-dark, .btn-outline-dark {
+    border-radius: 3px;
+  }
+  code {
+    background: transparent;
+    color: #000;
+    font-size: 0.9rem;
+  }
+</style>
 {% endblock %}
