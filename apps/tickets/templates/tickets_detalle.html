@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* ===== Ticket Detail – Estilo profesional, sobrio y cuadrado ===== */
+.ticket-view{
+  --bg:#f6f7f9;
+  --card:#ffffff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --border:#dfe3e8;
+  --border-strong:#c7ccd3;
+  --primary:#0d6efd;
+  --accent:#f2f4f7;
+  --radius:6px;
+  --radius-sm:4px;
+}
+
+.ticket-view *{ box-sizing:border-box; }
+.ticket-view h4{ font-weight:600; color:#0f172a; margin:0; }
+.ticket-view .page-head{
+  padding-bottom:.75rem;
+  margin-bottom:1rem;
+  border-bottom:1px solid var(--border);
+}
+
+.ticket-view .badge{
+  border-radius:var(--radius-sm);
+  padding:.25rem .5rem;
+  font-weight:700;
+  font-size:.72rem;
+  letter-spacing:.3px;
+  text-transform:uppercase;
+  border:1px solid var(--border);
+}
+.ticket-view .badge.bg-secondary{
+  background:#eef2f6!important; color:#334155!important; border-color:var(--border-strong)!important;
+}
+.ticket-view .badge.bg-info{
+  background:#e9f2ff!important; color:#0b5ed7!important; border-color:#bfd3fb!important;
+}
+
+.ticket-view small.text-muted{ color:var(--muted)!important; }
+.ticket-view .form-text{ color:var(--muted); }
+
+/* Tarjetas planas, sin caricatura */
+.ticket-view .card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:none;
+}
+.ticket-view .card-header{
+  background:#fafbfc;
+  border-bottom:1px solid var(--border);
+  font-weight:600; color:var(--text);
+}
+.ticket-view .card-body{ padding:1rem 1rem; }
+
+/* Controles y botones más rectos */
+.ticket-view .btn{ border-radius:var(--radius-sm); }
+.ticket-view .btn-primary{
+  border-color:#0b5ed7;
+}
+.ticket-view .btn-outline-primary{
+  border-color:#b9c2ce; color:#0b5ed7;
+}
+.ticket-view .btn-outline-primary:hover{ background:#0b5ed7; color:#fff; }
+.ticket-view .btn-outline-secondary{
+  border-color:#b9c2ce; color:#334155;
+}
+.ticket-view .btn-outline-secondary:hover{ background:#eef2f6; color:#111827; }
+
+.ticket-view .form-control,
+.ticket-view .form-select,
+.ticket-view textarea,
+.ticket-view input[type="file"]{
+  border:1px solid var(--border-strong);
+  border-radius:var(--radius-sm);
+  box-shadow:none!important;
+}
+.ticket-view textarea{ min-height:120px; resize:vertical; }
+.ticket-view .form-select.form-select-sm{ min-width:180px; }
+
+/* Listado de mensajes */
+.ticket-view .list-unstyled li{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:.75rem .9rem;
+}
+.ticket-view .list-unstyled li + li{ margin-top:.75rem; }
+.ticket-view .list-unstyled strong{ color:#0f172a; }
+.ticket-view .list-unstyled .mt-1{ white-space:pre-wrap; }
+
+/* Adjuntos */
+.ticket-view .list-group-flush .list-group-item{
+  border:1px solid var(--border)!important;
+  border-radius:var(--radius-sm)!important;
+  margin-bottom:.5rem;
+  background:#fff;
+}
+.ticket-view .list-group-flush .list-group-item .me-2{ min-width:0; }
+.ticket-view code{
+  background:var(--accent);
+  border:1px solid var(--border);
+  padding:.2rem .45rem; border-radius:var(--radius-sm);
+  font-size:.85rem; word-break:break-all;
+}
+.ticket-view .text-truncate{ max-width:260px; }
+
+/* Toolbar superior compacto en pantallas pequeñas */
+@media (max-width: 992px){
+  .ticket-view .page-head{ gap:.75rem; }
+  .ticket-view .text-truncate{ max-width:180px; }
+}
+
+/* Accesibilidad: enfoque claro pero sobrio */
+.ticket-view a:focus-visible,
+.ticket-view button:focus-visible,
+.ticket-view select:focus-visible,
+.ticket-view textarea:focus-visible,
+.ticket-view input:focus-visible{
+  outline:2px solid rgba(13,110,253,.35);
+  outline-offset:2px;
+}
+</style>
+
+<div class="container py-4 ticket-view" style="max-width:1100px;">
+
+  <!-- Encabezado + gestión rápida (solo agentes/gestores) -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 page-head">
+    <div>
+      <h4 class="mb-1">#{{ ticket.id }} — {{ ticket.titulo }}</h4>
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <span class="badge bg-secondary">{{ ticket.get_estado_display }}</span>
+        <span class="badge bg-info text-dark">{{ ticket.get_prioridad_display }}</span>
+        <small class="text-muted">
+          · Creado: {{ ticket.fecha_creacion|date:"Y-m-d H:i" }}
+          · Actualizado: {{ ticket.fecha_actualizacion|date:"Y-m-d H:i" }}
+        </small>
+      </div>
+      <div class="small text-muted mt-1">
+        Solicitante:
+        <strong>{{ ticket.solicitante.get_full_name|default:ticket.solicitante.username }}</strong>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <a href="{% url 'tickets_bandeja' %}" class="btn btn-outline-secondary btn-sm">← Volver a la bandeja</a>
+      {% if puede_gestionar %}
+      <form class="d-flex gap-2" method="post" action="{% url 'tickets_cambiar_estado' ticket.id %}">
+        {% csrf_token %}
+        <select name="estado" class="form-select form-select-sm" style="width:auto;">
+          {% for val,label in ticket.ESTADOS %}
+            <option value="{{ val }}" {% if ticket.estado == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-outline-primary btn-sm">Actualizar</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if ticket.descripcion %}
+  <div class="card mt-3">
+    <div class="card-body">
+      <h6 class="card-title mb-2">Descripción</h6>
+      <div class="card-text">{{ ticket.descripcion|linebreaksbr }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row g-3 mt-3">
+    <!-- Conversación -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">Conversación</div>
+        <div class="card-body">
+          {% if mensajes %}
+            <ul class="list-unstyled mb-0">
+              {% for m in mensajes %}
+              <li class="mb-3">
+                <div class="d-flex justify-content-between">
+                  <strong>{{ m.autor.get_full_name|default:m.autor.username }}</strong>
+                  <span class="text-muted small">{{ m.fecha|date:"Y-m-d H:i" }}</span>
+                </div>
+                <div class="mt-1">{{ m.mensaje|linebreaksbr }}</div>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-0">Sin mensajes aún.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card mt-3">
+        <div class="card-header">Responder</div>
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+              {{ form_msg.mensaje.label_tag }}
+              {{ form_msg.mensaje }}
+              {% if form_msg.mensaje.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for e in form_msg.mensaje.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            <div class="mb-3">
+              {{ form_msg.archivos.label_tag }}
+              {{ form_msg.archivos }}
+              <div class="form-text">Puedes adjuntar varios archivos (imágenes, PDF, etc.).</div>
+              {% if form_msg.archivos.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for e in form_msg.archivos.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            <button class="btn btn-primary">Enviar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Adjuntos -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">Adjuntos</div>
+        <div class="card-body">
+          {% if adjuntos %}
+            <ul class="list-group list-group-flush">
+              {% for adj in adjuntos %}
+              <li class="list-group-item d-flex align-items-center justify-content-between gap-2">
+                <div class="me-2" style="min-width:0;">
+                  <div class="small fw-semibold">{{ adj.nombre|default:"Archivo" }}</div>
+                  {% if adj.ruta %}
+                    <code class="d-block text-truncate" title="{{ adj.ruta }}">{{ adj.ruta }}</code>
+                  {% endif %}
+                  <div class="text-muted small">
+                    Subido por {{ adj.subido_por.get_full_name|default:adj.subido_por.username }}
+                    · {{ adj.fecha_subida|date:"Y-m-d H:i" }}
+                  </div>
+                </div>
+                <div class="flex-shrink-0">
+                  {% if adj.url %}
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ adj.url }}" target="_blank">Ver</a>
+                  {% elif adj.ruta|slice:":4" == "http" %}
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ adj.ruta }}" target="_blank">Ver</a>
+                  {% endif %}
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-0">No hay adjuntos.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

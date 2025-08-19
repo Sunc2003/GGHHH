@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4" style="max-width:920px;">
+
+  <!-- Encabezado -->
+  <div class="d-flex justify-content-between align-items-center">
+    <h4 class="mb-0">#{{ ticket.id }} — {{ ticket.titulo }}</h4>
+    <span class="badge bg-secondary">{{ ticket.get_estado_display }}</span>
+  </div>
+  <div class="text-muted small mt-1">
+    Creado: {{ ticket.fecha_creacion|date:"Y-m-d H:i" }} · Última actualización: {{ ticket.fecha_actualizacion|date:"Y-m-d H:i" }}
+  </div>
+
+  {% if ticket.descripcion %}
+  <div class="card mt-3">
+    <div class="card-body">
+      <h6 class="card-title mb-2">Descripción</h6>
+      <div class="card-text">{{ ticket.descripcion|linebreaksbr }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row g-3 mt-3">
+    <!-- Conversación -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">Conversación</div>
+        <div class="card-body">
+          {% if mensajes %}
+            <ul class="list-unstyled mb-3">
+              {% for m in mensajes %}
+              <li class="mb-3">
+                <div class="d-flex justify-content-between">
+                  <strong>{{ m.autor.get_full_name|default:m.autor.username }}</strong>
+                  <span class="text-muted small">{{ m.fecha|date:"Y-m-d H:i" }}</span>
+                </div>
+                <div class="mt-1">{{ m.mensaje|linebreaksbr }}</div>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted">Sin mensajes aún.</p>
+          {% endif %}
+
+          <!-- Responder -->
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-2">
+              {{ form_msg.mensaje }}
+            </div>
+            <div class="mb-3">
+              <input type="file" name="archivos" multiple class="form-control form-control-sm">
+              <div class="form-text">Puedes adjuntar archivos.</div>
+            </div>
+            <button class="btn btn-primary btn-sm">Enviar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Adjuntos -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">Adjuntos</div>
+        <div class="card-body">
+          {% if adjuntos %}
+            <ul class="list-group list-group-flush">
+              {% for a in adjuntos %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="me-2">
+                  <div class="small">{{ a.nombre }}</div>
+                  <div class="text-muted small">
+                    Subido por {{ a.subido_por.get_full_name|default:a.subido_por.username }}
+                    {% if a.fecha_subida %} · {{ a.fecha_subida|date:"Y-m-d H:i" }}{% endif %}
+                  </div>
+                </div>
+                {% if a.url %}
+                  <a class="btn btn-sm btn-outline-secondary" href="{{ a.url }}" target="_blank">Ver</a>
+                {% elif a.ruta|slice:":4" == "http" %}
+                  <a class="btn btn-sm btn-outline-secondary" href="{{ a.ruta }}" target="_blank">Ver</a>
+                {% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-0">No hay adjuntos.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

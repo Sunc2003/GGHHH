@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+
+  <!-- Encabezado -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h4 class="mb-0">Bandeja de tickets</h4>
+
+    <form class="d-flex flex-wrap align-items-center gap-2" method="get">
+      <div class="input-group">
+        <input name="q" value="{{ q }}" class="form-control" placeholder="Buscar por título o descripción...">
+      </div>
+
+      <select name="estado" class="form-select">
+        <option value="">Todos los estados</option>
+        <option value="abierto"      {% if f_estado == 'abierto' %}selected{% endif %}>Abierto</option>
+        <option value="en_proceso"   {% if f_estado == 'en_proceso' %}selected{% endif %}>En proceso</option>
+        <option value="resuelto"     {% if f_estado == 'resuelto' %}selected{% endif %}>Resuelto</option>
+        <option value="cerrado"      {% if f_estado == 'cerrado' %}selected{% endif %}>Cerrado</option>
+      </select>
+
+      <div class="form-check ms-1">
+        <input class="form-check-input" type="checkbox" value="1" id="chkAbiertos" name="abiertos"
+               {% if solo_abiertos == '1' %}checked{% endif %}>
+        <label class="form-check-label" for="chkAbiertos">
+          Solo abiertos
+        </label>
+      </div>
+
+      <button class="btn btn-primary">Filtrar</button>
+      <a class="btn btn-light border" href="{% url 'tickets_bandeja' %}">Limpiar</a>
+    </form>
+  </div>
+
+  <!-- Lista -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      {% if tickets %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width:80px;">#</th>
+                <th>Título</th>
+                <th style="width:210px;">Solicitante</th>
+                
+                <th style="width:140px;">Estado</th>
+                <th style="width:160px;">Actualizado</th>
+                <th style="width:130px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in tickets %}
+              <tr>
+                <td class="text-muted">#{{ t.id }}</td>
+                <td>
+                  <div class="fw-semibold text-truncate" style="max-width:520px;">
+                    {{ t.titulo }}
+                  </div>
+                  {% if t.descripcion %}
+                    <div class="small text-muted text-truncate" style="max-width:520px;">
+                      {{ t.descripcion|truncatechars:140 }}
+                    </div>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if t.solicitante %}
+                    {{ t.solicitante.get_full_name|default:t.solicitante.username }}
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+                
+                <td>
+                  {% if t.estado == 'abierto' %}
+                    <span class="badge bg-danger-subtle text-danger border">Abierto</span>
+                  {% elif t.estado == 'en_proceso' or t.estado == 'en-proceso' %}
+                    <span class="badge bg-warning-subtle text-warning border">En proceso</span>
+                  {% elif t.estado == 'resuelto' %}
+                    <span class="badge bg-success-subtle text-success border">Resuelto</span>
+                  {% elif t.estado == 'cerrado' %}
+                    <span class="badge bg-secondary">Cerrado</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{{ t.get_estado_display }}</span>
+                  {% endif %}
+                </td>
+                <td class="text-nowrap">
+                  {{ t.fecha_actualizacion|date:"Y-m-d H:i" }}
+                </td>
+                <td class="text-end">
+                  <a href="{% url 'tickets_detalle' t.id %}" class="btn btn-sm btn-outline-primary">
+                    Ver / Responder
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="p-4 text-center text-muted">
+          <div class="mb-2" style="font-size:2rem;">📭</div>
+          No hay tickets que coincidan con el filtro.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

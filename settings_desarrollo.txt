@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'apps.organizaciones',
     'apps.utils',
     'storages',
+    'apps.tickets.apps.TicketsConfig',
 ]
 
 MIDDLEWARE = [

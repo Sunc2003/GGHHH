@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+/* ===== Banner efímero de éxito ===== */
+.flash-ok{
+  border:1px solid #cce3d0; background:#eef8f1; border-radius:6px;
+  padding:.85rem 1rem; display:flex; align-items:center; gap:.9rem;
+  margin-bottom:1rem; transition:opacity .25s ease, transform .25s ease;
+}
+.flash-ok.hide{ opacity:0; transform:translateY(-6px); }
+.flash-ok .title{ font-weight:700; color:#0f5132; margin:0; }
+.flash-ok .text{ color:#0f5132; margin:0; }
+.flash-ok img{ width:28px; height:28px; display:block; }
+
+/* ===== Vista profesional ===== */
+.help-view{
+  --bg:#f5f6f8; --card:#ffffff; --text:#111827; --muted:#6b7280;
+  --border:#dfe3e8; --border-strong:#c7ccd3; --primary:#0d6efd; --accent:#f2f4f7;
+  --radius:6px; --radius-sm:4px; --pad:1rem;
+}
+.help-view *{ box-sizing:border-box; }
+.help-view h4,.help-view h5{ color:var(--text); margin:0; font-weight:600; }
+.help-view .page-head{ padding-bottom:.5rem; margin-bottom:.75rem; border-bottom:1px solid var(--border); }
+
+/* Cards / Formularios */
+.help-view .card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:none; }
+.help-view .card-body{ padding:var(--pad); }
+.help-view .form-label{ font-weight:600; color:#0f172a; margin-bottom:.35rem; }
+.help-view .form-control, .help-view .form-select, .help-view textarea, .help-view input[type="file"]{
+  border:1px solid var(--border-strong); border-radius:var(--radius-sm); box-shadow:none!important;
+}
+.help-view textarea{ min-height:140px; resize:vertical; }
+.help-view .form-text{ color:var(--muted); }
+.help-view .btn{ border-radius:var(--radius-sm); box-shadow:none!important; }
+.help-view .btn-outline-secondary{ border-color:#b9c2ce; color:#334155; }
+.help-view .btn-outline-secondary:hover{ background:#eef2f6; color:#111827; }
+.help-view .btn-light.border{ border-color:#b9c2ce!important; }
+
+/* Tabla lista */
+.help-view .badge{
+  border-radius:var(--radius-sm); padding:.25rem .5rem; font-weight:700; font-size:.72rem;
+  letter-spacing:.2px; text-transform:uppercase; border:1px solid var(--border);
+}
+.help-view .badge.bg-secondary{ background:#eef2f6; color:#334155; border-color:#c7ccd3; }
+.help-view .badge.bg-danger-subtle{ background:#fdecef; color:#b42318; border-color:#f1c7cd; }
+.help-view .badge.bg-warning-subtle{ background:#fff6e5; color:#8a6100; border-color:#efd8a6; }
+.help-view .badge.bg-success-subtle{ background:#eaf7ee; color:#0f7a42; border-color:#c7e6d2; }
+
+.help-view a:focus-visible, .help-view button:focus-visible, .help-view select:focus-visible,
+.help-view textarea:focus-visible, .help-view input:focus-visible{ outline:2px solid rgba(13,110,253,.35); outline-offset:2px; }
+.help-view .empty{ color:var(--muted); border:1px dashed var(--border); border-radius:var(--radius); padding:1.25rem; }
+</style>
+
+{% if request.GET.ok %}
+  <div id="flash-ok" class="flash-ok" role="status">
+    <img src="{% static 'img/ticket-ok.svg' %}" alt="OK"
+         onerror="this.outerHTML=`<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='#198754' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 11.08V12a10 10 0 1 1-5.93-9.14'/><polyline points='22 4 12 14.01 9 11.01'/></svg>`">
+    <div>
+      <p class="title">Ticket enviado correctamente</p>
+      <p class="text">En breve te responderemos.</p>
+    </div>
+  </div>
+  <script>
+    (function(){
+      const el = document.getElementById('flash-ok');
+      setTimeout(()=>{ if(el){ el.classList.add('hide'); setTimeout(()=> el.remove(), 300); } }, 2000);
+      if (history.replaceState){
+        const url = new URL(window.location.href);
+        url.searchParams.delete('ok');
+        history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? '?' + url.searchParams : ''));
+      }
+    })();
+  </script>
+{% endif %}
+
+<div class="container-xxl py-4 help-view" style="max-width:1200px;">
+
+  <!-- Encabezado: 2 botones -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2 page-head">
+    <h4 class="mb-0">Solicitar ayuda</h4>
+    <div class="btn-group btn-group-sm">
+      <a href="?tab=crear&new=1"
+         class="btn {% if tab != 'lista' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+        Nuevo ticket
+      </a>
+      <a href="?tab=lista{% if base_qs %}&{{ base_qs }}{% endif %}"
+         class="btn {% if tab == 'lista' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+        Mis solicitudes
+      </a>
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      {% if 'error' in message.tags %}
+        <div class="alert alert-danger py-2" role="alert">{{ message }}</div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  {# =================== PESTAÑA: CREAR (SOLO FORMULARIO) =================== #}
+  {% if tab != 'lista' %}
+    {% if form.errors or request.GET.new %}
+    <div class="row g-4">
+      <div class="col-12 col-lg-6 col-xl-5">
+        <div id="ticket-form-card" class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="mb-0">Nuevo ticket</h5>
+              <button id="btn-cancel-form" class="btn btn-light border btn-sm" type="button"
+                      aria-controls="ticket-form-card">Cancelar</button>
+            </div>
+
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger py-2">
+                {% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}
+              </div>
+            {% endif %}
+
+            <form id="form-ayuda" method="post" enctype="multipart/form-data" novalidate>
+              {% csrf_token %}
+              <div class="mb-3">
+                <label class="form-label">{{ form.titulo.label }}</label>
+                {{ form.titulo }}
+                {% if form.titulo.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for e in form.titulo.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">{{ form.descripcion.label }}</label>
+                {{ form.descripcion }}
+                {% if form.descripcion.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for e in form.descripcion.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">{{ form.archivos.label }}</label>
+                {{ form.archivos }}
+                <div class="form-text">Puedes adjuntar archivos (imágenes, PDFs, etc.).</div>
+                {% if form.archivos.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for e in form.archivos.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+
+              {% if form.prioridad %}<input type="hidden" name="prioridad" value="media">{% endif %}
+              {% if form.asignado_a %}{% endif %}
+
+              <div class="d-grid d-sm-flex gap-2">
+                <button class="btn btn-primary">Enviar ticket</button>
+                <button type="button" id="btn-cancel-form-2" class="btn btn-light border">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- NO hay columna derecha -->
+    </div>
+    {% endif %}
+  {% endif %}
+
+  {# =================== PESTAÑA: LISTA (MIS SOLICITUDES) =================== #}
+  {% if tab == 'lista' %}
+  <div class="card">
+    <div class="card-body">
+      <form method="get" class="row g-2 align-items-end mb-3">
+        <input type="hidden" name="tab" value="lista">
+        <div class="col-md-4">
+          <label class="form-label">Buscar</label>
+          <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="título o descripción">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Estado</label>
+          <select class="form-select" name="estado">
+            <option value="">Todos</option>
+            {% for val,label in estados %}
+              <option value="{{ val }}" {% if f_estado == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Desde</label>
+          <input type="date" class="form-control" name="desde" value="{{ desde }}">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Hasta</label>
+          <input type="date" class="form-control" name="hasta" value="{{ hasta }}">
+        </div>
+        <div class="col-md-1 d-grid">
+          <button class="btn btn-primary">Filtrar</button>
+        </div>
+      </form>
+
+      {% if page_obj.object_list %}
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th style="width:80px;">ID</th>
+                <th>Título</th>
+                <th style="width:240px;">Asignado / Actualizado</th>
+                <th style="min-width:260px;">Último mensaje</th>
+                <th class="text-end" style="width:120px;">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in page_obj.object_list %}
+              <tr>
+                <td class="text-muted">#{{ t.id }}</td>
+                <td>
+                  <a class="fw-semibold link-dark text-decoration-none"
+                     href="{% url 'mi_ticket_detalle' t.id %}" title="{{ t.titulo }}">{{ t.titulo }}</a>
+                </td>
+                <td>
+                  <div class="small text-muted">
+                    {% if t.asignado_a %}
+                      <div>Asignado: <strong>{{ t.asignado_a.get_full_name|default:t.asignado_a.username }}</strong></div>
+                    {% endif %}
+                    <div>Act.: {{ t.fecha_actualizacion|date:"Y-m-d H:i" }}</div>
+                  </div>
+                </td>
+                <td>
+                  {% if t.ultimo_mensaje %}
+                    <div class="small text-muted" title="{{ t.ultimo_mensaje.mensaje }}">
+                      <strong>{{ t.ultimo_mensaje.autor.get_full_name|default:t.ultimo_mensaje.autor.username }}:</strong>
+                      {{ t.ultimo_mensaje.mensaje|truncatechars:200 }}
+                      <span>· {{ t.ultimo_mensaje.fecha|date:"Y-m-d H:i" }}</span>
+                    </div>
+                  {% else %}
+                    <span class="text-muted small">Sin respuestas.</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  {% if t.estado == 'abierto' %}
+                    <span class="badge bg-danger-subtle text-danger border">Abierto</span>
+                  {% elif t.estado == 'en_proceso' or t.estado == 'en-proceso' %}
+                    <span class="badge bg-warning-subtle text-warning border">En proceso</span>
+                  {% elif t.estado == 'resuelto' %}
+                    <span class="badge bg-success-subtle text-success border">Resuelto</span>
+                  {% elif t.estado == 'cerrado' %}
+                    <span class="badge bg-secondary">Cerrado</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{{ t.get_estado_display }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginación -->
+        <nav class="mt-3">
+          <ul class="pagination pagination-sm mb-0">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?tab=lista{% if base_qs %}&{{ base_qs }}{% endif %}&page={{ page_obj.previous_page_number }}">‹</a>
+              </li>
+            {% endif %}
+
+            {% for num in elided_range %}
+              {% if num == '…' %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+              {% elif num == page_obj.number %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+              {% else %}
+                <li class="page-item"><a class="page-link" href="?tab=lista{% if base_qs %}&{{ base_qs }}{% endif %}&page={{ num }}">{{ num }}</a></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?tab=lista{% if base_qs %}&{{ base_qs }}{% endif %}&page={{ page_obj.next_page_number }}">›</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% else %}
+        <div class="empty text-center">No hay resultados con esos filtros.</div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+(function(){
+  const formCard  = document.getElementById('ticket-form-card');
+  const btnCancel = document.getElementById('btn-cancel-form');
+  const btnCancel2 = document.getElementById('btn-cancel-form-2');
+
+  // Enfocar primer campo si el form está visible (errores o ?new=1)
+  if (formCard && !formCard.hasAttribute('hidden')) {
+    const firstInput = formCard.querySelector('input, textarea, select');
+    if (firstInput) setTimeout(()=> firstInput.focus(), 10);
+  }
+
+  // Cancelar → oculta formulario y limpia ?new de la URL
+  function closeForm() {
+    if (formCard) formCard.setAttribute('hidden','');
+    if (history.replaceState){
+      const url = new URL(window.location.href);
+      url.searchParams.delete('new');
+      history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? '?' + url.searchParams : ''));
+    }
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  if (btnCancel)  btnCancel.addEventListener('click', closeForm);
+  if (btnCancel2) btnCancel2.addEventListener('click', closeForm);
+})();
+</script>
+
+{% endblock %}

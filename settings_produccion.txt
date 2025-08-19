@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'apps.utils',
     'storages',
     'django.contrib.humanize',
+    'apps.tickets.apps.TicketsConfig',
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
