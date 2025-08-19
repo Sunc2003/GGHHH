@@ -20,7 +20,6 @@
 
 {% block content %}
 
-
 {% if request.user|tiene_permiso:"CREACION_USUARIO" %}
 <div class="container py-5">
   <h4 class="mb-4 text-dark">Administración de Usuarios</h4>
@@ -46,9 +45,9 @@
         <th>Estado</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="tabla-usuarios">
       {% for u in usuarios %}
-      <tr>
+      <tr data-estado="{{ u.en_linea|yesno:'enlinea,desconectado' }}">
         <td>{{ u.username }}</td>
         <td>{{ u.email }}</td>
         <td>
@@ -64,7 +63,6 @@
   </table>
 </div>
 {% endif %}
-
 
 {% if request.user|tiene_permiso:"DASHBOARD_RESPUESTAKPI" %}
 <div class="container py-4">
@@ -137,7 +135,7 @@
       <div class="card bg-light text-dark">
         <div class="card-body text-center">
           <div class="card-icon"><i class="fas fa-check-circle"></i></div>
-        <div class="text-muted small">Solicitudes Respondidas</div>
+          <div class="text-muted small">Solicitudes Respondidas</div>
           <h4 class="fw-semibold mt-1">{{ solicitudes_respondidas|default_if_none:"0" }}</h4>
         </div>
       </div>
@@ -195,26 +193,29 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<!-- Filtro de estado -->
+<!-- Filtro de estado (usa data-estado en cada fila) -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const filtro = document.getElementById('filtro-estado');
-  const filtrar = function () {
-    const rows = document.querySelectorAll('table tbody tr');
-    rows.forEach(row => {
-      const estado = row.querySelector('.badge')?.textContent?.trim();
-      if (!filtro || filtro.value === 'todos') {
+  const cuerpo = document.getElementById('tabla-usuarios');
+
+  function filtrar() {
+    const valor = filtro?.value || 'todos';
+    if (!cuerpo) return;
+
+    cuerpo.querySelectorAll('tr').forEach(row => {
+      const estado = row.dataset.estado; // 'enlinea' | 'desconectado'
+      if (valor === 'todos' || estado === valor) {
         row.style.display = '';
-      } else if (filtro.value === 'enlinea') {
-        row.style.display = estado === 'En línea' ? '' : 'none';
-      } else if (filtro.value === 'desconectado') {
-        row.style.display = estado === 'Desconectado' ? '' : 'none';
+      } else {
+        row.style.display = 'none';
       }
     });
-  };
+  }
+
   if (filtro) {
     filtro.addEventListener('change', filtrar);
-    filtrar();
+    filtrar(); // aplica el valor inicial (por defecto 'enlinea')
   }
 });
 </script>

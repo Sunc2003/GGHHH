@@ -77,26 +77,32 @@ def formatear_tiempo(td):
     return f"{hours}h {minutes}min"
  
  
- 
+from django.shortcuts import render
+from django.utils import timezone
+from django.db.models import F, Avg, ExpressionWrapper, DurationField
+from django.contrib.auth.decorators import user_passes_test
+from django.core.cache import cache
+from datetime import timedelta
+
+from apps.usuarios.models import CustomUser, SolicitudCodigo
+from apps.permisos.decorators import permiso_requerido
+
+
 @user_passes_test(es_admin)
 def panel_admin_usuarios(request):
     usuarios = CustomUser.objects.all()
-    ahora = timezone.now()
-    minutos_activo = 5
- 
-    # Marcar usuarios conectados
+
+    # Marcar usuarios en línea desde cache
     for u in usuarios:
-        u.en_linea = False
-        if u.last_login and (ahora - u.last_login) < timedelta(minutes=minutos_activo):
-            u.en_linea = True
- 
+        u.en_linea = bool(cache.get(f"online:{u.id}", False))
+
     # 🔹 Solicitudes recibidas por el administrador
     solicitudes_recibidas = SolicitudCodigo.objects.filter(receptor=request.user)
     total_recibidas = solicitudes_recibidas.count()
     pendientes = solicitudes_recibidas.filter(estado='pendiente').count()
     completadas = total_recibidas - pendientes
- 
-    # 🔹 Tiempo promedio de respuesta (solo si fecha_respuesta está)
+
+    # 🔹 Tiempo promedio de respuesta
     solicitudes_con_respuesta = solicitudes_recibidas.filter(
         estado='creado',
         fecha_creacion__isnull=False
@@ -106,16 +112,16 @@ def panel_admin_usuarios(request):
             output_field=DurationField()
         )
     )
- 
+
     promedio_respuesta = solicitudes_con_respuesta.aggregate(
         promedio=Avg('tiempo_respuesta')
     )['promedio'] if solicitudes_con_respuesta.exists() else None
- 
+
     # 🔹 KPI para usuarios normales
     solicitudes_enviadas_usuario = SolicitudCodigo.objects.filter(solicitante=request.user)
     total_solicitudes = solicitudes_enviadas_usuario.count()
     solicitudes_respondidas = solicitudes_enviadas_usuario.exclude(estado='pendiente').count()
- 
+
     context = {
         'usuarios': usuarios,
         'solicitudes_recibidas': solicitudes_recibidas,
@@ -126,7 +132,7 @@ def panel_admin_usuarios(request):
         'total_solicitudes': total_solicitudes,
         'solicitudes_respondidas': solicitudes_respondidas,
     }
- 
+
     return render(request, 'panel_admin.html', context)
  
  
@@ -552,3 +558,9 @@ def api_contador_solicitudes_pendientes(request):
         })
 
     return JsonResponse(data)
+
+
+
+
+
+
