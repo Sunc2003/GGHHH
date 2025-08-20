@@ -4,14 +4,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
 from django.db import transaction
-from django.urls import reverse
+from django.core.paginator import Paginator
+from django.utils.dateparse import parse_date
 
 from apps.utils.supabase_storage import SupabaseStorage
 from apps.usuarios.models import CustomUser
 
 from .models import Ticket, TicketMensaje, TicketAdjunto
 from .forms import TicketForm, TicketMensajeForm
-from django.utils.http import urlencode
+
+import re
 
 
 # ===== Helpers =====
@@ -23,10 +25,18 @@ def _es_agente(user):
         user.has_perm('permisos.TICKETS_GESTIONAR')
     )
 
+def _safe_filename(name: str) -> str:
+    """Nombre de archivo seguro (sin espacios raros/acentos)."""
+    name = re.sub(r'[^\w.\-]+', '_', name).strip('._')
+    return name or 'archivo'
+
+def _ruta_adjunto_ticket(ticket_id, filename: str) -> str:
+    """Ruta lógica en el bucket: tickets/{id}/adjuntos/{filename}."""
+    return f"tickets/{ticket_id}/adjuntos/{_safe_filename(filename)}"
 
 def _adjuntos_ctx(adjuntos_queryset):
     """Convierte adjuntos a dict, agregando URL pública desde Supabase."""
-    storage = SupabaseStorage()
+    storage = SupabaseStorage()  # usa el bucket por defecto (ej. "media")
     ctx = []
     for a in adjuntos_queryset:
         url = None
@@ -85,21 +95,13 @@ def lista_tickets(request):
     })
 
 
-# ===== SOLICITAR AYUDA (crear + listado propios) =====
-# apps/tickets/views.py
-from django.utils.http import urlencode  # <- nuevo import
-
-# arriba del archivo
-from django.core.paginator import Paginator
-from django.utils.dateparse import parse_date
-from urllib.parse import urlencode  # ya lo usabas para ?ok=1 si quieres
-
+# ===== SOLICITAR AYUDA (crear + ver mis solicitudes en misma vista) =====
 @login_required
 def solicitar_ayuda(request):
     """
-    Crear ticket + ver mis solicitudes en la misma vista.
-    - POST: crea ticket y redirige a ?ok=1
-    - GET con tab=lista: muestra tabla con filtros/paginación
+    - GET ?tab=crear (default): muestra CTA y abre form si ?new=1 o hay errores.
+    - POST: crea ticket, sube adjuntos a tickets/{id}/adjuntos/, redirige a ?ok=1
+    - GET ?tab=lista: muestra tabla filtrable con paginación.
     """
     tab = request.GET.get('tab', 'crear')
 
@@ -110,24 +112,33 @@ def solicitar_ayuda(request):
             with transaction.atomic():
                 t = form.save(commit=False)
                 t.solicitante = request.user
-                try: t.prioridad = t.prioridad or 'media'
-                except Exception: pass
-                try: t.estado = t.estado or 'abierto'
-                except Exception: pass
+                # defaults seguros si tu modelo tiene estos campos
+                try:
+                    t.prioridad = t.prioridad or 'media'
+                except Exception:
+                    pass
+                try:
+                    t.estado = t.estado or 'abierto'
+                except Exception:
+                    pass
                 if hasattr(t, 'asignado_a'):
                     t.asignado_a = None
                 t.save()
 
-                # Adjuntos múltiples
+                # Adjuntos múltiples (sube a tickets/{id}/adjuntos/)
                 archivos = request.FILES.getlist('archivos')
                 if archivos:
                     storage = SupabaseStorage()
                     for f in archivos:
-                        ruta = f"tickets/{t.id}/adjuntos/{f.name}"
+                        ruta = _ruta_adjunto_ticket(t.id, f.name)
                         storage._save(ruta, f)
+                        es_img = (f.content_type or "").startswith("image/")
                         TicketAdjunto.objects.create(
-                            ticket=t, tipo='documento', ruta=ruta,
-                            nombre=f.name, subido_por=request.user
+                            ticket=t,
+                            tipo='imagen' if es_img else 'documento',
+                            ruta=ruta,
+                            nombre=f.name,
+                            subido_por=request.user,
                         )
 
                 # Primer mensaje desde la descripción (opcional)
@@ -137,15 +148,15 @@ def solicitar_ayuda(request):
                         ticket=t, autor=request.user, mensaje=desc, publico=True
                     )
 
-            # Redirigir a la MISMA URL con ok=1 (banner efímero)
+            # Redirigir a MISMA URL con ok=1 (banner efímero 2s)
             return redirect(f"{request.path}?ok=1")
         else:
             messages.error(request, "Revisa los campos del formulario.")
-        tab = 'crear'  # si hubo errores, dejamos abierta la pestaña crear
+        tab = 'crear'  # si hay errores, mantenemos la pestaña crear
     else:
         form = TicketForm()
 
-    # --- Lado derecho: recientes (para la pestaña crear)
+    # --- Mis tickets recientes (si quieres mostrarlos en la pestaña crear)
     mis_tickets = (
         Ticket.objects.filter(solicitante=request.user)
         .select_related('asignado_a')
@@ -185,8 +196,12 @@ def solicitar_ayuda(request):
         per_page = max(1, min(50, int(request.GET.get('pp', 15))))
     except ValueError:
         per_page = 15
+
     paginator = Paginator(tickets_qs, per_page)
     page_obj = paginator.get_page(request.GET.get('page'))
+    elided_range = paginator.get_elided_page_range(
+        number=page_obj.number, on_each_side=1, on_ends=1
+    )
 
     # último mensaje para los tickets mostrados en la tabla
     for tk in page_obj.object_list:
@@ -210,6 +225,7 @@ def solicitar_ayuda(request):
         'tab': tab,                # 'crear' o 'lista'
         'page_obj': page_obj,      # tabla
         'paginator': paginator,
+        'elided_range': elided_range,
         'q': q,
         'f_estado': estado,
         'desde': desde_str,
@@ -217,8 +233,6 @@ def solicitar_ayuda(request):
         'base_qs': base_qs,
         'estados': Ticket.ESTADOS,
     })
-
-
 
 
 # ===== DETALLE del usuario (propietario) =====
@@ -236,7 +250,6 @@ def mi_ticket_detalle(request, pk):
     adjuntos_ctx = _adjuntos_ctx(ticket.adjuntos.all())
 
     if request.method == 'POST':
-        # el usuario puede enviar nuevos mensajes públicos
         form_msg = TicketMensajeForm(request.POST, request.FILES)
         if form_msg.is_valid():
             with transaction.atomic():
@@ -246,24 +259,23 @@ def mi_ticket_detalle(request, pk):
                 msg.publico = True
                 msg.save()
 
-                # adjuntar archivos al ticket (no al mensaje) para simplificar
+                # Adjuntos en la respuesta (al ticket)
                 archivos = request.FILES.getlist('archivos')
                 if archivos:
                     storage = SupabaseStorage()
                     for f in archivos:
-                        ruta = f"tickets/{ticket.id}/adjuntos/{f.name}"
+                        ruta = _ruta_adjunto_ticket(ticket.id, f.name)
                         storage._save(ruta, f)
+                        es_img = (f.content_type or "").startswith("image/")
                         TicketAdjunto.objects.create(
                             ticket=ticket,
-                            tipo='documento',
+                            tipo='imagen' if es_img else 'documento',
                             ruta=ruta,
                             nombre=f.name,
-                            subido_por=request.user
+                            subido_por=request.user,
                         )
 
-                # refresca fecha_actualizacion si tu modelo lo hace en save()
-                ticket.save()
-
+                ticket.save()  # refresca fecha_actualizacion si tu modelo lo hace
             messages.success(request, "Mensaje enviado.")
             return redirect('mi_ticket_detalle', pk=ticket.pk)
         else:
@@ -325,7 +337,7 @@ def tickets_detalle(request, pk):
 
     mensajes = (
         TicketMensaje.objects
-        .filter(ticket=ticket)  # agentes ven todos (públicos y no públicos si existieran)
+        .filter(ticket=ticket)  # agentes ven todos
         .select_related('autor')
         .order_by('fecha')
     )
@@ -334,7 +346,6 @@ def tickets_detalle(request, pk):
     puede_gestionar = user.has_perm('permisos.TICKETS_GESTIONAR')
     usuarios_asignables = CustomUser.objects.all().order_by('first_name', 'last_name', 'username') if puede_gestionar else []
 
-    # Responder desde el mismo detalle
     if request.method == 'POST' and 'mensaje' in request.POST:
         if not (user.has_perm('permisos.TICKETS_RESPONDER') or puede_gestionar):
             messages.error(request, "No tienes permiso para responder.")
@@ -346,25 +357,25 @@ def tickets_detalle(request, pk):
                 msg = form_msg.save(commit=False)
                 msg.ticket = ticket
                 msg.autor = user
-                msg.publico = True  # si quieres notas internas, aquí podrías setear False según un checkbox
+                msg.publico = True
                 msg.save()
 
                 archivos = request.FILES.getlist('archivos')
                 if archivos:
                     storage = SupabaseStorage()
                     for f in archivos:
-                        ruta = f"tickets/{ticket.id}/adjuntos/{f.name}"
+                        ruta = _ruta_adjunto_ticket(ticket.id, f.name)
                         storage._save(ruta, f)
+                        es_img = (f.content_type or "").startswith("image/")
                         TicketAdjunto.objects.create(
                             ticket=ticket,
-                            tipo='documento',
+                            tipo='imagen' if es_img else 'documento',
                             ruta=ruta,
                             nombre=f.name,
                             subido_por=user
                         )
 
                 ticket.save()
-
             messages.success(request, "Respuesta enviada.")
             return redirect('tickets_detalle', pk=ticket.pk)
         else:
@@ -406,5 +417,55 @@ def tickets_cambiar_estado(request, pk):
     return redirect('tickets_detalle', pk=ticket.pk)
 
 
+# apps/tickets/views.py
+
+def _adjuntos_ctx(adjuntos_queryset):
+    """Convierte adjuntos a dict, agregando URL pública desde Supabase."""
+    storage = SupabaseStorage()  # ✅ sin 'bucket'
+    ctx = []
+    for a in adjuntos_queryset:
+        url = None
+        try:
+            if a.ruta:
+                url = storage.get_public_url(a.ruta)
+        except Exception:
+            url = None
+        ctx.append({
+            "id": a.id,
+            "nombre": getattr(a, "nombre", "") or "Archivo",
+            "ruta": getattr(a, "ruta", ""),
+            "url": url,
+            "subido_por": a.subido_por,
+            "fecha_subida": getattr(a, "fecha_subida", None),
+        })
+    return ctx
 
 
+
+# apps/tickets/views.py
+from django.http import HttpResponseRedirect, Http404
+
+@login_required
+def adjunto_ver(request, adjunto_id: int):
+    adj = get_object_or_404(TicketAdjunto, pk=adjunto_id)
+    ticket = adj.ticket
+    user = request.user
+
+    es_autor = (ticket.solicitante_id == user.id)
+    es_asignado = (getattr(ticket, "asignado_a_id", None) == user.id)
+    es_agente = _es_agente(user)
+    if not (es_autor or es_asignado or es_agente):
+        messages.error(request, "No tienes permiso para ver este adjunto.")
+        return redirect('mi_ticket_detalle', pk=ticket.pk)
+
+    storage = SupabaseStorage()  # usa tu bucket por defecto (p. ej. "media")
+    try:
+        url = storage.get_public_url(adj.ruta) if adj.ruta else None
+        # si tienes método firmado: url = storage.get_signed_url(adj.ruta, 3600)
+    except Exception:
+        url = None
+
+    if not url:
+        raise Http404("Archivo no disponible.")
+
+    return HttpResponseRedirect(url)

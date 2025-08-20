@@ -142,18 +142,10 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label">{{ form.archivos.label }}</label>
-                {{ form.archivos }}
+                <label class="form-label">Archivos</label>
+                <input type="file" name="archivos" class="form-control" multiple>
                 <div class="form-text">Puedes adjuntar archivos (imágenes, PDFs, etc.).</div>
-                {% if form.archivos.errors %}
-                  <div class="invalid-feedback d-block">
-                    {% for e in form.archivos.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
-                  </div>
-                {% endif %}
               </div>
-
-              {% if form.prioridad %}<input type="hidden" name="prioridad" value="media">{% endif %}
-              {% if form.asignado_a %}{% endif %}
 
               <div class="d-grid d-sm-flex gap-2">
                 <button class="btn btn-primary">Enviar ticket</button>
@@ -299,13 +291,11 @@
   const btnCancel = document.getElementById('btn-cancel-form');
   const btnCancel2 = document.getElementById('btn-cancel-form-2');
 
-  // Enfocar primer campo si el form está visible (errores o ?new=1)
   if (formCard && !formCard.hasAttribute('hidden')) {
     const firstInput = formCard.querySelector('input, textarea, select');
     if (firstInput) setTimeout(()=> firstInput.focus(), 10);
   }
 
-  // Cancelar → oculta formulario y limpia ?new de la URL
   function closeForm() {
     if (formCard) formCard.setAttribute('hidden','');
     if (history.replaceState){

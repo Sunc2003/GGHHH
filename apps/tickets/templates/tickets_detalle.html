@@ -43,7 +43,7 @@
 .ticket-view small.text-muted{ color:var(--muted)!important; }
 .ticket-view .form-text{ color:var(--muted); }
 
-/* Tarjetas planas, sin caricatura */
+/* Tarjetas planas */
 .ticket-view .card{
   background:var(--card);
   border:1px solid var(--border);
@@ -57,18 +57,12 @@
 }
 .ticket-view .card-body{ padding:1rem 1rem; }
 
-/* Controles y botones más rectos */
+/* Controles y botones */
 .ticket-view .btn{ border-radius:var(--radius-sm); }
-.ticket-view .btn-primary{
-  border-color:#0b5ed7;
-}
-.ticket-view .btn-outline-primary{
-  border-color:#b9c2ce; color:#0b5ed7;
-}
+.ticket-view .btn-primary{ border-color:#0b5ed7; }
+.ticket-view .btn-outline-primary{ border-color:#b9c2ce; color:#0b5ed7; }
 .ticket-view .btn-outline-primary:hover{ background:#0b5ed7; color:#fff; }
-.ticket-view .btn-outline-secondary{
-  border-color:#b9c2ce; color:#334155;
-}
+.ticket-view .btn-outline-secondary{ border-color:#b9c2ce; color:#334155; }
 .ticket-view .btn-outline-secondary:hover{ background:#eef2f6; color:#111827; }
 
 .ticket-view .form-control,
@@ -81,6 +75,9 @@
 }
 .ticket-view textarea{ min-height:120px; resize:vertical; }
 .ticket-view .form-select.form-select-sm{ min-width:180px; }
+
+/* Mensajes */
+.ticket-view .alert{ border-radius:var(--radius-sm); }
 
 /* Listado de mensajes */
 .ticket-view .list-unstyled li{
@@ -109,13 +106,13 @@
 }
 .ticket-view .text-truncate{ max-width:260px; }
 
-/* Toolbar superior compacto en pantallas pequeñas */
+/* Responsive */
 @media (max-width: 992px){
   .ticket-view .page-head{ gap:.75rem; }
   .ticket-view .text-truncate{ max-width:180px; }
 }
 
-/* Accesibilidad: enfoque claro pero sobrio */
+/* Accesibilidad */
 .ticket-view a:focus-visible,
 .ticket-view button:focus-visible,
 .ticket-view select:focus-visible,
@@ -128,13 +125,45 @@
 
 <div class="container py-4 ticket-view" style="max-width:1100px;">
 
+  {# Bloque de mensajes Django (éxito/error) #}
+  {% if messages %}
+    <div id="flash-messages">
+      {% for message in messages %}
+        <div class="alert
+             {% if 'success' in message.tags %}alert-success
+             {% elif 'error' in message.tags %}alert-danger
+             {% elif 'warning' in message.tags %}alert-warning
+             {% else %}alert-info{% endif %}
+             alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+      {% endfor %}
+    </div>
+    <script>
+      // Oculta automáticamente los mensajes de éxito en ~2s
+      (function(){
+        const box = document.getElementById('flash-messages');
+        if(!box) return;
+        setTimeout(()=>{
+          box.querySelectorAll('.alert-success').forEach(el=>{
+            if (el.classList.contains('show')) el.classList.remove('show');
+            setTimeout(()=> el.remove(), 300);
+          });
+        }, 2000);
+      })();
+    </script>
+  {% endif %}
+
   <!-- Encabezado + gestión rápida (solo agentes/gestores) -->
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 page-head">
     <div>
       <h4 class="mb-1">#{{ ticket.id }} — {{ ticket.titulo }}</h4>
       <div class="d-flex flex-wrap align-items-center gap-2">
         <span class="badge bg-secondary">{{ ticket.get_estado_display }}</span>
-        <span class="badge bg-info text-dark">{{ ticket.get_prioridad_display }}</span>
+        {% if ticket.get_prioridad_display %}
+          <span class="badge bg-info text-dark">{{ ticket.get_prioridad_display }}</span>
+        {% endif %}
         <small class="text-muted">
           · Creado: {{ ticket.fecha_creacion|date:"Y-m-d H:i" }}
           · Actualizado: {{ ticket.fecha_actualizacion|date:"Y-m-d H:i" }}
@@ -147,7 +176,12 @@
     </div>
 
     <div class="d-flex align-items-center gap-2">
-      <a href="{% url 'tickets_bandeja' %}" class="btn btn-outline-secondary btn-sm">← Volver a la bandeja</a>
+      {% if puede_gestionar %}
+        <a href="{% url 'tickets_bandeja' %}" class="btn btn-outline-secondary btn-sm">← Volver a la bandeja</a>
+      {% else %}
+        <a href="{% url 'mi_ticket_detalle' ticket.id %}" class="btn btn-outline-secondary btn-sm">← Volver</a>
+      {% endif %}
+
       {% if puede_gestionar %}
       <form class="d-flex gap-2" method="post" action="{% url 'tickets_cambiar_estado' ticket.id %}">
         {% csrf_token %}
@@ -226,41 +260,42 @@
     </div>
 
     <!-- Adjuntos -->
-    <div class="col-lg-4">
-      <div class="card">
-        <div class="card-header">Adjuntos</div>
-        <div class="card-body">
-          {% if adjuntos %}
-            <ul class="list-group list-group-flush">
-              {% for adj in adjuntos %}
-              <li class="list-group-item d-flex align-items-center justify-content-between gap-2">
-                <div class="me-2" style="min-width:0;">
-                  <div class="small fw-semibold">{{ adj.nombre|default:"Archivo" }}</div>
-                  {% if adj.ruta %}
-                    <code class="d-block text-truncate" title="{{ adj.ruta }}">{{ adj.ruta }}</code>
-                  {% endif %}
-                  <div class="text-muted small">
-                    Subido por {{ adj.subido_por.get_full_name|default:adj.subido_por.username }}
-                    · {{ adj.fecha_subida|date:"Y-m-d H:i" }}
-                  </div>
-                </div>
-                <div class="flex-shrink-0">
-                  {% if adj.url %}
-                    <a class="btn btn-sm btn-outline-secondary" href="{{ adj.url }}" target="_blank">Ver</a>
-                  {% elif adj.ruta|slice:":4" == "http" %}
-                    <a class="btn btn-sm btn-outline-secondary" href="{{ adj.ruta }}" target="_blank">Ver</a>
-                  {% endif %}
-                </div>
-              </li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <p class="text-muted mb-0">No hay adjuntos.</p>
-          {% endif %}
-        </div>
-      </div>
+<!-- Adjuntos -->
+<div class="col-lg-4">
+  <div class="card">
+    <div class="card-header">Adjuntos</div>
+    <div class="card-body">
+      {% if adjuntos %}
+        <ul class="list-group list-group-flush">
+          {% for adj in adjuntos %}
+          <li class="list-group-item d-flex align-items-center justify-content-between gap-2">
+            <div class="me-2" style="min-width:0;">
+              <div class="small fw-semibold text-truncate" title="{{ adj.nombre|default:'Archivo' }}">
+                {{ adj.nombre|default:"Archivo" }}
+              </div>
+              {# ⛔️ Ya no mostramos adj.ruta ni ninguna URL #}
+              <div class="text-muted small">
+                Subido por {{ adj.subido_por.get_full_name|default:adj.subido_por.username }}
+                · {{ adj.fecha_subida|date:"Y-m-d H:i" }}
+              </div>
+            </div>
+            <div class="flex-shrink-0">
+              <a class="btn btn-sm btn-outline-secondary"
+                 href="{% url 'tickets_adjunto_ver' adj.id %}"
+                 title="Abrir {{ adj.nombre|default:'archivo' }}" target="_blank" rel="noopener">
+                Ver
+              </a>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted mb-0">No hay adjuntos.</p>
+      {% endif %}
     </div>
   </div>
+</div>
+
 
 </div>
 {% endblock %}
