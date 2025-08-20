@@ -1,71 +1,99 @@
+# apps/sap/views.py
 from django.shortcuts import render
-import requests
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
+from django.conf import settings
 from apps.permisos.decorators import permiso_requerido
  
-NGROK_API_URL = "https://804103bbd425.ngrok-free.app/api/productos"
-NGROK_API_SOCIOS = "https://804103bbd425.ngrok-free.app/api/socios" 
+import requests
+import time, hmac, hashlib
  
-HEADERS_NGROK = {
+# ---- ENDPOINTS REMOTOS (ajusta si cambias el dominio) ----
+NGROK_API_URL = "https://804103bbd425.ngrok-free.app/api/productos"
+NGROK_API_SOCIOS = "https://804103bbd425.ngrok-free.app/api/socios"
+ 
+# ---- HEADERS BASE (útiles para ngrok) ----
+HEADERS_BASE = {
     "ngrok-skip-browser-warning": "true",
-    "User-Agent": "DjangoClient/1.0"
+    "User-Agent": "DjangoClient/1.0",
+    "accept": "application/json",
 }
  
+def _hmac_headers():
+    """
+    Genera los 3 headers requeridos por tu API:
+      - X-API-KeyId
+      - X-API-Timestamp (epoch en segundos)
+      - X-API-Signature (HMAC-SHA256 de "KeyId.Timestamp" con API_KEY_SECRET)
+    """
+    key_id = getattr(settings, "API_KEY_ID", None)
+    key_secret = getattr(settings, "API_KEY_SECRET", None)
+    if not key_id or not key_secret:
+        # Evita llamadas silenciosas si falta configuración
+        raise RuntimeError("API_KEY_ID / API_KEY_SECRET no configurados en settings.py")
+ 
+    ts = str(int(time.time()))
+    sig = hmac.new(key_secret.encode(), f"{key_id}.{ts}".encode(), hashlib.sha256).hexdigest()
+    return {
+        **HEADERS_BASE,
+        "X-API-KeyId": key_id,
+        "X-API-Timestamp": ts,
+        "X-API-Signature": sig,
+    }
+ 
+# ---------------------------------------------------------------------
+# PRODUCTOS
+# ---------------------------------------------------------------------
 @login_required
 @permiso_requerido('BUSCAR_PRODUCTOS_SAP')
 def buscar_productos_remoto(request):
-    termino = request.GET.get("q", "")
-    headers = {
-        "ngrok-skip-browser-warning": "true",
-        "User-Agent": "DjangoClient/1.0"
-    }
+    termino = (request.GET.get("q") or "").strip()
+    if termino == "":
+        return JsonResponse({"productos": []})
  
     try:
-        response = requests.get(NGROK_API_URL, params={"q": termino}, headers=headers, timeout=5)
+        response = requests.get(
+            NGROK_API_URL,
+            params={"q": termino},
+            headers=_hmac_headers(),
+            timeout=int(getattr(settings, "API_TIMEOUT", 5)),
+        )
         response.raise_for_status()
         data = response.json()
         return JsonResponse({"productos": data})
     except requests.exceptions.HTTPError as e:
-        return JsonResponse({
-            "error": str(e),
-            "response_text": response.text,
-            "status_code": response.status_code
-        }, status=500)
-    except requests.exceptions.RequestException as e:
+        status = e.response.status_code if e.response else 500
+        body = e.response.text if e.response else str(e)
+        return JsonResponse({"error": str(e), "response_text": body, "status_code": status}, status=status)
+    except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-    
+ 
 @login_required
 @permiso_requerido('BUSCAR_PRODUCTOS_SAP')
 def buscador_productos_view(request):
     resultados = []
-    termino = request.GET.get("q", "")  # Obtén el término de búsqueda de la URL
-    filtrar_stock = request.GET.get("con_stock", "") == "on"  # Filtrar por stock disponible
-
+    termino = (request.GET.get("q") or "").strip()
+    filtrar_stock = request.GET.get("con_stock", "") == "on"
+ 
     if termino:
         try:
-            # Realizamos la solicitud a la API para obtener productos
-            response = requests.get(
+            r = requests.get(
                 NGROK_API_URL,
-                params={"q": termino},  # Pasa el término de búsqueda
-                headers={
-                    "ngrok-skip-browser-warning": "true",
-                    "User-Agent": "DjangoClient/1.0"
-                },
-                timeout=5  # Tiempo de espera de 5 segundos
+                params={"q": termino},
+                headers=_hmac_headers(),
+                timeout=int(getattr(settings, "API_TIMEOUT", 5)),
             )
-            response.raise_for_status()  # Si la respuesta tiene errores, lanzará una excepción
-
-            productos = response.json()  # Convierte la respuesta en un objeto JSON
-
-            # Filtrar por stock si el checkbox 'con_stock' está activado
-            if filtrar_stock:
-                resultados = [p for p in productos if p.get("StockTotal", 0) > 0]
-            else:
-                resultados = productos
-
-            # Si no hay productos, mostramos un mensaje de no encontrado
+            r.raise_for_status()
+            productos = r.json()
+ 
+            # opcional: calcula Disponible (si lo quieres en tu template)
+            for p in productos:
+                p.setdefault("StockTotal", p.get("StockTotal", 0) or 0)
+                p.setdefault("Comprometido", p.get("Comprometido", 0) or 0)
+                p["Disponible"] = (p["StockTotal"] - p["Comprometido"])
+ 
+            resultados = [p for p in productos if p.get("StockTotal", 0) > 0] if filtrar_stock else productos
+ 
             if not resultados:
                 resultados = [{
                     "Codigo": "No encontrado",
@@ -76,9 +104,8 @@ def buscador_productos_view(request):
                     "Pedido": "N/A",
                     "PrecioMinVta": "N/A"
                 }]
-        
+ 
         except requests.exceptions.RequestException as e:
-            # Si hay un error con la solicitud a la API, mostramos un mensaje de error
             resultados = [{
                 "Codigo": "Error",
                 "Descripcion": str(e),
@@ -88,67 +115,67 @@ def buscador_productos_view(request):
                 "Pedido": "N/A",
                 "PrecioMinVta": "N/A"
             }]
-    
+ 
     return render(request, "buscador_productos.html", {
         "termino": termino,
         "filtrar_stock": filtrar_stock,
         "resultados": resultados
     })
-    
-
+ 
+@login_required
+@permiso_requerido('BUSCAR_PRODUCTOS_SAP')
 def obtener_detalle_producto(request, itemcode):
     try:
-        # Solicitud a la API externa
-        response = requests.get(
+        r = requests.get(
             f"{NGROK_API_URL}/{itemcode}",
-            headers={
-                "ngrok-skip-browser-warning": "true",
-                "User-Agent": "DjangoClient/1.0"
-            },
-            timeout=5
+            headers=_hmac_headers(),
+            timeout=int(getattr(settings, "API_TIMEOUT", 5)),
         )
-        response.raise_for_status()
-        productos = response.json()
-
+        r.raise_for_status()
+        productos = r.json()
+ 
         if not productos:
             return JsonResponse({'error': 'Producto no encontrado'}, status=404)
-
-        # Diccionario para organizar los almacenes
+ 
         detalles_producto = {}
-        for producto in productos:
-            codigo = producto["Codigo"]
+        for prod in productos:
+            codigo = prod["Codigo"]
             if codigo not in detalles_producto:
                 detalles_producto[codigo] = {
                     'Codigo': codigo,
-                    'Descripcion': producto.get("Descripcion"),
-                    'PrecioMinVta': producto.get("PrecioMinVta"),
-                    'ProveedorPredeterminado': producto.get("ProveedorPredeterminado", "N/A"),
-                    'SKUProveedor': producto.get("SKUProveedor", "N/A"),
-                    'NombreProveedor': producto.get("NombreProveedor", "N/A"),
-                    'UnidadMedida': producto.get("UnidadMedida", "N/A"),
-                    'OrigenArticulo': producto.get("OrigenArticulo", "N/A"),
-                    'Almacenes': {}  # Diccionario de almacenes
+                    'Descripcion': prod.get("Descripcion"),
+                    'PrecioMinVta': prod.get("PrecioMinVta"),
+                    'ProveedorPredeterminado': prod.get("ProveedorPredeterminado", "N/A"),
+                    'SKUProveedor': prod.get("SKUProveedor", "N/A"),
+                    'NombreProveedor': prod.get("NombreProveedor", "N/A"),
+                    'UnidadMedida': prod.get("UnidadMedida", "N/A"),
+                    'OrigenArticulo': prod.get("OrigenArticulo", "N/A"),
+                    'Almacenes': {}
                 }
-
-            # Guardamos un diccionario por cada almacén
-            detalles_producto[codigo]["Almacenes"][producto["Almacen"]] = {
-                'NombreAlmacen': producto.get("NombreAlmacen", "N/A"),
-                'Stock': producto.get("Stock", 0),
-                'Compromiso': producto.get("Compromiso", 0),
-                'Pedido': producto.get("Pedido", 0)
+ 
+            detalles_producto[codigo]["Almacenes"][prod["Almacen"]] = {
+                'NombreAlmacen': prod.get("NombreAlmacen", "N/A"),
+                'Stock': prod.get("Stock", 0),
+                'Compromiso': prod.get("Compromiso", 0),
+                'Pedido': prod.get("Pedido", 0)
             }
-
+ 
         producto_detalles = list(detalles_producto.values())[0]
         return render(request, "detalle_producto.html", {'producto': producto_detalles})
-
-    except requests.exceptions.RequestException as e:
-        return JsonResponse({'error': str(e)}, status=500)
-
  
+    except requests.exceptions.HTTPError as e:
+        status = e.response.status_code if e.response else 500
+        return JsonResponse({'error': str(e)}, status=status)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+ 
+# ---------------------------------------------------------------------
+# SOCIOS
+# ---------------------------------------------------------------------
 @login_required
 @permiso_requerido('BUSCAR_SOCIOS')
 def socios_lista_view(request):
-    q = request.GET.get("q", "").strip()
+    q = (request.GET.get("q") or "").strip()
     socios = []
     error = None
  
@@ -157,8 +184,8 @@ def socios_lista_view(request):
             r = requests.get(
                 NGROK_API_SOCIOS,
                 params={"q": q},
-                headers=HEADERS_NGROK,
-                timeout=7,
+                headers=_hmac_headers(),
+                timeout=int(getattr(settings, "API_TIMEOUT", 7)),
             )
             r.raise_for_status()
             socios = r.json()
@@ -171,7 +198,6 @@ def socios_lista_view(request):
         "error": error,
     })
  
- 
 @login_required
 @permiso_requerido('BUSCAR_SOCIOS')
 def socio_detalle_view(request, cardcode: str):
@@ -180,8 +206,8 @@ def socio_detalle_view(request, cardcode: str):
     try:
         r = requests.get(
             f"{NGROK_API_SOCIOS}/{cardcode}",
-            headers=HEADERS_NGROK,
-            timeout=7,
+            headers=_hmac_headers(),
+            timeout=int(getattr(settings, "API_TIMEOUT", 7)),
         )
         r.raise_for_status()
         detalle = r.json()
@@ -193,3 +219,4 @@ def socio_detalle_view(request, cardcode: str):
         "detalle": detalle,
         "error": error,
     })
+ 

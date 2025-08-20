@@ -2,56 +2,9 @@
 {% load static %}
 {% block content %}
 
-<style>
-/* ===== Banner efímero de éxito ===== */
-.flash-ok{
-  border:1px solid #cce3d0; background:#eef8f1; border-radius:6px;
-  padding:.85rem 1rem; display:flex; align-items:center; gap:.9rem;
-  margin-bottom:1rem; transition:opacity .25s ease, transform .25s ease;
-}
-.flash-ok.hide{ opacity:0; transform:translateY(-6px); }
-.flash-ok .title{ font-weight:700; color:#0f5132; margin:0; }
-.flash-ok .text{ color:#0f5132; margin:0; }
-.flash-ok img{ width:28px; height:28px; display:block; }
-
-/* ===== Vista profesional ===== */
-.help-view{
-  --bg:#f5f6f8; --card:#ffffff; --text:#111827; --muted:#6b7280;
-  --border:#dfe3e8; --border-strong:#c7ccd3; --primary:#0d6efd; --accent:#f2f4f7;
-  --radius:6px; --radius-sm:4px; --pad:1rem;
-}
-.help-view *{ box-sizing:border-box; }
-.help-view h4,.help-view h5{ color:var(--text); margin:0; font-weight:600; }
-.help-view .page-head{ padding-bottom:.5rem; margin-bottom:.75rem; border-bottom:1px solid var(--border); }
-
-/* Cards / Formularios */
-.help-view .card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:none; }
-.help-view .card-body{ padding:var(--pad); }
-.help-view .form-label{ font-weight:600; color:#0f172a; margin-bottom:.35rem; }
-.help-view .form-control, .help-view .form-select, .help-view textarea, .help-view input[type="file"]{
-  border:1px solid var(--border-strong); border-radius:var(--radius-sm); box-shadow:none!important;
-}
-.help-view textarea{ min-height:140px; resize:vertical; }
-.help-view .form-text{ color:var(--muted); }
-.help-view .btn{ border-radius:var(--radius-sm); box-shadow:none!important; }
-.help-view .btn-outline-secondary{ border-color:#b9c2ce; color:#334155; }
-.help-view .btn-outline-secondary:hover{ background:#eef2f6; color:#111827; }
-.help-view .btn-light.border{ border-color:#b9c2ce!important; }
-
-/* Tabla lista */
-.help-view .badge{
-  border-radius:var(--radius-sm); padding:.25rem .5rem; font-weight:700; font-size:.72rem;
-  letter-spacing:.2px; text-transform:uppercase; border:1px solid var(--border);
-}
-.help-view .badge.bg-secondary{ background:#eef2f6; color:#334155; border-color:#c7ccd3; }
-.help-view .badge.bg-danger-subtle{ background:#fdecef; color:#b42318; border-color:#f1c7cd; }
-.help-view .badge.bg-warning-subtle{ background:#fff6e5; color:#8a6100; border-color:#efd8a6; }
-.help-view .badge.bg-success-subtle{ background:#eaf7ee; color:#0f7a42; border-color:#c7e6d2; }
-
-.help-view a:focus-visible, .help-view button:focus-visible, .help-view select:focus-visible,
-.help-view textarea:focus-visible, .help-view input:focus-visible{ outline:2px solid rgba(13,110,253,.35); outline-offset:2px; }
-.help-view .empty{ color:var(--muted); border:1px dashed var(--border); border-radius:var(--radius); padding:1.25rem; }
-</style>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/solicitar_ayuda.css' %}">
+{% endblock %}
 
 {% if request.GET.ok %}
   <div id="flash-ok" class="flash-ok" role="status">
@@ -77,7 +30,7 @@
 
 <div class="container-xxl py-4 help-view" style="max-width:1200px;">
 
-  <!-- Encabezado: 2 botones -->
+  <!-- Encabezado -->
   <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2 page-head">
     <h4 class="mb-0">Solicitar ayuda</h4>
     <div class="btn-group btn-group-sm">
@@ -100,7 +53,7 @@
     {% endfor %}
   {% endif %}
 
-  {# =================== PESTAÑA: CREAR (SOLO FORMULARIO) =================== #}
+  {# =================== CREAR =================== #}
   {% if tab != 'lista' %}
     {% if form.errors or request.GET.new %}
     <div class="row g-4">
@@ -155,21 +108,23 @@
           </div>
         </div>
       </div>
-      <!-- NO hay columna derecha -->
     </div>
     {% endif %}
   {% endif %}
 
-  {# =================== PESTAÑA: LISTA (MIS SOLICITUDES) =================== #}
+  {# =================== LISTA =================== #}
   {% if tab == 'lista' %}
   <div class="card">
     <div class="card-body">
+      <!-- FILTROS -->
       <form method="get" class="row g-2 align-items-end mb-3">
         <input type="hidden" name="tab" value="lista">
+
         <div class="col-md-4">
           <label class="form-label">Buscar</label>
           <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="título o descripción">
         </div>
+
         <div class="col-md-3">
           <label class="form-label">Estado</label>
           <select class="form-select" name="estado">
@@ -179,18 +134,22 @@
             {% endfor %}
           </select>
         </div>
+
         <div class="col-md-2">
           <label class="form-label">Desde</label>
           <input type="date" class="form-control" name="desde" value="{{ desde }}">
         </div>
+
         <div class="col-md-2">
           <label class="form-label">Hasta</label>
           <input type="date" class="form-control" name="hasta" value="{{ hasta }}">
         </div>
-        <div class="col-md-1 d-grid">
-          <button class="btn btn-primary">Filtrar</button>
+
+        <div class="col-auto d-flex">
+          <button class="btn btn-primary align-self-end">Filtrar</button>
         </div>
       </form>
+
 
       {% if page_obj.object_list %}
         <div class="table-responsive">

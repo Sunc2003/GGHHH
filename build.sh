@@ -28,7 +28,8 @@ python manage.py makemigrations --check --noinput || python manage.py makemigrat
 python manage.py migrate
 
 # Crear usuario admin solo si no existe
-python manage.py poblar_cargos_areas || echo "Datos basicos de cargos y areas"
-python manage.py crear_admin || echo "Admin ya existe o fallo tolerado"
-python manage.py poblar_sap || echo "Datos basicos de sap agregados"
-python manage.py asignar_permisos_iniciales || echo "Datos basicos de permisos agregados"
+#python manage.py poblar_cargos_areas || echo "Datos basicos de cargos y areas"
+
+#python manage.py crear_admin || echo "Admin ya existe o fallo tolerado"
+#python manage.py poblar_sap || echo "Datos basicos de sap agregados"
+#python manage.py asignar_permisos_iniciales || echo "Datos basicos de permisos agregados"

@@ -145,3 +145,9 @@ SUPABASE_BUCKET = os.getenv('SUPABASE_BUCKET', 'media')  # Nombre de tu bucket
 
 
 
+#PARA LA CONEXION SEGURA A LA API
+ 
+API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:8000/api")
+API_KEY_ID = os.getenv("API_KEY_ID", "intramars")
+API_KEY_SECRET = os.getenv("API_KEY_SECRET", "super-secreto-largo")
+API_TIMEOUT = int(os.getenv("API_TIMEOUT", "5")) 
