@@ -62,6 +62,11 @@ class Command(BaseCommand):
                 "codigo": "VER_AD",
                 "nombre": "Visualizar todos los usuarios del AD",
                 "descripcion": "Permite ver la lista de todos los usuarios y poder acceder a su apartado de perfil y permisos."
+            },
+            {
+                "codigo": "TICKETS_ACCESO_MENU",
+                "nombre": "Acceso al módulo Tickets",
+                "descripcion": "Permite acceder al módulo de Tickets y mostrar la opción en el menú."
             }
             
         ]

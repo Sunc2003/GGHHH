@@ -38,6 +38,8 @@
     #offcanvasMenu .nav-item form .nav-link:active{ transform:scale(0.99); }
     #offcanvas-edge{ position:fixed; top:0; left:0; bottom:0; width:24px; background:transparent; z-index:1040; touch-action: pan-y; }
     @media (min-width: 992px){ #offcanvas-edge{ display:none; } }
+
+    
   </style>
 
   {% block extra_css %}{% endblock %}
@@ -82,18 +84,17 @@
           </a>
         </li>
         {% endif %}
-
+        
+        {% if request.user.is_authenticated and request.user|tiene_permiso:"VER_AD" %}
         <li class="nav-item">
           <a class="nav-link text-white" href="{% url 'usuarios_ad' %}">
             <i class="fa fa-users"></i> Usuarios AD
           </a>
         </li>
-
-
-
+        {% endif %}
 
         
-          {% if perms.permisos.TICKETS_CREAR %}
+          {% if request.user.is_authenticated and request.user|tiene_permiso:"TICKETS_CREAR" %}
           <li class="nav-item">
             <a class="nav-link text-white" href="{% url 'tickets_solicitar_ayuda' %}">
               <i class="fa fa-life-ring"></i> Solicitar ayuda
@@ -101,19 +102,27 @@
           </li>
         {% endif %}
 
-        {% if perms.permisos.TICKETS_VER_TODOS or perms.permisos.TICKETS_RESPONDER or perms.permisos.TICKETS_GESTIONAR %}
-          <li class="nav-item">
-            <a class="nav-link text-white" href="{% url 'tickets_bandeja' %}">
-              <i class="fa fa-inbox"></i> Tickets
-            </a>
-          </li>
-        {% endif %}
+{% if request.user.is_authenticated and request.user|tiene_permiso:"TICKETS_ACCESO_MENU" %}
+  <li class="nav-item">
+    <a class="nav-link text-white" href="{% url 'tickets_bandeja' %}">
+      <i class="fa fa-inbox"></i> Tickets
+    </a>
+  </li>
+{% endif %}
+
+
+
+     
+        {% if request.user.is_authenticated and request.user|tiene_permiso:"CREAR_PERMISOS" %}
         <li class="nav-item">
           <a class="nav-link text-white" href="{% url 'crear_permiso' %}">
             <i class="fa fa-key"></i> Gestión de Permisos
           </a>
         </li>
+        {% endif %}
+   
 
+      
         {% if request.user.is_authenticated and request.user|tiene_permiso:"PROCESOS" %}
         <li class="nav-item">
           <a class="nav-link text-white" href="{% url 'procesos' %}">
@@ -168,7 +177,10 @@
           <li class="nav-item">
             <form method="post" action="{% url 'logout' %}" class="w-100 m-0">
               {% csrf_token %}
-              <button type="submit" class="nav-link text-white w-100 text-start d-inline-flex align-items-center gap-2" style="background:none;border:0;">
+              <button type="button"
+                      class="nav-link text-white w-100 text-start d-inline-flex align-items-center gap-2"
+                      style="background:none;border:0;"
+                      data-bs-toggle="modal" data-bs-target="#logoutModal">
                 <i class="fas fa-power-off"></i> Cerrar sesión
               </button>
             </form>
@@ -183,6 +195,50 @@
       </ul>
     </div>
   </div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md" style="max-width: 600px;">
+    <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden">
+      <div class="row g-0">
+        
+        <!-- Columna de la imagen -->
+        <div class="col-md-5 d-none d-md-flex align-items-center justify-content-center bg-light">
+          <img src="{% static 'img/ggh.png' %}" alt="Logo Marsella"
+               class="img-fluid p-3"
+               style="max-height:220px; object-fit:contain; border-radius:.3rem 0 0 .3rem;">
+        </div>
+
+        <!-- Columna del texto -->
+        <div class="col-md-7 d-flex align-items-center">
+          <div class="modal-body text-center">
+            <h5 class="modal-title mb-3">Cerrar sesión</h5>
+            <p>¿Está seguro que desea salir del sistema?</p>
+
+            <!-- Formulario POST para logout -->
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <div class="d-flex justify-content-center gap-2 mt-3">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn btn-danger">
+                  Cerrar sesión
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 
   <!-- Contenido principal -->
   <main class="flex-grow-1">

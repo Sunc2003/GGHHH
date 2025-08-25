@@ -18,7 +18,7 @@ from apps.organizaciones.views import cargos_por_area
 from .views import procesos_view
 from .views import CrearPermisoView
 from .views import api_contador_solicitudes_pendientes
- 
+from django.contrib.auth.views import LogoutView
  
  
  
@@ -39,7 +39,7 @@ urlpatterns = [
     path('permisos/nuevo/', CrearPermisoView.as_view(), name='crear_permiso'),
     # path('permisos/', PermisosListView.as_view(), name='lista_permisos'),  # si usas success_url
  
-
+    path("logout/", LogoutView.as_view(next_page="login"), name="logout"),
     # API para carga dinámica de cargos
  
     path('api/cargos_por_area/<int:area_id>/', cargos_por_area, name='cargos_por_area'),

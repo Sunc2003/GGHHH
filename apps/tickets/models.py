@@ -22,13 +22,19 @@ class Ticket(models.Model):
     descripcion = models.TextField()
     estado = models.CharField(max_length=20, choices=ESTADOS, default='abierto')
     prioridad = models.CharField(max_length=10, choices=PRIORIDADES, default='media')
-    solicitante = models.ForeignKey(User, related_name='tickets_creados', on_delete=models.CASCADE)
-    asignado_a = models.ForeignKey(User, related_name='tickets_asignados', on_delete=models.SET_NULL, null=True, blank=True)
+    solicitante = models.ForeignKey(
+        User, related_name='tickets_creados', on_delete=models.CASCADE
+    )
+    asignado_a = models.ForeignKey(
+        User, related_name='tickets_asignados',
+        on_delete=models.SET_NULL, null=True, blank=True
+    )
     fecha_creacion = models.DateTimeField(default=timezone.now)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"#{self.pk} {self.titulo}"
+
 
 class TicketMensaje(models.Model):
     ticket = models.ForeignKey(Ticket, related_name='mensajes', on_delete=models.CASCADE)
@@ -39,6 +45,7 @@ class TicketMensaje(models.Model):
 
     class Meta:
         ordering = ['fecha']
+
 
 class TicketAdjunto(models.Model):
     ticket = models.ForeignKey(Ticket, related_name='adjuntos', on_delete=models.CASCADE)

@@ -28,7 +28,6 @@ import re
 from urllib.parse import quote
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.base import ContentFile
-from apps.utils.supabase_storage import SupabaseStorage
 from django.views.generic import ListView
 from django.utils.timezone import now
 from django import template
@@ -40,18 +39,38 @@ from apps.permisos.forms import PermisoForm
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
- 
- 
+from django.shortcuts import render
+from django.contrib.auth.decorators import user_passes_test
+from django.core.cache import cache
+from apps.usuarios.models import CustomUser, SolicitudCodigo
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.urls import reverse
+from urllib.parse import urlparse
+from django.urls import resolve, Resolver404 
  
 class IniciarSesionView(LoginView):
-    template_name = 'login.html'  # Ruta al template
-    
+    template_name = 'login.html'
+ 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         form.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Usuario'})
         form.fields['password'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Contraseña'})
         return form
-    
+ 
+    def get_success_url(self):
+        # 1) Si viene ?next= y es seguro Y EXISTE en tus urls, respétalo
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url and url_has_allowed_host_and_scheme(next_url, {self.request.get_host()}):
+            path = urlparse(next_url).path
+            try:
+                resolve(path)   # ¿existe esa ruta?
+                return next_url
+            except Resolver404:
+                pass   # ignoramos next inválido (/usuarios/panel/ por ejemplo)
+ 
+        # 2) Si no hay next válido, SIEMPRE al panel real
+        return reverse('panel_admin_usuarios')   
+        
 @method_decorator(permiso_requerido('CREACION_USUARIO'), name='dispatch')
 class RegistroUsuarioView(CreateView):
     model = CustomUser
@@ -77,31 +96,23 @@ def formatear_tiempo(td):
     return f"{hours}h {minutes}min"
  
  
-from django.shortcuts import render
-from django.utils import timezone
-from django.db.models import F, Avg, ExpressionWrapper, DurationField
-from django.contrib.auth.decorators import user_passes_test
-from django.core.cache import cache
-from datetime import timedelta
-
-from apps.usuarios.models import CustomUser, SolicitudCodigo
-from apps.permisos.decorators import permiso_requerido
 
 
-@user_passes_test(es_admin)
+
+##@user_passes_test(es_admin)
 def panel_admin_usuarios(request):
     usuarios = CustomUser.objects.all()
-
+ 
     # Marcar usuarios en línea desde cache
     for u in usuarios:
         u.en_linea = bool(cache.get(f"online:{u.id}", False))
-
+ 
     # 🔹 Solicitudes recibidas por el administrador
     solicitudes_recibidas = SolicitudCodigo.objects.filter(receptor=request.user)
     total_recibidas = solicitudes_recibidas.count()
     pendientes = solicitudes_recibidas.filter(estado='pendiente').count()
     completadas = total_recibidas - pendientes
-
+ 
     # 🔹 Tiempo promedio de respuesta
     solicitudes_con_respuesta = solicitudes_recibidas.filter(
         estado='creado',
@@ -112,16 +123,16 @@ def panel_admin_usuarios(request):
             output_field=DurationField()
         )
     )
-
+ 
     promedio_respuesta = solicitudes_con_respuesta.aggregate(
         promedio=Avg('tiempo_respuesta')
     )['promedio'] if solicitudes_con_respuesta.exists() else None
-
+ 
     # 🔹 KPI para usuarios normales
     solicitudes_enviadas_usuario = SolicitudCodigo.objects.filter(solicitante=request.user)
     total_solicitudes = solicitudes_enviadas_usuario.count()
     solicitudes_respondidas = solicitudes_enviadas_usuario.exclude(estado='pendiente').count()
-
+ 
     context = {
         'usuarios': usuarios,
         'solicitudes_recibidas': solicitudes_recibidas,
@@ -132,8 +143,11 @@ def panel_admin_usuarios(request):
         'total_solicitudes': total_solicitudes,
         'solicitudes_respondidas': solicitudes_respondidas,
     }
-
+ 
     return render(request, 'panel_admin.html', context)
+
+
+################################################################################################
  
  
 @method_decorator(permiso_requerido('SOLICITUD_CODIGO'), name='dispatch')    
@@ -343,7 +357,7 @@ class CambiarEstadoView(UpdateView):
  
  
  
- 
+@method_decorator(permiso_requerido('VER_AD'), name='dispatch')
 class UsuariosADListView(ListView):
     model = CustomUser
     template_name = 'usuarios_ad.html'
@@ -483,7 +497,7 @@ class EditarPerfilYPermisosUsuarioView(LoginRequiredMixin, UpdateView):
  
  
  
- 
+@method_decorator(permiso_requerido('CREAR_PERMISO'), name='dispatch')
 class CrearPermisoView(CreateView):
     model = Permiso
     form_class = PermisoForm
@@ -563,4 +577,46 @@ def api_contador_solicitudes_pendientes(request):
 
 
 
+
+
+class EditarPerfilYPermisosUsuarioView(LoginRequiredMixin, UpdateView):
+    model = CustomUser
+    form_class = PerfilYPermisosUsuarioForm
+    template_name = 'asignar_permisos_usuario.html'
+    success_url = reverse_lazy('usuarios_ad')
+ 
+    def form_valid(self, form):
+        # deja que el form guarde primero
+        response = super().form_valid(form)
+ 
+        # compute y fuerza el username después de guardar (por si algo lo pisó)
+        new_first = (form.cleaned_data.get('first_name') or "").strip()
+        new_last  = (form.cleaned_data.get('last_name')  or "").strip()
+        new_base  = f"{new_first} {new_last}".strip()
+ 
+        # usa el helper del form para garantizar unicidad
+        try:
+            builder = getattr(form, "_build_unique_username")
+        except AttributeError:
+            # fallback mínimo
+            def builder(base, user_pk=None):
+                base = base or (form.cleaned_data.get('email','').split('@')[0] or 'usuario')
+                from apps.usuarios.models import CustomUser
+                i, username = 1, base
+                qs = CustomUser.objects.exclude(pk=self.object.pk) if self.object.pk else CustomUser.objects.all()
+                while qs.filter(username=username).exists():
+                    username = f"{base} {i}"; i += 1
+                return username
+ 
+        forced_username = builder(new_base, user_pk=self.object.pk)
+        print("DEBUG vista.force username =>", forced_username)
+ 
+        # Sólo si cambió, persistimos
+        if self.object.username != forced_username:
+            self.object.username = forced_username
+            # si tienes un save() de modelo que lo pisa, usa update() directo como último recurso:
+            # type(self.object).objects.filter(pk=self.object.pk).update(username=forced_username)
+            self.object.save(update_fields=["username"])
+ 
+        return response 
 

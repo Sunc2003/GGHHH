@@ -54,7 +54,7 @@
   /* Checkbox visible */
   .form-check-input{
     width:18px; height:18px; margin:0; cursor:pointer;
-    accent-color: var(--accent); /* check visible en verde */
+    accent-color: var(--accent);
     border:1px solid #cfd4da !important;
     border-radius:3px; box-shadow:none;
   }
@@ -72,14 +72,12 @@
   .btn-primary{ background:#2f3235; border-color:#2f3235; font-weight:600; border-radius:var(--radius); }
   .btn-primary:hover{ background:#232527; border-color:#232527; }
  
-    /* Achicar solo el campo "Equipo a cargo" */
+  /* Achicar solo el campo "Equipo a cargo" */
   textarea#id_equipo_a_cargo {
-      min-height: 38px; /* alto igual a un input normal */
+      min-height: 38px;
       height: 38px;
-      resize: vertical; /* opcional: permite agrandarlo manualmente */
+      resize: vertical;
   }
- 
- 
 </style>
 {% endblock %}
  
@@ -157,10 +155,60 @@
       </div>
     </div>
  
+    <!-- Acciones -->
     <div class="sticky-actions mt-3">
       <a href="{% url 'usuarios_ad' %}" class="btn btn-outline-secondary">Cancelar</a>
-      <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      <!-- Abrir modal -->
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmModal">
+        Guardar cambios
+      </button>
     </div>
+
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md" style="max-width: 600px;">
+    <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden">
+      <div class="row g-0">
+        
+        <!-- Columna imagen -->
+        <div class="col-5 d-flex align-items-center justify-content-center bg-light">
+          <img src="{% static 'img/ggh.png' %}" alt="Confirmación" class="img-fluid p-3" style="max-height:180px; object-fit:contain;">
+        </div>
+        
+        <!-- Columna texto -->
+        <div class="col-7 d-flex flex-column">
+          <div class="modal-header border-0 pb-2">
+            <h6 class="modal-title fw-bold text-dark" id="confirmModalLabel">
+              <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> Confirmar cambios
+            </h6>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+
+          <div class="modal-body flex-grow-1 d-flex align-items-center">
+            <p class="mb-0 text-muted small">
+              ¿Está seguro que desea <span class="fw-semibold text-dark">guardar los cambios</span> en el perfil y los permisos?
+            </p>
+          </div>
+
+          <div class="modal-footer border-0 pt-0 justify-content-end">
+            <button type="button" class="btn btn-outline-secondary btn-sm px-4" data-bs-dismiss="modal" style="border-radius:6px;">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-success btn-sm px-4" style="border-radius:6px;">
+              Sí, guardar
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
   </form>
 </div>
  
@@ -186,4 +234,7 @@
     clearBtn.addEventListener('click', () => { for (const cb of body.querySelectorAll('.perm-check')) cb.checked = false; updateCount(); });
   })();
 </script>
+
+<!-- Bootstrap JS necesario para el modal -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

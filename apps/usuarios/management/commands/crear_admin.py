@@ -1,15 +1,15 @@
-from django.core.management.base import BaseCommand
+# apps/usuarios/management/commands/seed_users.py
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 from django.contrib.auth import get_user_model
 from apps.organizaciones.models import Area, Cargo
-from apps.usuarios.models import AbstractUser
-class Command(BaseCommand):
-    help = 'Elimina y vuelve a crear usuarios administradores con todos sus campos'
 
-    def handle(self, *args, **options):
-        User = get_user_model()
+NO_EMAIL_VALUES = {"NO APLICA", "DISPONIBLE", ""}
 
-        usuarios = [
-            {
+# ⚠️ Pega aquí tu lista completa exactamente como la tienes:
+#    OJO: el orden determina quiénes serán superusers (los primeros 4).
+usuarios = [
+     {
                 "username": "Gonzalo Neira",
                 "email": "gneira@ggh.cl",
                 "password": "Manzana",
@@ -1153,50 +1153,112 @@ class Command(BaseCommand):
         "impresora_a_cargo": "BROTHER MFCL6900W",
         "movil": "+569 5 216 7864"
     }
+]
 
+class Command(BaseCommand):
+    help = "Elimina todos los usuarios y los recrea desde una lista. Los primeros N quedan como superusers."
 
-    
-        ]
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help="No pedir confirmación para borrar todos los usuarios.",
+        )
+        parser.add_argument(
+            "--super-count",
+            type=int,
+            default=4,
+            help="Cantidad de usuarios iniciales a marcar como superusers (default: 4).",
+        )
 
-        for u in usuarios:
-            # Separar nombre completo
-            nombre_split = u["username"].split()
-            first_name = nombre_split[0]
-            last_name = " ".join(nombre_split[1:]) if len(nombre_split) > 1 else ""
+    def _split_names(self, nombre_completo: str):
+        partes = (nombre_completo or "").strip().split()
+        if not partes:
+            return "", ""
+        first = partes[0]
+        last = " ".join(partes[1:]) if len(partes) > 1 else ""
+        return first, last
 
-            # Buscar área y cargo
-            try:
-                area = Area.objects.get(nombre=u["area"])
-                cargo = Cargo.objects.get(nombre=u["cargo"], area=area)
-            except Area.DoesNotExist:
-                self.stdout.write(self.style.ERROR(f'Área no encontrada: {u["area"]}'))
-                continue
-            except Cargo.DoesNotExist:
-                self.stdout.write(self.style.ERROR(f'Cargo no encontrado: {u["cargo"]}'))
-                continue
+    def handle(self, *args, **opts):
+        User = get_user_model()
+        super_count = int(opts["super_count"])
 
-            # Eliminar usuario si ya existe
-            existente = User.objects.filter(username=u["username"])
-            if existente.exists():
-                existente.delete()
-                self.stdout.write(self.style.WARNING(f'✘ Usuario {u["username"]} eliminado'))
-            
+        if not usuarios:
+            raise CommandError("La lista 'usuarios' está vacía. Pega tu data antes de ejecutar.")
 
-            # Crear nuevo usuario con todos los campos
-            nuevo = User.objects.create_superuser(
-                username=u["username"],
-                email=u["email"],
-                password=u["password"],
-                first_name=first_name,
-                last_name=last_name,
-                area=area,
-                cargo=cargo,
-                usuario_ad=u["usuario_ad"],
-                usuario_office=u["usuario_office"],
-                usuario_sap=u["usuario_sap"],
-                equipo_a_cargo=u["equipo_a_cargo"],
-                impresora_a_cargo=u["impresora_a_cargo"],
-                movil=u["movil"]
-            )
+        if not opts["force"]:
+            self.stdout.write(self.style.WARNING("⚠ Esto ELIMINARÁ TODOS los usuarios."))
+            resp = input("¿Continuar? (escribe 'SI' para continuar): ").strip()
+            if resp != "SI":
+                self.stdout.write(self.style.NOTICE("Operación cancelada."))
+                return
 
-            self.stdout.write(self.style.SUCCESS(f'✔ Usuario {u["username"]} creado correctamente'))
+        with transaction.atomic():
+            # 1) Borrar todos los usuarios
+            total_prev = User.objects.count()
+            User.objects.all().delete()
+            self.stdout.write(self.style.WARNING(f"✘ Eliminados {total_prev} usuarios."))
+
+            # 2) Crear de nuevo en orden
+            creados, saltados = 0, 0
+            for idx, u in enumerate(usuarios, start=1):
+                username = (u.get("username") or "").strip()
+                email_raw = (u.get("email") or "").strip()
+                email = "" if email_raw.upper() in NO_EMAIL_VALUES else email_raw
+                pwd = u.get("password") or "Cambiar123!"  # fallback decente
+                area_nombre = (u.get("area") or "").strip()
+                cargo_nombre = (u.get("cargo") or "").strip()
+
+                if not username:
+                    self.stdout.write(self.style.ERROR("Usuario sin 'username' → saltado."))
+                    saltados += 1
+                    continue
+
+                # Resuelve Area y Cargo
+                area = Area.objects.filter(nombre=area_nombre).first()
+                if not area:
+                    self.stdout.write(self.style.ERROR(f"Área no encontrada: {area_nombre} → {username} saltado"))
+                    saltados += 1
+                    continue
+
+                cargo = Cargo.objects.filter(nombre=cargo_nombre, area=area).first()
+                if not cargo:
+                    self.stdout.write(self.style.ERROR(f"Cargo '{cargo_nombre}' no encontrado en área '{area_nombre}' → {username} saltado"))
+                    saltados += 1
+                    continue
+
+                first_name, last_name = self._split_names(username)
+
+                # Flags: primeros N superusers
+                es_super = idx <= super_count
+                es_staff = es_super  # si quieres, puedes dejar staff=True para otros también
+
+                # Crear usuario
+                obj = User(
+                    username=username,
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    area=area,
+                    cargo=cargo,
+                    usuario_ad=u.get("usuario_ad") or "",
+                    usuario_office=u.get("usuario_office") or "",
+                    usuario_sap=u.get("usuario_sap") or "",
+                    equipo_a_cargo=u.get("equipo_a_cargo") or "",
+                    impresora_a_cargo=u.get("impresora_a_cargo") or "",
+                    movil=u.get("movil") or "",
+                    is_superuser=es_super,
+                    is_staff=es_staff,
+                    is_active=True,
+                )
+                obj.set_password(pwd)
+                obj.save()
+                creados += 1
+
+                if es_super:
+                    self.stdout.write(self.style.SUCCESS(f"✔ {idx}. {username} (SUPERUSER) creado"))
+                else:
+                    self.stdout.write(self.style.SUCCESS(f"✔ {idx}. {username} creado"))
+
+        self.stdout.write(self.style.SUCCESS(f"\n✅ Listo. Creados: {creados} | Saltados: {saltados}"))
+        self.stdout.write(self.style.HTTP_INFO("Recuerda: sólo los primeros N quedaron como superusers."))

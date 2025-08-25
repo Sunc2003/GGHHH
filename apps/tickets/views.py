@@ -12,11 +12,14 @@ from apps.usuarios.models import CustomUser
 
 from .models import Ticket, TicketMensaje, TicketAdjunto
 from .forms import TicketForm, TicketMensajeForm
+from apps.permisos.decorators import permiso_requerido
+from django.contrib.auth.decorators import login_required, permission_required
 
 import re
 
 
 # ===== Helpers =====
+
 def _es_agente(user):
     """Determina si el usuario es de soporte/mesa TI."""
     return (
@@ -57,7 +60,9 @@ def _adjuntos_ctx(adjuntos_queryset):
 
 
 # ===== LISTA general (mixta; restringe si no es agente) =====
+
 @login_required
+
 def lista_tickets(request):
     user = request.user
 
@@ -292,29 +297,43 @@ def mi_ticket_detalle(request, pk):
 
 
 # ===== BANDEJA (solo agentes) =====
-@login_required
-def tickets_bandeja(request):
-    user = request.user
-    if not _es_agente(user):
-        messages.error(request, "No tienes permiso para ver la bandeja de tickets.")
-        return redirect('tickets_lista')
+# apps/tickets/views.py
+from django.contrib.auth.decorators import login_required, permission_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.db.models import Q
 
+from .models import Ticket
+
+
+# ===== BANDEJA (solo agentes con permiso) =====
+@login_required
+@permiso_requerido('TICKETS_ACCESO_MENU')
+def tickets_bandeja(request):
+
+    """
+    Bandeja de tickets para agentes.
+    - Requiere el permiso único: tickets.TICKETS_ACCESO_MENU
+    - Si no lo tiene, devuelve 403 (o puedes redirigirlo).
+    """
     q = request.GET.get('q', '').strip()
     estado = request.GET.get('estado', '')
     solo_abiertos = request.GET.get('abiertos', '1')
 
-    tickets = Ticket.objects.all().select_related('solicitante', 'asignado_a').order_by('-fecha_actualizacion')
+    tickets = Ticket.objects.all().select_related(
+        'solicitante', 'asignado_a'
+    ).order_by('-fecha_actualizacion')
 
     if solo_abiertos == '1':
-        try:
-            tickets = tickets.exclude(estado='cerrado')
-        except Exception:
-            pass
+        tickets = tickets.exclude(estado='cerrado')
 
     if estado:
         tickets = tickets.filter(estado=estado)
+
     if q:
-        tickets = tickets.filter(Q(titulo__icontains=q) | Q(descripcion__icontains=q))
+        tickets = tickets.filter(
+            Q(titulo__icontains=q) | Q(descripcion__icontains=q)
+        )
 
     return render(request, 'tickets_bandeja.html', {
         'tickets': tickets,
@@ -322,6 +341,7 @@ def tickets_bandeja(request):
         'f_estado': estado,
         'solo_abiertos': solo_abiertos,
     })
+
 
 
 # ===== DETALLE (agentes) =====

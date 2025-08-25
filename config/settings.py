@@ -26,8 +26,9 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 AUTH_USER_MODEL = 'usuarios.CustomUser'
-LOGIN_REDIRECT_URL = '/usuarios/panel/'
-LOGOUT_REDIRECT_URL = '/usuarios/login/'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/panel/'
+LOGOUT_REDIRECT_URL = '/login/'
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
