@@ -113,7 +113,7 @@
 
 
      
-        {% if request.user.is_authenticated and request.user|tiene_permiso:"CREAR_PERMISOS" %}
+        {% if request.user.is_authenticated and request.user|tiene_permiso:"GESTIONAR_PERMISOS" %}
         <li class="nav-item">
           <a class="nav-link text-white" href="{% url 'crear_permiso' %}">
             <i class="fa fa-key"></i> Gestión de Permisos

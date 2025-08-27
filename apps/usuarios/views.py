@@ -497,7 +497,7 @@ class EditarPerfilYPermisosUsuarioView(LoginRequiredMixin, UpdateView):
  
  
  
-@method_decorator(permiso_requerido('CREAR_PERMISO'), name='dispatch')
+@method_decorator(permiso_requerido('GESTIONAR_PERMISOS'), name='dispatch')
 class CrearPermisoView(CreateView):
     model = Permiso
     form_class = PermisoForm
