@@ -11,36 +11,170 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link href="{% static 'css/base.css' %}" rel="stylesheet" />
 
-  <style>
-    .badge-counter{
-      background:#dc3545;color:#fff;font-size:.75rem;padding:.25em .6em;border-radius:10rem;
+
+<style>
+  /* ---------- Contador notificaciones ---------- */
+  .badge-counter {
+    background:#dc3545;
+    color:#fff;
+    font-size:.75rem;
+    padding:.25em .6em;
+    border-radius:10rem;
+  }
+
+  /* ---------- Offcanvas ---------- */
+  #offcanvasMenu .offcanvas-body {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    padding-left:1.25rem;
+    padding-right:1rem;
+    gap:.5rem;
+  }
+  #offcanvasMenu .navbar-nav {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:.25rem;
+  }
+  #offcanvasMenu .nav-link,
+  .navbar .nav-link {
+    color:#fff !important;
+    border-radius:.6rem;
+    padding:.55rem .8rem;
+    display:inline-flex;
+    align-items:center;
+    gap:.55rem;
+    transition: background-color .18s ease,
+                color .18s ease,
+                transform .05s ease,
+                box-shadow .18s ease;
+    text-decoration:none;
+  }
+  #offcanvasMenu .nav-link:hover,
+  .navbar .nav-link:hover {
+    background: var(--bs-primary);
+    color:#fff !important;
+    box-shadow: 0 2px 8px rgba(13,110,253,.35);
+  }
+  #offcanvasMenu .nav-link:focus-visible,
+  .navbar .nav-link:focus-visible {
+    outline:2px solid var(--bs-primary);
+    outline-offset:2px;
+  }
+  #offcanvasMenu .nav-link.active,
+  .navbar .nav-link.active {
+    background: rgba(13,110,253,.22);
+    color:#fff !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+  }
+  #offcanvasMenu .nav-link:active,
+  .navbar .nav-link:active {
+    transform:scale(0.99);
+  }
+  #offcanvasMenu .nav-link .fa,
+  .navbar .nav-link .fa,
+  #offcanvasMenu .nav-link .fas,
+  .navbar .nav-link .fas {
+    width:1.15em;
+    text-align:center;
+    opacity:.95;
+  }
+
+  /* ---------- Navbar y logo ---------- */
+  .navbar .navbar-brand img.logo-ggh {
+    height:140px !important;
+    width:auto !important;
+    filter: drop-shadow(2px 2px 10px #232323);
+  }
+  @media (min-width: 576px) and (max-width: 991.98px){
+    .navbar .navbar-brand img.logo-ggh {
+      height:100px !important;
     }
-    #offcanvasMenu .offcanvas-body { display:flex; flex-direction:column; align-items:flex-start; padding-left:1.25rem; padding-right:1rem; gap:.5rem; }
-    #offcanvasMenu .navbar-nav { display:flex; flex-direction:column; align-items:flex-start; gap:.25rem; }
-    #offcanvasMenu .nav-link, .navbar .nav-link{
-      color:#fff !important; border-radius:.6rem; padding:.55rem .8rem; display:inline-flex; align-items:center; gap:.55rem;
-      transition: background-color .18s ease, color .18s ease, transform .05s ease, box-shadow .18s ease; text-decoration:none;
+  }
+  @media (max-width:575.98px){
+    .navbar .navbar-brand img.logo-ggh {
+      height:90px !important;
     }
-    #offcanvasMenu .nav-link:hover, .navbar .nav-link:hover{ background: var(--bs-primary); color:#fff !important; box-shadow: 0 2px 8px rgba(13,110,253,.35); }
-    #offcanvasMenu .nav-link:focus-visible, .navbar .nav-link:focus-visible{ outline:2px solid var(--bs-primary); outline-offset:2px; }
-    #offcanvasMenu .nav-link.active, .navbar .nav-link.active{ background: rgba(13,110,253,.22); color:#fff !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
-    #offcanvasMenu .nav-link:active, .navbar .nav-link:active{ transform:scale(0.99); }
-    #offcanvasMenu .nav-link .fa, .navbar .nav-link .fa, #offcanvasMenu .nav-link .fas, .navbar .nav-link .fas{ width:1.15em; text-align:center; opacity:.95; }
-    .navbar .navbar-brand img.logo-ggh{ height:140px !important; width:auto !important; filter: drop-shadow(2px 2px 10px #232323); }
-    @media (min-width: 576px) and (max-width: 991.98px){ .navbar .navbar-brand img.logo-ggh{ height:100px !important; } }
-    @media (max-width:575.98px){ .navbar .navbar-brand img.logo-ggh{ height:90px !important; } }
-    #offcanvasMenu .offcanvas-title img{ height:60px; width:auto; }
-    .navbar{ padding-top:.5rem; padding-bottom:.5rem; }
-    #offcanvasMenu .nav-item form{ width:100%; margin:0; }
-    #offcanvasMenu .nav-item form .nav-link{ padding:.55rem .8rem; border-radius:.6rem; }
-    #offcanvasMenu .nav-item form .nav-link:hover{ background: var(--bs-primary); color:#fff !important; box-shadow:0 2px 8px rgba(13,110,253,.35); }
-    #offcanvasMenu .nav-item form .nav-link:focus-visible{ outline:2px solid var(--bs-primary); outline-offset:2px; }
-    #offcanvasMenu .nav-item form .nav-link:active{ transform:scale(0.99); }
-    #offcanvas-edge{ position:fixed; top:0; left:0; bottom:0; width:24px; background:transparent; z-index:1040; touch-action: pan-y; }
-    @media (min-width: 992px){ #offcanvas-edge{ display:none; } }
+  }
+  #offcanvasMenu .offcanvas-title img {
+    height:60px;
+    width:auto;
+  }
+  .navbar {
+    padding-top:.5rem;
+    padding-bottom:.5rem;
+  }
+
+  /* ---------- Formularios dentro del offcanvas ---------- */
+  #offcanvasMenu .nav-item form {
+    width:100%;
+    margin:0;
+  }
+  #offcanvasMenu .nav-item form .nav-link {
+    padding:.55rem .8rem;
+    border-radius:.6rem;
+  }
+  #offcanvasMenu .nav-item form .nav-link:hover {
+    background: var(--bs-primary);
+    color:#fff !important;
+    box-shadow:0 2px 8px rgba(13,110,253,.35);
+  }
+  #offcanvasMenu .nav-item form .nav-link:focus-visible {
+    outline:2px solid var(--bs-primary);
+    outline-offset:2px;
+  }
+  #offcanvasMenu .nav-item form .nav-link:active {
+    transform:scale(0.99);
+  }
+
+  /* ---------- Edge para swipe ---------- */
+  #offcanvas-edge {
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+    width:24px;
+    background:transparent;
+    z-index:1040;
+    touch-action: pan-y;
+  }
+  @media (min-width: 992px){
+    #offcanvas-edge{ display:none; }
+  }
+
+  /* ---------- Footer ---------- */
+  .site-footer .footer-logo img {
+    height:50px;
+    max-width:100%;
+  }
+  .site-footer .footer-contact p {
+    margin-bottom:.3rem;
+  }
+  /* Responsivo: móviles y tablets */
+  @media (max-width: 767.98px) {
+    .site-footer .container {
+      text-align:center;        /* Centrar todo en móvil */
+    }
+    .site-footer .footer-contact {
+      margin-top:1rem;          /* Espacio entre logo y contacto */
+    }
+    .site-footer .d-flex.gap-3 a {
+      font-size:1.6rem;         /* Íconos más grandes para tocar */
+    }
+  }
+
+  /* ---------- Ajustes offcanvas en pantallas pequeñas ---------- */
+  .offcanvas .nav-link {
+    font-size:1rem;
+    padding:.75rem 1rem;
+  }
+  .offcanvas .offcanvas-title img {
+    max-height:50px;
+  }
+</style>
 
     
-  </style>
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -247,26 +381,30 @@
     </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="site-footer bg-dark text-white mt-auto">
-    <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between py-4">
-      <div class="footer-logo mb-3 mb-md-0">
-        <img src="{% static 'img/logomarsella.png' %}" alt="Logo Marsella" height="60"
-             style="filter: drop-shadow(2px 2px 10px #434040);">
-      </div>
-      <div class="footer-contact text-white ms-md-4">
-        <p class="fw-bold mb-2" style="font-size:1.3rem; letter-spacing:0.5px;">CONTACTO</p>
-        <div style="line-height:1.7; font-size:1.05rem;">
-          Casa central: Av. España #2501,<br>
-          Batuco, Lampa. Santiago, Chile.<br><br>
-          Antofagasta: El Quisco #678<br>
-          Correo: <a href="mailto:contacto@ggh.cl" class="footer-link">contacto@ggh.cl</a><br>
-          Whatsapp: <a href="https://wa.me/56952167864" class="footer-link">+569 5216 7864</a><br>
-          Chile
-        </div>
+<footer class="site-footer bg-dark text-white mt-auto">
+  <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between py-4">
+    
+    <!-- Logo -->
+    <div class="footer-logo mb-3 mb-md-0 text-center text-md-start">
+      <img src="{% static 'img/logomarsella.png' %}" alt="Logo Marsella" height="50"
+           style="filter: drop-shadow(2px 2px 10px #434040);">
+    </div>
+
+    <!-- Contacto -->
+    <div class="footer-contact text-center text-md-start">
+      <p class="fw-bold mb-2" style="font-size:1.1rem;">CONTACTO</p>
+      <p class="mb-1">Casa central: Av. España #2501, Batuco, Lampa.</p>
+      <p class="mb-1">Antofagasta: El Quisco #678</p>
+      <div class="d-flex gap-3 justify-content-center justify-content-md-start mt-2">
+        <a href="mailto:contacto@ggh.cl" class="text-white fs-4"><i class="fas fa-envelope"></i></a>
+        <a href="https://wa.me/56952167864" class="text-white fs-4"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://www.google.com/maps/place/Batuco,+Lampa" target="_blank" class="text-white fs-4"><i class="fas fa-map-marker-alt"></i></a>
       </div>
     </div>
-  </footer>
+  </div>
+</footer>
+
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
