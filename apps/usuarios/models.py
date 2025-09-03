@@ -3,11 +3,6 @@ from django.db import models
 from apps.organizaciones.models import Area, Cargo
 from django.conf import settings
 from django.utils import timezone
-from django.db import models
-from django.conf import settings
-
-
-
 
 
 class CustomUser(AbstractUser):
@@ -31,32 +26,32 @@ class CustomUser(AbstractUser):
     def tiene_permiso(self, codigo_permiso):
         return self.obtener_permisos().filter(codigo=codigo_permiso).exists()
 
-
+        
 class SolicitudCodigo(models.Model):
     ESTADOS = [
         ('pendiente', 'Pendiente'),
         ('creado', 'Código Creado'),
     ]
- 
+
     EMPRESAS = [
         ('asland', 'Asland'),
         ('marsella', 'Marsella'),
     ]
- 
+
     TIPOS_SOLICITUD = [
         ('nuevo_articulo', 'Nuevo Artículo'),
         ('produccion', 'Producción'),
         ('activacion', 'Activación'),
         ('modificacion', 'Modificación'),
     ]
- 
+
     OPCIONES_COTIZACION = [
         ('telefono', 'Por Teléfono'),
         ('documento', 'Por Documento'),
         ('lista_precios', 'Por Lista de Precios'),
         ('whatsapp', 'Por WhatsApp'),
     ]
- 
+
     # Relaciones de usuarios
     solicitante = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -68,22 +63,31 @@ class SolicitudCodigo(models.Model):
         on_delete=models.CASCADE,
         related_name='solicitudes_recibidas'
     )
- 
+
     # Datos generales de la solicitud
     empresa = models.CharField(max_length=20, choices=EMPRESAS, default='marsella')
     tipo_solicitud = models.CharField(max_length=20, choices=TIPOS_SOLICITUD, default='nuevo_articulo')
     cotizacion = models.CharField(max_length=20, choices=OPCIONES_COTIZACION, blank=True, null=True)
- 
- 
+
+    # Extra para el flujo de Activación
+
+    codigo_extra = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text="Solo se usa en solicitudes de tipo Activación"
+    )
+
+
+
     # Estado y control
     titulo = models.CharField(max_length=100, null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
     fecha_creacion = models.DateTimeField(default=timezone.now)
-    fecha_respuesta = models.DateTimeField(null=True, blank=True)  # ✅ NUEVO
+    fecha_respuesta = models.DateTimeField(null=True, blank=True)
     mensaje = models.TextField(blank=True, null=True, verbose_name="Mensaje al receptor")
     comentario_estado = models.TextField(blank=True, null=True, verbose_name="Comentario de respuesta")
- 
-    
+
     def __str__(self):
         return f"{self.get_tipo_solicitud_display()} - {self.solicitante.username} → {self.receptor.username}"
 
@@ -101,7 +105,6 @@ class DetalleCodigo(models.Model):
     marca = models.ForeignKey('sap.Marca', on_delete=models.PROTECT)
     udm = models.ForeignKey('sap.UDM', on_delete=models.PROTECT)
 
-    # NUEVOS CAMPOS
     origen = models.CharField(max_length=20, choices=ORIGENES, default='sin origen')
     proveedor = models.ForeignKey('sap.Proveedor', on_delete=models.PROTECT, related_name='detalles')
 
@@ -115,19 +118,14 @@ class DetalleCodigo(models.Model):
 
     def __str__(self):
         return f"SKU: {self.sku_proveedor or self.sku_fabricante} - ${self.costo}"
-    
-    
-    
-def ruta_adjuntos(instance, filename):
-    # Carpeta base por solicitud
-    carpeta_base = f"solicitudes/{instance.solicitud.id}"
 
-    # Subcarpeta por tipo
+
+def ruta_adjuntos(instance, filename):
+    carpeta_base = f"solicitudes/{instance.solicitud.id}"
     if instance.tipo == 'documento':
         carpeta = f"{carpeta_base}/archivos"
     else:
         carpeta = f"{carpeta_base}/imagenes"
-
     return f"{carpeta}/{filename}"
 
 
@@ -143,31 +141,7 @@ class SolicitudAdjunto(models.Model):
         related_name='adjuntos'
     )
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
-
-    # 🔥 Ahora usamos el upload_to dinámico
     archivo = models.FileField(upload_to=ruta_adjuntos)
 
     def __str__(self):
         return f"{self.get_tipo_display()} - {self.archivo.name}"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

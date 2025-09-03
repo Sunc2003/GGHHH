@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load permisos_tags %}
 {% load static %}
- 
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/solicitud_form.css' %}">
 <style>
   .menu-botones{display:flex;justify-content:center;flex-wrap:wrap;gap:1.5rem;margin-bottom:2rem;}
-  .btn-cuadrado{display:flex;flex-direction:column;align-items:center;justify-content:center;width:180px;height:140px;background:#f1f3f5;color:#212529;border:none;border-radius:1rem;font-weight:600;font-size:.95rem;text-align:center;box-shadow:0 4px 8px rgba(0,0,0,.1);transition:all .2s;text-decoration:none;}
+  .btn-cuadrado{display:flex;flex-direction:column;align-items:center;justify-content:center;width:180px;height:140px;background:#f1f3f5;color:#212529;border:none;border-radius:1rem;font-weight:600;font-size:.95rem;text-align:center;box-shadow:0 4px 8px rgba(0,0,0,.1);transition:all .2s;text-decoration:none;cursor:pointer;}
   .btn-cuadrado:hover{background:#e2e6ea;transform:scale(1.05);}
   .btn-cuadrado img{width:80px;height:80px;margin-bottom:10px;}
   .error-msg{color:#d9534f;font-size:.85rem;margin-top:.25rem;}
@@ -17,7 +17,7 @@
   .is-invalid{border-color:#dc3545 !important;}
 </style>
 {% endblock %}
- 
+
 {% block content %}
 <div class="container py-5">
   <!-- Menú principal -->
@@ -38,49 +38,53 @@
     </a>
     {% endif %}
   </div>
- 
-  <!-- Formulario Solicitud -->
+
+  <!-- Submenú -->
+  <div id="submenu-opciones" class="menu-botones" style="display:none; margin-top:2rem;">
+    <button class="btn-cuadrado opcion-solicitud" data-tipo="nuevo_articulo">Nuevo artículo</button>
+    <button class="btn-cuadrado opcion-solicitud" data-tipo="produccion">Producción</button>
+    <button class="btn-cuadrado opcion-solicitud" data-tipo="activacion">Activación</button>
+    <button class="btn-cuadrado opcion-solicitud" data-tipo="modificacion">Modificación</button>
+  </div>
+
+  <!-- Formulario COMPLETO (Nuevo artículo) -->
   <div id="formulario-container" style="display:none;">
-    <div class="card shadow-sm mx-auto" style="max-width: 1200px;">
+    <div class="card shadow-sm mx-auto" style="max-width:1200px;">
       <div class="card-body">
         <h2 class="mb-4"><i class="fas fa-barcode"></i> Nueva Solicitud de Código SAP</h2>
         <form method="post" enctype="multipart/form-data" id="solicitud-form">
           {% csrf_token %}
- 
+          <input type="hidden" name="tipo_opcion" id="tipo-opcion">
+
           <!-- Información General -->
           <fieldset class="border rounded p-3 mb-4">
             <legend class="w-auto px-2">Información General</legend>
             <div class="row g-3">
-              <div class="col-md-4">{{ form.receptor.label_tag }}{{ form.receptor }}{% for error in form.receptor.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}</div>
-              <div class="col-md-4">{{ form.empresa.label_tag }}{{ form.empresa }}{% for error in form.empresa.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}</div>
-              <div class="col-md-4">{{ form.tipo_solicitud.label_tag }}{{ form.tipo_solicitud }}{% for error in form.tipo_solicitud.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}</div>
-              <div class="col-md-4">{{ form.cotizacion.label_tag }}{{ form.cotizacion }}{% for error in form.cotizacion.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}</div>
+              <div class="col-md-4">{{ form.receptor.label_tag }}{{ form.receptor }}</div>
+              <div class="col-md-4">{{ form.empresa.label_tag }}{{ form.empresa }}</div>
+              <div class="col-md-4">{{ form.tipo_solicitud.label_tag }}{{ form.tipo_solicitud }}</div>
+              <div class="col-md-4">{{ form.cotizacion.label_tag }}{{ form.cotizacion }}</div>
               <div class="col-md-4" id="campo_archivo" style="display:none;">
                 {{ form.archivos.label_tag }}{{ form.archivos }}
-                <small class="text-muted">Puedes seleccionar varios archivos</small>
               </div>
               <div class="col-md-4" id="campo_imagen" style="display:none;">
                 {{ form.imagenes.label_tag }}{{ form.imagenes }}
-                <small class="text-muted">Puedes seleccionar varias imágenes</small>
               </div>
             </div>
           </fieldset>
- 
+
           <!-- Agregar producto -->
           <fieldset class="border rounded p-3 mb-4">
             <legend class="w-auto px-2">Agregar Producto</legend>
             <div class="row g-3" id="formset-actual">
               {% for field in formset.empty_form.visible_fields %}
-                <div class="col-md-3">
-                  {{ field.label_tag }}{{ field }}
-                  {% for error in field.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
-                </div>
+                <div class="col-md-3">{{ field.label_tag }}{{ field }}</div>
               {% endfor %}
             </div>
             {{ formset.management_form }}
             <button type="button" class="btn btn-outline-primary mt-2" id="add-product-btn">+ Agregar Producto</button>
           </fieldset>
- 
+
           <!-- Productos agregados -->
           <fieldset class="border rounded p-3 mb-4">
             <legend class="w-auto px-2">Productos Agregados</legend>
@@ -97,16 +101,13 @@
               </table>
             </div>
           </fieldset>
- 
+
           <!-- Mensaje -->
           <fieldset class="border rounded p-3 mb-4">
             <legend class="w-auto px-2">Mensaje</legend>
-            <div class="mb-3">
-              {{ form.mensaje.label_tag }}{{ form.mensaje }}
-              {% for error in form.mensaje.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
-            </div>
+            {{ form.mensaje.label_tag }}{{ form.mensaje }}
           </fieldset>
- 
+
           <button type="submit" class="btn btn-success px-4 py-2">
             <i class="fas fa-paper-plane"></i> Enviar Solicitud
           </button>
@@ -114,166 +115,265 @@
       </div>
     </div>
   </div>
+
+  <!-- Formulario Activación/Modificación -->
+  <div id="form-activacion" style="display:none;">
+    <div class="card shadow-sm mx-auto" style="max-width:600px;">
+      <div class="card-body">
+        <h4 class="mb-3" id="titulo-activacion"><i class="fas fa-bolt"></i> Solicitud</h4>
+        <form method="post" id="form-activacion-real">
+          {% csrf_token %}
+          <input type="hidden" name="tipo_opcion" id="tipo-opcion-activacion">
+          <div class="mb-3">{{ form.receptor.label_tag }}{{ form.receptor }}</div>
+          <div class="mb-3">{{ form.empresa.label_tag }}{{ form.empresa }}</div>
+          <div class="mb-3">
+            <label for="codigo_extra">Código</label>
+            <input type="text" name="codigo_extra" id="codigo_extra" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label for="mensaje_activacion">Detalle</label>
+            <textarea name="mensaje" id="mensaje_activacion" class="form-control" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-paper-plane"></i> Enviar Solicitud
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+<!-- Formulario Producción -->
+<div id="form-produccion" style="display:none;">
+  <div class="card shadow-sm mx-auto" style="max-width:800px;">
+    <div class="card-body">
+      <h4 class="mb-3"><i class="fas fa-industry"></i> Solicitud de Producción</h4>
+      <form method="post" id="form-produccion-real">
+        {% csrf_token %}
+        <input type="hidden" name="tipo_opcion" value="produccion">
+
+        <div class="mb-3" id="campo-empresa">
+          {{ form.empresa.label_tag }}{{ form.empresa }}
+        </div>
+
+        <div class="mb-3">
+          <label for="hijo_padre">¿Hijo o Padre?</label>
+          <select name="hijo_padre" id="hijo_padre" class="form-control" required>
+            <option value="">-- Selecciona --</option>
+            <option value="hijo_nuevo">Código Hijo Nuevo</option>
+            <option value="hijo_existente">Código Hijo Existente</option>
+            <option value="padre">Código Padre</option>
+          </select>
+        </div>
+
+        <div class="mb-3" id="campo-hijo-existente" style="display:none;">
+          <label for="codigo_hijo_existente">Código Hijo Existente</label>
+          <input type="text" name="codigo_hijo_existente" id="codigo_hijo_existente" class="form-control">
+        </div>
+
+        <div class="mb-3" id="campo-padre" style="display:none;">
+          <label for="codigo_padre">Código Padre</label>
+          <input type="text" name="codigo_padre" id="codigo_padre" class="form-control">
+        </div>
+
+        <div class="mb-3" id="campo-origen">
+          {{ form.origen.label_tag }}{{ form.origen }}
+        </div>
+
+        <div class="mb-3" id="campo-proveedor">
+          {{ form.proveedor.label_tag }}{{ form.proveedor }}
+        </div>
+
+        <div class="mb-3" id="campo-sku-proveedor">
+          <label>SKU Proveedor</label>
+          <input type="text" name="sku_proveedor" class="form-control">
+        </div>
+
+        <div class="mb-3" id="campo-sku-fabricante">
+          <label>SKU Fabricante</label>
+          <input type="text" name="sku_fabricante" class="form-control">
+        </div>
+
+        <div class="mb-3" id="campo-marca">
+          {{ form.marca.label_tag }}{{ form.marca }}
+        </div>
+
+        <div class="mb-3" id="campo-udm">
+          {{ form.udm.label_tag }}{{ form.udm }}
+        </div>
+
+        <div class="mb-3" id="campo-mensaje">
+          <label for="mensaje_produccion">Mensaje</label>
+          <textarea name="mensaje" id="mensaje_produccion" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="row" id="grupo-dimensiones">
+          <div class="col-md-4 mb-3"><label>Largo</label><input type="number" step="0.01" name="largo" class="form-control"></div>
+          <div class="col-md-4 mb-3"><label>Ancho</label><input type="number" step="0.01" name="ancho" class="form-control"></div>
+          <div class="col-md-4 mb-3"><label>Alto</label><input type="number" step="0.01" name="alto" class="form-control"></div>
+        </div>
+
+        <div class="mb-3" id="campo-peso">
+          <label>Peso</label>
+          <input type="number" step="0.01" name="peso" class="form-control">
+        </div>
+
+        <div class="mb-3" id="campo-costo">
+          <label>Costo</label>
+          <input type="number" step="0.01" name="costo" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-success"><i class="fas fa-paper-plane"></i> Enviar Solicitud</button>
+      </form>
+    </div>
+  </div>
 </div>
- 
+
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  // -------------------------------
+  // Menú principal / submenú
+  // -------------------------------
+  const submenu = document.getElementById('submenu-opciones');
+  const formProduccion = document.getElementById('form-produccion');
+  const formActivacion = document.getElementById('form-activacion');
+  const formCompleto = document.getElementById('formulario-container');
+  const btnMostrarForm = document.getElementById('btn-mostrar-form');
   const menu = document.getElementById('menu-botones');
-  const formContainer = document.getElementById('formulario-container');
-  const formEl = document.getElementById('solicitud-form');
- 
-  const cotSelect = document.getElementById('id_cotizacion');
-  const campoArchivo = document.getElementById('campo_archivo');
-  const campoImagen = document.getElementById('campo_imagen');
-  const inputArchivos = campoArchivo ? campoArchivo.querySelector('input[type="file"]') : null;
-  const inputImagenes = campoImagen ? campoImagen.querySelector('input[type="file"]') : null;
- 
-  const tabla = document.querySelector('#tabla-detalles tbody');
-  const addBtn = document.getElementById('add-product-btn');
-  const totalForms = document.getElementById('id_form-TOTAL_FORMS');
-  let index = parseInt(totalForms.value);
- 
-  const REQUIRED_KEYS = [
-    'descripcion','marca','udm','origen','proveedor',
-    'largo','ancho','alto','peso','costo',
-    'sku_proveedor','sku_fabricante'
-  ];
- 
-  const btnMostrar = document.getElementById('btn-mostrar-form');
-  if (btnMostrar) {
-    btnMostrar.onclick = () => { formContainer.style.display = 'block'; menu.style.display = 'none'; };
-  }
- 
-  const isVisible = (el) => !!(el.offsetParent || el.getClientRects().length);
-  const trimVal = (v) => (typeof v === 'string' ? v.trim() : v);
- 
-  if (cotSelect) {
-    const toggleArchivosImagenes = () => {
-      const v = cotSelect.value;
-      const doc = v === 'documento';
-      const img = v === 'whatsapp';
-      if (campoArchivo) campoArchivo.style.display = doc ? 'block' : 'none';
-      if (inputArchivos) inputArchivos.required = doc;
-      if (campoImagen)  campoImagen.style.display  = img ? 'block' : 'none';
-      if (inputImagenes) inputImagenes.required = img;
+
+  if (btnMostrarForm) {
+    btnMostrarForm.onclick = () => {
+      menu.style.display = 'none';
+      submenu.style.display = 'flex';
     };
-    cotSelect.addEventListener('change', toggleArchivosImagenes);
-    toggleArchivosImagenes();
   }
- 
-  const showError = (el, msg='Campo obligatorio') => {
-    el.classList.add('is-invalid');
-    let help = el.parentElement.querySelector('.error-msg');
-    if (!help) {
-      help = document.createElement('div');
-      help.className = 'error-msg';
-      el.parentElement.appendChild(help);
-    }
-    help.textContent = msg;
-  };
-  const clearError = (el) => {
-    el.classList.remove('is-invalid');
-    const help = el.parentElement.querySelector('.error-msg');
-    if (help) help.remove();
-  };
- 
-  formEl.addEventListener('submit', (e) => {
-    const requiredEls = formEl.querySelectorAll('[required]');
-    let firstInvalid = null, valid = true;
-    requiredEls.forEach(el => {
-      if (!isVisible(el)) return;
-      const val = trimVal(el.value);
-      const ok = val !== '' && !(el.type === 'select-one' && (val === '' || val === null));
-      if (!ok) { showError(el); if (!firstInvalid) firstInvalid = el; valid = false; }
-      else { clearError(el); }
+
+  document.querySelectorAll('.opcion-solicitud').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tipo = btn.dataset.tipo;
+      submenu.style.display = 'none';
+      formProduccion.style.display = (tipo === 'produccion') ? 'block' : 'none';
+      formActivacion.style.display = (tipo === 'activacion' || tipo === 'modificacion') ? 'block' : 'none';
+      formCompleto.style.display = (tipo === 'nuevo_articulo') ? 'block' : 'none';
     });
-    if (!valid) { e.preventDefault(); if (firstInvalid) firstInvalid.focus(); }
   });
- 
-  // 💡 Hacer que el campo peso acepte decimales
-  const pesoInput = document.querySelector('[name$="-peso"]');
-  if (pesoInput) {
-    pesoInput.type = 'number';
-    pesoInput.step = '0.01';
+
+  // -------------------------------
+  // Producción: visibilidad por Hijo/Padre
+  // IMPORTANTE: Asegúrate de que los wrappers tengan estos IDs:
+  // campo-empresa, campo-origen, campo-proveedor, campo-sku-proveedor, campo-sku-fabricante,
+  // campo-marca, campo-udm, campo-mensaje, grupo-dimensiones, campo-peso, campo-costo,
+  // campo-hijo-existente, campo-padre
+  // -------------------------------
+  const $ = (id) => document.getElementById(id);
+
+  const hijoPadreSelect   = $('hijo_padre');
+  const wrapEmpresa       = $('campo-empresa');
+  const wrapOrigen        = $('campo-origen');
+  const wrapProveedor     = $('campo-proveedor');
+  const wrapSkuProv       = $('campo-sku-proveedor');
+  const wrapSkuFab        = $('campo-sku-fabricante');
+  const wrapMarca         = $('campo-marca');
+  const wrapUDM           = $('campo-udm');
+  const wrapMensaje       = $('campo-mensaje');
+  const wrapDimensiones   = $('grupo-dimensiones');
+  const wrapPeso          = $('campo-peso');
+  const wrapCosto         = $('campo-costo');
+  const wrapHijoExistente = $('campo-hijo-existente');
+  const wrapPadre         = $('campo-padre');
+
+  const allWrappers = [
+    wrapEmpresa, wrapOrigen, wrapProveedor, wrapSkuProv, wrapSkuFab,
+    wrapMarca, wrapUDM, wrapMensaje, wrapDimensiones, wrapPeso, wrapCosto,
+    wrapHijoExistente, wrapPadre
+  ];
+
+  function disableInputs(container) {
+    if (!container) return;
+    container.querySelectorAll('input, select, textarea').forEach(el => {
+      el.disabled = true;
+      el.removeAttribute('required'); // evita validación HTML5 en ocultos
+    });
   }
- 
-  addBtn.addEventListener('click', () => {
-    const currentForm = document.querySelector('#formset-actual');
- 
-    let valido = true, firstInvalid = null;
-    const values = {};
- 
-    for (const key of REQUIRED_KEYS) {
-      const el = currentForm.querySelector(`[name$="-${key}"]`);
-      if (!el) continue;
-      const raw = trimVal(el.value);
-      const empty = (el.tagName === 'SELECT') ? (raw === '' || el.selectedIndex === 0) : (raw === '');
-      if (empty) {
-        showError(el);
-        if (!firstInvalid) firstInvalid = el;
-        valido = false;
-      } else {
-        clearError(el);
-        const type = (el.type || '').toLowerCase();
-        if (['text','textarea','search','tel','url','email'].includes(type)) {
-          el.value = raw.toUpperCase();
-          values[key] = el.value;
-        } else {
-          values[key] = raw;
-        }
-      }
-      el.addEventListener('input', () => clearError(el), { once: true });
-      el.addEventListener('change', () => clearError(el), { once: true });
-    }
- 
-    if (!valido) { if (firstInvalid) firstInvalid.focus(); return; }
- 
-    const txt = (nameEnd) =>
-      currentForm.querySelector(`select[name$="-${nameEnd}"]`)?.selectedOptions[0]?.text?.toUpperCase() || '';
- 
-    const txtMarca  = txt('marca');
-    const txtUdm    = txt('udm');
-    const txtOrigen = txt('origen');
-    const txtProv   = txt('proveedor');
- 
-    const fila = document.createElement('tr');
-    fila.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${values.descripcion || ''}</td>
-      <td>${txtMarca}</td>
-      <td>${txtUdm}</td>
-      <td>${txtOrigen}</td>
-      <td>${txtProv}</td>
-      <td>${(values.largo||'')}x${(values.ancho||'')}x${(values.alto||'')}</td>
-      <td>${values.peso ? (parseFloat(values.peso).toFixed(2) + 'kg') : ''}</td>
-      <td>${values.costo ? ('$' + values.costo) : ''}</td>
-      <td>${values.sku_proveedor || ''}</td>
-      <td>${values.sku_fabricante || ''}</td>
-      <td><button type="button" class="btn btn-sm btn-danger eliminar-fila">✕</button></td>
-    `;
-    tabla.appendChild(fila);
-    fila.querySelector('.eliminar-fila').addEventListener('click', () => fila.remove());
- 
-    for (const key of Object.keys(values)) {
-      const hidden = document.createElement('input');
-      hidden.type = 'hidden';
-      hidden.name = `form-${index}-${key}`;
-      hidden.value = values[key];
-      formEl.appendChild(hidden);
-    }
- 
-    index++;
-    totalForms.value = index;
- 
-    currentForm.querySelectorAll('input, select, textarea').forEach(el => {
-      if (el.tagName === 'SELECT') el.selectedIndex = 0;
-      else el.value = '';
-      clearError(el);
+
+  function enableInputs(container) {
+    if (!container) return;
+    container.querySelectorAll('input, select, textarea').forEach(el => {
+      el.disabled = false;
+      // si necesitas restaurar "required", puedes manejarlo con data-attrs
     });
- 
-    document.querySelector('#tabla-detalles').scrollIntoView({ behavior: 'smooth' });
-  });
+  }
+
+  function hide(container) {
+    if (!container) return;
+    container.style.display = 'none';
+    disableInputs(container);
+  }
+
+  function show(container) {
+    if (!container) return;
+    // quitar display:none para volver al display por defecto del layout (row/block)
+    container.style.removeProperty('display');
+    enableInputs(container);
+  }
+
+  function showOnly(listToShow) {
+    // Oculta todo y luego muestra solo lo pedido
+    allWrappers.forEach(w => hide(w));
+    listToShow.forEach(w => show(w));
+  }
+
+  function restoreDefault() {
+    // Vuelve a mostrar todo (estado "completo" típico)
+    allWrappers.forEach(w => show(w));
+    // Nota: la visibilidad del campo de código hijo/padre se maneja aparte
+  }
+
+  function toggleCodigoSegunSeleccion(val) {
+    // Muestra el wrapper del código correspondiente (hijo existente / padre)
+    if (wrapHijoExistente) wrapHijoExistente.style.display = (val === 'hijo_existente') ? 'block' : 'none';
+    if (wrapPadre)         wrapPadre.style.display         = (val === 'padre') ? 'block' : 'none';
+
+    // Ajusta habilitado/deshabilitado de sus inputs
+    if (val === 'hijo_existente') {
+      enableInputs(wrapHijoExistente);
+      disableInputs(wrapPadre);
+    } else if (val === 'padre') {
+      enableInputs(wrapPadre);
+      disableInputs(wrapHijoExistente);
+    } else {
+      disableInputs(wrapHijoExistente);
+      disableInputs(wrapPadre);
+    }
+  }
+
+  function updateProduccionVisibility() {
+    if (!hijoPadreSelect) return;
+
+    const val = hijoPadreSelect.value;
+
+    // 1) Siempre sincroniza la visibilidad del campo de código según selección
+    toggleCodigoSegunSeleccion(val);
+
+    // 2) Regla solicitada: si elige "hijo_existente" -> mostrar solo Empresa, Origen, Código, Mensaje y Costo
+    if (val === 'hijo_existente') {
+      showOnly([wrapEmpresa, wrapOrigen, wrapHijoExistente, wrapMensaje, wrapCosto]);
+      return;
+    }
+
+    // 3) Para otras opciones, restaura todo (comportamiento estándar)
+    restoreDefault();
+
+    // Mantén visible SOLO el código que corresponda (ya lo hace toggleCodigoSegunSeleccion),
+    // pero no ocultes el resto en estos casos.
+  }
+
+  if (hijoPadreSelect) {
+    hijoPadreSelect.addEventListener('change', updateProduccionVisibility);
+    // Inicializa por si viene preseleccionado (back/recarga)
+    updateProduccionVisibility();
+  }
 });
 </script>
- 
+
 {% endblock %}

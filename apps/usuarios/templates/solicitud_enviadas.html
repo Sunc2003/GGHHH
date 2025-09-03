@@ -12,6 +12,7 @@
         <tr class="text-uppercase small">
           <th>ID</th>
           <th>Empresa</th>
+          <th>Tipo</th>
           <th>Estado</th>
           <th>Fecha</th>
           <th>Hora</th>
@@ -20,13 +21,26 @@
       </thead>
       <tbody>
         {% for solicitud in solicitudes_enviadas %}
-        {# Normaliza el estado a minúsculas #}
         {% with estado=solicitud.estado|lower %}
         <tr>
           <td>{{ solicitud.id }}</td>
-          <td>{{ solicitud.empresa }}</td>
+          <td>{{ solicitud.get_empresa_display }}</td>
           <td>
-            {# Ajusta los badges a tus estados reales: pendiente / creado #}
+            {{ solicitud.get_tipo_solicitud_display }}
+            {% if solicitud.codigo_extra and solicitud.tipo_solicitud in "activacion,modificacion" %}
+              <br>
+              <small class="text-muted">
+                {% if solicitud.codigo_extra == "sin_sku" %}
+                  (Código: Sin SKU)
+                {% elif solicitud.codigo_extra == "sin_codigo" %}
+                  (Código: Sin Código)
+                {% else %}
+                  (Código: {{ solicitud.codigo_extra }})
+                {% endif %}
+              </small>
+            {% endif %}
+          </td>
+          <td>
             {% if estado == 'pendiente' %}
               <span class="badge bg-warning text-dark">Pendiente</span>
             {% elif estado == 'creado' %}
@@ -36,7 +50,6 @@
             {% endif %}
           </td>
 
-          {# Usa fecha_respuesta si existe; sino fecha_creacion #}
           <td>
             {% if solicitud.fecha_respuesta %}
               {{ solicitud.fecha_respuesta|date:"d/m/Y" }}
@@ -52,19 +65,16 @@
             {% endif %}
           </td>
 
-          {# Mensaje: si está respondida (creado), muestra comentario_estado; si no, el mensaje original #}
           <td class="text-start">
-            {% if estado == 'creado' and solicitud.comentario_estado %}
+            {% if solicitud.comentario_estado %}
               {{ solicitud.comentario_estado }}
-            {% else %}
-              {{ solicitud.mensaje|default:"-" }}
             {% endif %}
           </td>
         </tr>
         {% endwith %}
         {% empty %}
         <tr>
-          <td colspan="6" class="text-center text-muted py-4">No hay solicitudes enviadas.</td>
+          <td colspan="7" class="text-center text-muted py-4">No hay solicitudes enviadas.</td>
         </tr>
         {% endfor %}
       </tbody>

@@ -43,6 +43,7 @@
           <tr>
             <th>#</th>
             <th>Solicitante</th>
+            <th>Tipo</th>
             <th>Fecha</th>
             <th>Hora</th>
             <th>Estado</th>
@@ -54,6 +55,16 @@
           <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ solicitud.solicitante.get_full_name|default:solicitud.solicitante.username }}</td>
+            <td>
+              {{ solicitud.get_tipo_solicitud_display }}
+              {% if solicitud.tipo_solicitud == "activacion" and solicitud.codigo_extra %}
+                <br><small class="text-muted">
+                  {% if solicitud.codigo_extra == "sin_sku" %}Código: Sin SKU
+                  {% elif solicitud.codigo_extra == "sin_codigo" %}Código: Sin Código
+                  {% endif %}
+                </small>
+              {% endif %}
+            </td>
             <td>{{ solicitud.fecha_creacion|date:"d/m/Y" }}</td>
             <td>{{ solicitud.fecha_creacion|date:"H:i" }}</td>
             <td>
