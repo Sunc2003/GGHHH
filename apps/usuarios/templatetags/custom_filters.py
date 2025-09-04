@@ -10,7 +10,7 @@ def div(value, arg):
     except (ValueError, ZeroDivisionError, TypeError):
         return ''
  
- 
+
 @register.filter
 def basename(value, mode=None):
     """Extrae el último segmento de una ruta (carpeta o archivo).

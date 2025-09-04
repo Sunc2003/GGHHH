@@ -5,7 +5,12 @@
   <!-- Encabezado -->
   <div class="d-flex justify-content-between align-items-center">
     <h4 class="mb-0">#{{ ticket.id }} — {{ ticket.titulo }}</h4>
-    <span class="badge bg-secondary">{{ ticket.get_estado_display }}</span>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-secondary">{{ ticket.get_estado_display }}</span>
+      {% if ticket.get_prioridad_display %}
+        <span class="badge bg-info text-dark">{{ ticket.get_prioridad_display }}</span>
+      {% endif %}
+    </div>
   </div>
   <div class="text-muted small mt-1">
     Creado: {{ ticket.fecha_creacion|date:"Y-m-d H:i" }} · Última actualización: {{ ticket.fecha_actualizacion|date:"Y-m-d H:i" }}
@@ -43,17 +48,28 @@
           {% endif %}
 
           <!-- Responder -->
-          <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="mb-2">
-              {{ form_msg.mensaje }}
+          {% if ticket.puede_responder %}
+            <form method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="mb-2">
+                {{ form_msg.mensaje }}
+                {% if form_msg.mensaje.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for e in form_msg.mensaje.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="mb-3">
+                <input type="file" name="archivos" multiple class="form-control form-control-sm">
+                <div class="form-text">Puedes adjuntar archivos.</div>
+              </div>
+              <button class="btn btn-primary btn-sm">Enviar</button>
+            </form>
+          {% else %}
+            <div class="alert alert-warning mb-0">
+              Este ticket está <strong>resuelto/cerrado</strong>. No se pueden agregar más mensajes ni adjuntos.
             </div>
-            <div class="mb-3">
-              <input type="file" name="archivos" multiple class="form-control form-control-sm">
-              <div class="form-text">Puedes adjuntar archivos.</div>
-            </div>
-            <button class="btn btn-primary btn-sm">Enviar</button>
-          </form>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -75,9 +91,9 @@
                   </div>
                 </div>
                 {% if a.url %}
-                  <a class="btn btn-sm btn-outline-secondary" href="{{ a.url }}" target="_blank">Ver</a>
-                {% elif a.ruta|slice:":4" == "http" %}
-                  <a class="btn btn-sm btn-outline-secondary" href="{{ a.ruta }}" target="_blank">Ver</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="{{ a.url }}" target="_blank" rel="noopener">Ver</a>
+                {% else %}
+                  <a class="btn btn-sm btn-outline-secondary" href="{% url 'tickets_adjunto_ver' a.id %}" target="_blank" rel="noopener">Ver</a>
                 {% endif %}
               </li>
               {% endfor %}
@@ -89,6 +105,13 @@
       </div>
     </div>
   </div>
+
+<div class="mt-4">
+  <a href="{% url 'tickets_solicitar_ayuda' %}?tab=lista{% if base_qs %}&{{ base_qs }}{% endif %}"
+     class="btn btn-secondary btn-sm">
+    Volver a mis solicitudes
+  </a>
+</div>
 
 </div>
 {% endblock %}

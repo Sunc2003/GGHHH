@@ -64,7 +64,7 @@ usuarios = [
                 {
         "username": "Valentina Osorio",
         "email": "vosorio@ggh.cl",
-        "password": "7cPW4xA2",
+        "password": "Osorio.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "ANALISTA CONTABLE",
         "usuario_ad": "FINAN9",
@@ -77,7 +77,7 @@ usuarios = [
     {
         "username": "Claudia Sanhueza",
         "email": "csanhueza@ggh.cl",
-        "password": "N6tz1FRp",
+        "password": "Sanhueza.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "ANALISTA CONTABLE",
         "usuario_ad": "FINAN4",
@@ -90,7 +90,7 @@ usuarios = [
     {
         "username": "Sebastián Calderón",
         "email": "scalderon@ggh.cl",
-        "password": "w91UmAKZ",
+        "password": "Calderon.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "ANALISTA FACTORING",
         "usuario_ad": "FINAN10",
@@ -103,7 +103,7 @@ usuarios = [
     {
         "username": "Jacqueline Pizarro",
         "email": "jpizarro@ggh.cl",
-        "password": "kVZF62Bq",
+        "password": "Pizarro.2025",
         "area": "Zona Norte",
         "cargo": "ASISTENTE ADMINISTRATIVA SUCURSAL ANTOFAGASTA Y ASISTENTE COMERCIAL NORTE",
         "usuario_ad": "VENTAS25",
@@ -116,7 +116,7 @@ usuarios = [
     {
         "username": "Rebecca Retamales",
         "email": "retamales@ggh.cl",
-        "password": "L7cf0Pwb",
+        "password": "Retamales.2025",
         "area": "Directorio Comercial",
         "cargo": "ASISTENTE COMERCIAL DE SERVICIOS",
         "usuario_ad": "COMPRAS3",
@@ -129,7 +129,7 @@ usuarios = [
     {
         "username": "Luis Cisternas",
         "email": "lcisternas@ggh.cl",
-        "password": "Vb7zWq1K",
+        "password": "Cisternas.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "ASISTENTE CONTABILIDAD",
         "usuario_ad": "FINAN8",
@@ -142,7 +142,7 @@ usuarios = [
     {
         "username": "Paula Faúndez",
         "email": "finanzas5@ggh.cl",
-        "password": "R3yE76mT",
+        "password": "Faúndez.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "ASISTENTE CONTABILIDAD",
         "usuario_ad": "FINAN5",
@@ -155,7 +155,7 @@ usuarios = [
     {
         "username": "Stefhanie Ramirez",
         "email": "Sramirez@ggh.cl",
-        "password": "5tR9mQyP",
+        "password": "Ramirez.2025",
         "area": "Compras e Inventario",
         "cargo": "ASISTENTE DE COMPRAS",
         "usuario_ad": "COMPRAS1",
@@ -168,7 +168,7 @@ usuarios = [
     {
         "username": "Carolina Herrera",
         "email": "cherrera@ggh.cl",
-        "password": "hZ7F3vLu",
+        "password": "Herrera.2025",
         "area": "Directorio Comercial",
         "cargo": "ASISTENTE DE EJECUTIVOS COMERCIALES",
         "usuario_ad": "VENTAS10",
@@ -181,7 +181,7 @@ usuarios = [
     {
         "username": "Paola Chiguay",
         "email": "pchiguay@ggh.cl",
-        "password": "Nzv1U95g",
+        "password": "Chiguay.2025",
         "area": "Directorio Comercial",
         "cargo": "ASISTENTE DE EJECUTIVOS COMERCIALES",
         "usuario_ad": "VENTAS1",
@@ -194,7 +194,7 @@ usuarios = [
         {
         "username": "Judith Lucero",
         "email": "jlucero@ggh.cl",
-        "password": "Zc6Xrp2K",
+        "password": "Lucero.2025",
         "area": "Directorio Comercial",
         "cargo": "ASISTENTE DE EJECUTIVOS COMERCIALES",
         "usuario_ad": "VENTAS4",
@@ -207,7 +207,7 @@ usuarios = [
     {
         "username": "Sebastian Mella",
         "email": "smella@ggh.cl",
-        "password": "p5Xum7Zr",
+        "password": "Mella.2025",
         "area": "Directorio Comercial",
         "cargo": "ASISTENTE DE EJECUTIVOS COMERCIALES",
         "usuario_ad": "VENTAS22",
@@ -220,7 +220,7 @@ usuarios = [
     {
         "username": "Javiera Quezada",
         "email": "jquezada@ggh.cl",
-        "password": "Qs74mNfV",
+        "password": "Quezada.2025",
         "area": "Directorio Comercial",
         "cargo": "ASISTENTE DE FACTURACIÓN Y OPERACIONES",
         "usuario_ad": "BOD5",
@@ -233,7 +233,7 @@ usuarios = [
     {
         "username": "Elvis Lopez",
         "email": "elopez@ggh.cl",
-        "password": "gBmZf952",
+        "password": "Lopez.2025",
         "area": "Operaciones",
         "cargo": "ASISTENTE DE OPERACIONES",
         "usuario_ad": "BOD2",
@@ -246,7 +246,7 @@ usuarios = [
     {
         "username": "Sabrina Arce",
         "email": "sarce@ggh.cl",
-        "password": "3cEvzB9Q",
+        "password": "Arce.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "ASISTENTE DE RECURSOS HUMANOS",
         "usuario_ad": "NO APLICA",
@@ -259,7 +259,7 @@ usuarios = [
     {
         "username": "Byron Marambio",
         "email": "bmarambio@ggh.cl",
-        "password": "UqPz7Xn6",
+        "password": "Marambio.2025",
         "area": "Zona Norte",
         "cargo": "ASISTENTE DE VENTAS Y BODEGA",
         "usuario_ad": "BOD3",
@@ -272,7 +272,7 @@ usuarios = [
     {
         "username": "Valeria Godoy",
         "email": "CONTACTO@GGH.CL",
-        "password": "Mz4qWx9R",
+        "password": "Godoy.2025",
         "area": "Sistemas",
         "cargo": "ASISTENTE SERVICIO AL CLIENTE",
         "usuario_ad": "VENTAS24",
@@ -285,7 +285,7 @@ usuarios = [
     {
         "username": "Jaime Garrido",
         "email": "Jaime.seguridad@ggh.cl",
-        "password": "P7Vsm9Tx",
+        "password": "Garrido.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "CONTROL INTERNO",
         "usuario_ad": "NO APLICA",
@@ -298,7 +298,7 @@ usuarios = [
     {
         "username": "Isrrael Castro",
         "email": "icastro@ggh.cl",
-        "password": "Rm4xVzqT",
+        "password": "Castro.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "COORDINADOR DE ADMINISTRACIÓN Y FINANZAS",
         "usuario_ad": "FINAN6",
@@ -311,7 +311,7 @@ usuarios = [
     {
         "username": "Pedro Rojas",
         "email": "projas@ggh.cl",
-        "password": "Xy2RbNz4",
+        "password": "Rojas.2025",
         "area": "Operaciones",
         "cargo": "Coordinador de Bodega y Gestión de Pendientes",
         "usuario_ad": "BOD12",
@@ -324,7 +324,7 @@ usuarios = [
         {
         "username": "Marcelo Cabezas",
         "email": "mcabezas@ggh.cl",
-        "password": "Kv3bXz8L",
+        "password": "Cabezas.2025",
         "area": "Sistemas",
         "cargo": "Data Master",
         "usuario_ad": "SISTEMAS3",
@@ -337,7 +337,7 @@ usuarios = [
     {
         "username": "Rodrigo Gomez",
         "email": "rgomez@ggh.cl",
-        "password": "Fs7QxLm2",
+        "password": "Gomez.2025",
         "area": "Directorio Comercial",
         "cargo": "DIRECTOR COMERCIAL",
         "usuario_ad": "RGOMEZ",
@@ -350,7 +350,7 @@ usuarios = [
     {
         "username": "Alfredo Gomez",
         "email": "agomez@ggh.cl",
-        "password": "Qv5Pmr7A",
+        "password": "Gomez.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "DIRECTOR DE ADMINISTRACION",
         "usuario_ad": "AGOMEZ",
@@ -363,7 +363,7 @@ usuarios = [
     {
         "username": "Felipe Leiva",
         "email": "design@ggh.cl",
-        "password": "TnZq6vV5",
+        "password": "Leiva.2025",
         "area": "Sistemas",
         "cargo": "DISEÑADOR GRAFICO",
         "usuario_ad": "NO APLICA",
@@ -376,7 +376,7 @@ usuarios = [
     {
         "username": "Débora Astudillo",
         "email": "dastudillo@ggh.cl",
-        "password": "Lw9Rzn8Q",
+        "password": "Astudillo.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "EJECUTIVA PAGO PROVEEDORES",
         "usuario_ad": "FINAN11",
@@ -389,7 +389,7 @@ usuarios = [
     {
         "username": "María Serey",
         "email": "mserey@ggh.cl",
-        "password": "Px3Rzn2W",
+        "password": "Serey.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "EJECUTIVA PAGO PROVEEDORES",
         "usuario_ad": "FINAN3",
@@ -402,7 +402,7 @@ usuarios = [
     {
         "username": "Silvina Araya",
         "email": "saraya@ggh.cl",
-        "password": "Wx5Lvn9E",
+        "password": "Araya.2025",
         "area": "Directorio Comercial",
         "cargo": "EJECUTIVO COMERCIAL",
         "usuario_ad": "VENTAS23",
@@ -415,7 +415,7 @@ usuarios = [
     {
         "username": "Cecilia Rodriguez",
         "email": "crodriguez@ggh.cl",
-        "password": "As9Wpl7T",
+        "password": "Rodriguez.2025",
         "area": "Directorio Comercial",
         "cargo": "EJECUTIVO COMERCIAL",
         "usuario_ad": "VENTAS12",
@@ -428,7 +428,7 @@ usuarios = [
     {
         "username": "Dorka Molina",
         "email": "dmolina@ggh.cl",
-        "password": "Vm7Tqn3E",
+        "password": "Molina.2025",
         "area": "Directorio Comercial",
         "cargo": "EJECUTIVO COMERCIAL",
         "usuario_ad": "VENTAS26",
@@ -441,7 +441,7 @@ usuarios = [
     {
         "username": "Israel Vergara",
         "email": "ivergara@ggh.cl",
-        "password": "Yr4Xnp2L",
+        "password": "Vergara.2025",
         "area": "Directorio Comercial",
         "cargo": "EJECUTIVO COMERCIAL",
         "usuario_ad": "VENTAS19",
@@ -454,7 +454,7 @@ usuarios = [
         {
         "username": "Andres Rojas",
         "email": "arojas@ggh.cl",
-        "password": "Ck7Lpy6F",
+        "password": "Rojas.2025",
         "area": "Directorio Comercial",
         "cargo": "EJECUTIVO COMERCIAL",
         "usuario_ad": "VENTAS5",
@@ -467,7 +467,7 @@ usuarios = [
     {
         "username": "Alfredo Garreton",
         "email": "agarreton@ggh.cl",
-        "password": "Vt5Nzq3B",
+        "password": "Garreton.2025",
         "area": "Directorio Comercial",
         "cargo": "EJECUTIVO COMERCIAL",
         "usuario_ad": "VENTAS3",
@@ -480,7 +480,7 @@ usuarios = [
     {
         "username": "Mariana Cortes",
         "email": "mcortes@ggh.cl",
-        "password": "Rz8Wvm5N",
+        "password": "Cortes.2025",
         "area": "Directorio Comercial",
         "cargo": "EJECUTIVO COMERCIAL",
         "usuario_ad": "VENTAS17",
@@ -493,7 +493,7 @@ usuarios = [
     {
         "username": "Grecia Castro",
         "email": "gcastro@ggh.cl",
-        "password": "Tw2Zxn7K",
+        "password": "Castro.2025",
         "area": "Directorio Comercial",
         "cargo": "EJECUTIVO COMERCIAL",
         "usuario_ad": "VENTAS15",
@@ -532,7 +532,7 @@ usuarios = [
     {
         "username": "Patricio Toro",
         "email": "ptoro@ggh.cl",
-        "password": "Lp6Vmz1R",
+        "password": "Toro.2025",
         "area": "Directorio Comercial",
         "cargo": "EJECUTIVO COMERCIAL",
         "usuario_ad": "VENTAS21",
@@ -545,7 +545,7 @@ usuarios = [
     {
         "username": "Sebastian Valdivia",
         "email": "svaldivia@ggh.cl",
-        "password": "Gq3Nmx8S",
+        "password": "Valdivia.2025",
         "area": "Directorio Comercial",
         "cargo": "EJECUTIVO COMERCIAL",
         "usuario_ad": "VENTAS8",
@@ -558,7 +558,7 @@ usuarios = [
     {
         "username": "Jorge Bustamante",
         "email": "abustamante@ggh.cl",
-        "password": "Hf7Xpl3M",
+        "password": "Bustamante.2025",
         "area": "Directorio Comercial",
         "cargo": "EJECUTIVO COMERCIAL",
         "usuario_ad": "VENTAS6",
@@ -571,7 +571,7 @@ usuarios = [
     {
         "username": "Ivan Toro",
         "email": "itoro@ggh.cl",
-        "password": "Bw2Tzn7L",
+        "password": "Toro.2025",
         "area": "Directorio Comercial",
         "cargo": "EJECUTIVO COMERCIAL",
         "usuario_ad": "VENTAS28",
@@ -584,7 +584,7 @@ usuarios = [
         {
         "username": "Paola Rivera",
         "email": "privera@ggh.cl",
-        "password": "Lw7Cxq9K",
+        "password": "Rivera.2025",
         "area": "Zona Norte",
         "cargo": "EJECUTIVO COMERCIAL ZONA NORTE",
         "usuario_ad": "VENTAS20",
@@ -597,7 +597,7 @@ usuarios = [
     {
         "username": "Lorena Jiménez",
         "email": "finanzas13@ggh.cl",
-        "password": "Pk8Xnm4D",
+        "password": "Jimenez.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "EJECUTIVO DE COBRANZA",
         "usuario_ad": "FINAN13",
@@ -610,7 +610,7 @@ usuarios = [
     {
         "username": "Carolina Diaz",
         "email": "cdiaz@ggh.cl",
-        "password": "Jz4Twp7L",
+        "password": "Diaz.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "EJECUTIVO DE COBRANZA",
         "usuario_ad": "cdiaz",
@@ -623,7 +623,7 @@ usuarios = [
     {
         "username": "Maribel Esparza",
         "email": "mesparza@ggh.cl",
-        "password": "Vd3Lyk2R",
+        "password": "Esparza.2025",
         "area": "Compras e Inventario",
         "cargo": "EJECUTIVO DE COMPRAS",
         "usuario_ad": "LICENCIA",
@@ -636,7 +636,7 @@ usuarios = [
     {
         "username": "Pedro Carreño",
         "email": "pcarreno@ggh.cl",
-        "password": "Nc6Azm3H",
+        "password": "Carreño.2025",
         "area": "Compras e Inventario",
         "cargo": "EJECUTIVO DE COMPRAS",
         "usuario_ad": "COMPRAS2",
@@ -649,7 +649,7 @@ usuarios = [
     {
         "username": "Elba Díaz",
         "email": "Prevencion@ggh.cl",
-        "password": "Qk9Pzl8M",
+        "password": "Diaz.2025",
         "area": "Operaciones",
         "cargo": "Encargada de Prevención de Riesgos",
         "usuario_ad": "no aplica",
@@ -662,7 +662,7 @@ usuarios = [
     {
         "username": "Angelica Erices",
         "email": "aerices@ggh.cl",
-        "password": "Zq7Vmp2X",
+        "password": "Erices.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "ENCARGADA DE RECURSOS HUMANOS",
         "usuario_ad": "FINAN2",
@@ -675,7 +675,7 @@ usuarios = [
     {
         "username": "Emerson Vera",
         "email": "evera@ggh.cl",
-        "password": "Tf5Cmn6V",
+        "password": "Vera.2025",
         "area": "Directorio Administración y Finanzas",
         "cargo": "Encargado de Control de Gestión y Procesos",
         "usuario_ad": "FINAN12",
@@ -688,7 +688,7 @@ usuarios = [
     {
         "username": "Ariel Martínez",
         "email": "amartinez@ggh.cl",
-        "password": "Wm4Qcp8J",
+        "password": "Martinez.2025",
         "area": "Directorio Comercial",
         "cargo": "Encargado de Línea",
         "usuario_ad": "VENTAS9",
@@ -701,7 +701,7 @@ usuarios = [
     {
         "username": "Luis Bravo",
         "email": "lbravo@ggh.cl",
-        "password": "Ks8Lzp3T",
+        "password": "Bravo.2025",
         "area": "Operaciones",
         "cargo": "Encargado de Logística",
         "usuario_ad": "BOD4",
@@ -714,7 +714,7 @@ usuarios = [
         {
         "username": "Hernan Ahumada",
         "email": "serviciotecnico@ggh.cl",
-        "password": "Uf3Nxp7B",
+        "password": "Uhumada.2025",
         "area": "Directorio Comercial",
         "cargo": "ENCARGADO DE SERVICIO TECNICO",
         "usuario_ad": "VENTAS16",
@@ -727,7 +727,7 @@ usuarios = [
     {
         "username": "Mauricio Ricke",
         "email": "mricke@ggh.cl",
-        "password": "Qz9Hcf2A",
+        "password": "Ricke.2025",
         "area": "Compras e Inventario",
         "cargo": "Gerente Compras e Inventario",
         "usuario_ad": "BOD9",
@@ -740,7 +740,7 @@ usuarios = [
     {
         "username": "Ricardo Añual",
         "email": "ranual@ggh.cl",
-        "password": "Lt5Zsv9F",
+        "password": "Anual.2025",
         "area": "Operaciones",
         "cargo": "GERENTE DE OPERACIONES",
         "usuario_ad": "RANUAL",
@@ -753,7 +753,7 @@ usuarios = [
     {
         "username": "Daniel Canto",
         "email": "dcanto@ggh.cl",
-        "password": "Xs4Mlp2N",
+        "password": "Canto.2025",
         "area": "Zona Norte",
         "cargo": "GERENTE DE ZONA NORTE",
         "usuario_ad": "VENTAS13",
@@ -766,7 +766,7 @@ usuarios = [
     {
         "username": "Iván Henríquez",
         "email": "ihenriquez@ggh.cl",
-        "password": "Hr6Kwm3X",
+        "password": "Henriquez.2025",
         "area": "Sistemas",
         "cargo": "Lider de Canal Marketplace Ecommerce",
         "usuario_ad": "VENTAS2",
@@ -779,7 +779,7 @@ usuarios = [
     {
         "username": "FE2 DISPONIBLE",
         "email": "",
-        "password": "Xy9Hkp5V",
+        "password": "Disponible123",
         "area": "NO APLICA",
         "cargo": "NO APLICA",
         "usuario_ad": "FE2",
@@ -792,7 +792,7 @@ usuarios = [
     {
         "username": "FE4 DISPONIBLE",
         "email": "",
-        "password": "Jc8Wlp6T",
+        "password": "Disponible123",
         "area": "NO APLICA",
         "cargo": "NO APLICA",
         "usuario_ad": "FE4",
@@ -805,7 +805,7 @@ usuarios = [
     {
         "username": "Raul Olivares",
         "email": "rolivares@ggh.cl",
-        "password": "Tf3Bwm8L",
+        "password": "Olivares.2025",
         "area": "NO APLICA",
         "cargo": "NO APLICA",
         "usuario_ad": "FINAN7",
@@ -818,7 +818,7 @@ usuarios = [
     {
         "username": "VENTAS9 DISPONIBLE",
         "email": "",
-        "password": "Lz6Cfp9W",
+        "password": "Disponible123",
         "area": "NO APLICA",
         "cargo": "NO APLICA",
         "usuario_ad": "VENTAS9",
@@ -831,7 +831,7 @@ usuarios = [
     {
         "username": "TV INDICADORES BODEGA",
         "email": "",
-        "password": "Br8Nwm7J",
+        "password": "TVBodega123",
         "area": "NO APLICA",
         "cargo": "NO APLICA",
         "usuario_ad": "NO APLICA",
@@ -844,7 +844,7 @@ usuarios = [
     {
     "username": "Poligonix",
     "email": "NO APLICA",
-    "password": "yBnsvDglX9",
+    "password": "Poligonix123",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "poligonix",
@@ -857,7 +857,7 @@ usuarios = [
 {
     "username": "COBRANZAS FE1",
     "email": "NO APLICA",
-    "password": "XIGxrWHgzi",
+    "password": "Cobranza123",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "FE1",
@@ -870,7 +870,7 @@ usuarios = [
 {
     "username": "DISPONIBLE VENTAS18",
     "email": "DISPONIBLE",
-    "password": "bVZeIkploo",
+    "password": "Disponible123",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "VENTAS18",
@@ -883,7 +883,7 @@ usuarios = [
 {
     "username": "DISPONIBLE RRHH2",
     "email": "NO APLICA",
-    "password": "fJkptai9ab",
+    "password": "Disponible123",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "RRHH2",
@@ -896,7 +896,7 @@ usuarios = [
 {
     "username": "DISPONIBLE FE3",
     "email": "NO APLICA",
-    "password": "A2ueDUPYKm",
+    "password": "Disponible123",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "FE3",
@@ -909,7 +909,7 @@ usuarios = [
 {
     "username": "DISPONIBLE FE5",
     "email": "NO APLICA",
-    "password": "YIv2zFLSd1",
+    "password": "Disponible123",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "FE5",
@@ -922,7 +922,7 @@ usuarios = [
 {
     "username": "DISPONIBLE COMPRAS4",
     "email": "Disponible",
-    "password": "aW0OfBGJPw",
+    "password": "Disponible123",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "COMPRAS4",
@@ -935,7 +935,7 @@ usuarios = [
 {
     "username": "DISPONIBLE RRHH1",
     "email": "NO APLICA",
-    "password": "n9RpAAOmoP",
+    "password": "Disponible123",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "RRHH1",
@@ -948,7 +948,7 @@ usuarios = [
 {
     "username": "DISPONIBLE VENTAS28",
     "email": "dDISPONIBLE",
-    "password": "DYEGC3yF5l",
+    "password": "Disponible123",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "VENTAS28",
@@ -961,7 +961,7 @@ usuarios = [
 {
     "username": "Arturo León",
     "email": "NO APLICA",
-    "password": "0fF9XXc1Tx",
+    "password": "Leon.2025",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "aleon",
@@ -974,7 +974,7 @@ usuarios = [
 {
     "username": "Bodega Antofagasta",
     "email": "NO APLICA",
-    "password": "ZlcfRUENAC",
+    "password": "Bodega123",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "BOD14",
@@ -987,7 +987,7 @@ usuarios = [
 {
     "username": "Inxap",
     "email": "NO APLICA",
-    "password": "QLZ9dyZAvM",
+    "password": "Inxap2025",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "Inxap",
@@ -1000,7 +1000,7 @@ usuarios = [
 {
     "username": "DISPONIBLE BOD13",
     "email": "NO APLICA",
-    "password": "BIHtYmNc9T",
+    "password": "Disponible123",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "BOD13",
@@ -1013,7 +1013,7 @@ usuarios = [
 {
     "username": "Inxap2",
     "email": "NO APLICA",
-    "password": "C4IP3EpRAX",
+    "password": "Inxap2025",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "inxap2",
@@ -1026,7 +1026,7 @@ usuarios = [
 {
     "username": "ITHelper",
     "email": "NO APLICA",
-    "password": "nsczK8wIuz",
+    "password": "IThelper123",
     "area": "NO APLICA",
     "cargo": "NO APLICA",
     "usuario_ad": "SISTEMAS1",
@@ -1039,7 +1039,7 @@ usuarios = [
     {
         "username": "Juan Leiva",
         "email": "marketing@ggh.cl",
-        "password": "FQb9kA3P",
+        "password": "Leiva.2025",
         "area": "Sistemas",
         "cargo": "ASISTENTE DE MARKETING",
         "usuario_ad": "NO APLICA",
@@ -1052,7 +1052,7 @@ usuarios = [
     {
         "username": "DISPONIBLE FINAN1",
         "email": "NO APLICA",
-        "password": "qzC7WYvM",
+        "password": "Disponible123",
         "area": "NO APLICA",
         "cargo": "NO APLICA",
         "usuario_ad": "FINAN1",
@@ -1065,7 +1065,7 @@ usuarios = [
     {
         "username": "DISPONIBLE BOD8",
         "email": "NO APLICA",
-        "password": "GJ6tKvwA",
+        "password": "Disponible123",
         "area": "NO APLICA",
         "cargo": "NO APLICA",
         "usuario_ad": "BOD8",
@@ -1078,7 +1078,7 @@ usuarios = [
     {
         "username": "Marco Pinto",
         "email": "packing@ggh.cl",
-        "password": "bqJd6XUm",
+        "password": "Pinto.2025",
         "area": "Operaciones",
         "cargo": "OPERARIO DE BODEGA",
         "usuario_ad": "NO APLICA",
@@ -1091,7 +1091,7 @@ usuarios = [
     {
         "username": "Eliseo Ancan",
         "email": "eancan@ggh.cl",
-        "password": "kBTLgkAx",
+        "password": "Ancan.2025",
         "area": "Operaciones",
         "cargo": "OPERARIO DE BODEGA",
         "usuario_ad": "BOD11",
@@ -1104,7 +1104,7 @@ usuarios = [
     {
         "username": "Maximiliano Jara",
         "email": "mjara@ggh.cl",
-        "password": "RvEyTDqB",
+        "password": "Jara.2025",
         "area": "Operaciones",
         "cargo": "OPERARIO DE BODEGA",
         "usuario_ad": "BOD10",
@@ -1117,7 +1117,7 @@ usuarios = [
     {
         "username": "Luis Ortega",
         "email": "lortega@ggh.cl",
-        "password": "8ZsnWgUJ",
+        "password": "Ortega.2025",
         "area": "Operaciones",
         "cargo": "OPERARIO DE BODEGA RECEPCIÓN",
         "usuario_ad": "BOD6",
@@ -1130,7 +1130,7 @@ usuarios = [
     {
         "username": "Gustavo Zuñiga",
         "email": "recepcion@ggh.cl",
-        "password": "T8dMLbvo",
+        "password": "Zuniga.2025",
         "area": "Operaciones",
         "cargo": "OPERARIO DE BODEGA RECEPCIÓN",
         "usuario_ad": "BOD7",
@@ -1143,7 +1143,7 @@ usuarios = [
     {
         "username": "Valentina Pérez",
         "email": "vperez@ggh.cl",
-        "password": "EnGcRt7u",
+        "password": "Perez.2025",
         "area": "Sistemas",
         "cargo": "PRODUCT MANAGER",
         "usuario_ad": "VENTAS14",

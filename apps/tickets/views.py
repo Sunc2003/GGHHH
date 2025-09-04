@@ -6,14 +6,14 @@ from django.db.models import Q
 from django.db import transaction
 from django.core.paginator import Paginator
 from django.utils.dateparse import parse_date
+from django.http import HttpResponseRedirect, Http404
 
 from apps.utils.supabase_storage import SupabaseStorage
 from apps.usuarios.models import CustomUser
+from apps.permisos.decorators import permiso_requerido
 
 from .models import Ticket, TicketMensaje, TicketAdjunto
 from .forms import TicketForm, TicketMensajeForm
-from apps.permisos.decorators import permiso_requerido
-from django.contrib.auth.decorators import login_required, permission_required
 
 import re
 
@@ -28,6 +28,10 @@ def _es_agente(user):
         user.has_perm('permisos.TICKETS_GESTIONAR')
     )
 
+def _esta_bloqueado(ticket: Ticket) -> bool:
+    """Bloquea respuestas/adjuntos si el ticket está resuelto o cerrado."""
+    return ticket.estado in ('resuelto', 'cerrado')
+
 def _safe_filename(name: str) -> str:
     """Nombre de archivo seguro (sin espacios raros/acentos)."""
     name = re.sub(r'[^\w.\-]+', '_', name).strip('._')
@@ -38,7 +42,10 @@ def _ruta_adjunto_ticket(ticket_id, filename: str) -> str:
     return f"tickets/{ticket_id}/adjuntos/{_safe_filename(filename)}"
 
 def _adjuntos_ctx(adjuntos_queryset):
-    """Convierte adjuntos a dict, agregando URL pública desde Supabase."""
+    """
+    Convierte adjuntos a dict, agregando URL pública desde Supabase.
+    Mapea 'fecha_subida' desde el campo 'fecha' del modelo.
+    """
     storage = SupabaseStorage()  # usa el bucket por defecto (ej. "media")
     ctx = []
     for a in adjuntos_queryset:
@@ -54,7 +61,7 @@ def _adjuntos_ctx(adjuntos_queryset):
             "ruta": getattr(a, "ruta", ""),
             "url": url,
             "subido_por": a.subido_por,
-            "fecha_subida": getattr(a, "fecha_subida", None),
+            "fecha_subida": getattr(a, "fecha", None),  # usar 'fecha' del modelo
         })
     return ctx
 
@@ -62,7 +69,6 @@ def _adjuntos_ctx(adjuntos_queryset):
 # ===== LISTA general (mixta; restringe si no es agente) =====
 
 @login_required
-
 def lista_tickets(request):
     user = request.user
 
@@ -117,20 +123,13 @@ def solicitar_ayuda(request):
             with transaction.atomic():
                 t = form.save(commit=False)
                 t.solicitante = request.user
-                # defaults seguros si tu modelo tiene estos campos
-                try:
-                    t.prioridad = t.prioridad or 'media'
-                except Exception:
-                    pass
-                try:
-                    t.estado = t.estado or 'abierto'
-                except Exception:
-                    pass
+                t.prioridad = getattr(t, 'prioridad', None) or 'media'
+                t.estado = getattr(t, 'estado', None) or 'abierto'
                 if hasattr(t, 'asignado_a'):
                     t.asignado_a = None
                 t.save()
 
-                # Adjuntos múltiples (sube a tickets/{id}/adjuntos/)
+                # Adjuntos múltiples
                 archivos = request.FILES.getlist('archivos')
                 if archivos:
                     storage = SupabaseStorage()
@@ -153,15 +152,14 @@ def solicitar_ayuda(request):
                         ticket=t, autor=request.user, mensaje=desc, publico=True
                     )
 
-            # Redirigir a MISMA URL con ok=1 (banner efímero 2s)
             return redirect(f"{request.path}?ok=1")
         else:
             messages.error(request, "Revisa los campos del formulario.")
-        tab = 'crear'  # si hay errores, mantenemos la pestaña crear
+        tab = 'crear'
     else:
         form = TicketForm()
 
-    # --- Mis tickets recientes (si quieres mostrarlos en la pestaña crear)
+    # --- Mis tickets recientes
     mis_tickets = (
         Ticket.objects.filter(solicitante=request.user)
         .select_related('asignado_a')
@@ -208,7 +206,6 @@ def solicitar_ayuda(request):
         number=page_obj.number, on_each_side=1, on_ends=1
     )
 
-    # último mensaje para los tickets mostrados en la tabla
     for tk in page_obj.object_list:
         tk.ultimo_mensaje = (
             TicketMensaje.objects
@@ -218,7 +215,6 @@ def solicitar_ayuda(request):
             .first()
         )
 
-    # construir QS base para paginación (sin page ni tab)
     base_qs = request.GET.copy()
     base_qs.pop('page', None)
     base_qs.pop('tab', None)
@@ -227,8 +223,8 @@ def solicitar_ayuda(request):
     return render(request, 'solicitar_ayuda.html', {
         'form': form,
         'mis_tickets': mis_tickets,
-        'tab': tab,                # 'crear' o 'lista'
-        'page_obj': page_obj,      # tabla
+        'tab': tab,
+        'page_obj': page_obj,
         'paginator': paginator,
         'elided_range': elided_range,
         'q': q,
@@ -255,6 +251,11 @@ def mi_ticket_detalle(request, pk):
     adjuntos_ctx = _adjuntos_ctx(ticket.adjuntos.all())
 
     if request.method == 'POST':
+        # Bloquea respuestas/adjuntos si resuelto o cerrado
+        if _esta_bloqueado(ticket):
+            messages.error(request, "El ticket está resuelto/cerrado; no se pueden agregar respuestas ni adjuntos.")
+            return redirect('mi_ticket_detalle', pk=ticket.pk)
+
         form_msg = TicketMensajeForm(request.POST, request.FILES)
         if form_msg.is_valid():
             with transaction.atomic():
@@ -264,7 +265,6 @@ def mi_ticket_detalle(request, pk):
                 msg.publico = True
                 msg.save()
 
-                # Adjuntos en la respuesta (al ticket)
                 archivos = request.FILES.getlist('archivos')
                 if archivos:
                     storage = SupabaseStorage()
@@ -280,7 +280,7 @@ def mi_ticket_detalle(request, pk):
                             subido_por=request.user,
                         )
 
-                ticket.save()  # refresca fecha_actualizacion si tu modelo lo hace
+                ticket.save()
             messages.success(request, "Mensaje enviado.")
             return redirect('mi_ticket_detalle', pk=ticket.pk)
         else:
@@ -293,28 +293,17 @@ def mi_ticket_detalle(request, pk):
         'mensajes': mensajes,
         'adjuntos': adjuntos_ctx,
         'form_msg': form_msg,
+        'puede_responder': not _esta_bloqueado(ticket),
     })
-
-
-# ===== BANDEJA (solo agentes) =====
-# apps/tickets/views.py
-from django.contrib.auth.decorators import login_required, permission_required
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.db.models import Q
-
-from .models import Ticket
 
 
 # ===== BANDEJA (solo agentes con permiso) =====
 @login_required
 @permiso_requerido('TICKETS_ACCESO_MENU')
 def tickets_bandeja(request):
-
     """
     Bandeja de tickets para agentes.
     - Requiere el permiso único: tickets.TICKETS_ACCESO_MENU
-    - Si no lo tiene, devuelve 403 (o puedes redirigirlo).
     """
     q = request.GET.get('q', '').strip()
     estado = request.GET.get('estado', '')
@@ -331,9 +320,7 @@ def tickets_bandeja(request):
         tickets = tickets.filter(estado=estado)
 
     if q:
-        tickets = tickets.filter(
-            Q(titulo__icontains=q) | Q(descripcion__icontains=q)
-        )
+        tickets = tickets.filter(Q(titulo__icontains=q) | Q(descripcion__icontains=q))
 
     return render(request, 'tickets_bandeja.html', {
         'tickets': tickets,
@@ -343,7 +330,6 @@ def tickets_bandeja(request):
     })
 
 
-
 # ===== DETALLE (agentes) =====
 @login_required
 def tickets_detalle(request, pk):
@@ -351,7 +337,7 @@ def tickets_detalle(request, pk):
     user = request.user
     if not _es_agente(user):
         messages.error(request, "No tienes permiso para ver este ticket.")
-        return redirect('tickets_lista')
+        return redirect('tickets_lista')  # nombre existente
 
     ticket = get_object_or_404(Ticket, pk=pk)
 
@@ -367,9 +353,14 @@ def tickets_detalle(request, pk):
     usuarios_asignables = CustomUser.objects.all().order_by('first_name', 'last_name', 'username') if puede_gestionar else []
 
     if request.method == 'POST' and 'mensaje' in request.POST:
+        # Bloquea respuestas/adjuntos si resuelto o cerrado
+        if _esta_bloqueado(ticket):
+            messages.error(request, "El ticket está resuelto/cerrado; no se pueden agregar respuestas ni adjuntos.")
+            return redirect('tickets_detalle', pk=ticket.pk)
+
         if not (user.has_perm('permisos.TICKETS_RESPONDER') or puede_gestionar):
             messages.error(request, "No tienes permiso para responder.")
-            return redirect('tickets_detalle', pk=pk)
+            return redirect('tickets_detalle', pk=ticket.pk)
 
         form_msg = TicketMensajeForm(request.POST, request.FILES)
         if form_msg.is_valid():
@@ -410,6 +401,7 @@ def tickets_detalle(request, pk):
         'form_msg': form_msg,
         'puede_gestionar': puede_gestionar,
         'usuarios_asignables': usuarios_asignables,
+        'puede_responder': (not _esta_bloqueado(ticket)) and (user.has_perm('permisos.TICKETS_RESPONDER') or puede_gestionar),
     })
 
 
@@ -437,34 +429,7 @@ def tickets_cambiar_estado(request, pk):
     return redirect('tickets_detalle', pk=ticket.pk)
 
 
-# apps/tickets/views.py
-
-def _adjuntos_ctx(adjuntos_queryset):
-    """Convierte adjuntos a dict, agregando URL pública desde Supabase."""
-    storage = SupabaseStorage()  # ✅ sin 'bucket'
-    ctx = []
-    for a in adjuntos_queryset:
-        url = None
-        try:
-            if a.ruta:
-                url = storage.get_public_url(a.ruta)
-        except Exception:
-            url = None
-        ctx.append({
-            "id": a.id,
-            "nombre": getattr(a, "nombre", "") or "Archivo",
-            "ruta": getattr(a, "ruta", ""),
-            "url": url,
-            "subido_por": a.subido_por,
-            "fecha_subida": getattr(a, "fecha_subida", None),
-        })
-    return ctx
-
-
-
-# apps/tickets/views.py
-from django.http import HttpResponseRedirect, Http404
-
+# ===== Ver adjunto (permisos + redirección a URL pública/firmada) =====
 @login_required
 def adjunto_ver(request, adjunto_id: int):
     adj = get_object_or_404(TicketAdjunto, pk=adjunto_id)

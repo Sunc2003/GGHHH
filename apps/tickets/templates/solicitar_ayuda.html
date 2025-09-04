@@ -6,6 +6,81 @@
 <link rel="stylesheet" href="{% static 'css/solicitar_ayuda.css' %}">
 {% endblock %}
 
+<style>
+
+.help-ui{
+  --bg:#f6f7f9;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --border-strong:#cbd5e1;
+  --primary:#0d6efd;
+  --radius:12px;
+  --radius-sm:8px;
+  --shadow:0 8px 24px rgba(2,6,23,.08);
+}
+.help-ui *{ box-sizing:border-box; }
+
+.page-head{ margin-bottom:14px; }
+
+
+.segmented{
+  display:inline-flex; border:1px solid var(--border-strong); border-radius:999px; overflow:hidden; background:#fff;
+  box-shadow:0 1px 0 rgba(2,6,23,.04);
+}
+.segmented a{
+  padding:.45rem .9rem; text-decoration:none; font-weight:600; font-size:.9rem; color:#334155; display:inline-block;
+}
+.segmented a + a{ border-left:1px solid var(--border); }
+.segmented .is-active{ background:var(--primary); color:#fff; }
+
+
+.card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); }
+.card .card-header{ border-bottom:1px solid var(--border); background:#f8fafc; font-weight:700; color:#0f172a; }
+.card .card-body{ padding:1rem 1rem; }
+
+.form-control, .form-select, textarea, input[type="file"]{
+  border:1px solid var(--border-strong)!important; border-radius:var(--radius-sm)!important; box-shadow:none!important;
+}
+.form-text{ color:var(--muted); }
+
+
+.table-frame{ border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+.table thead th{ background:#f8fafc; color:#334155; font-weight:700; border-bottom:1px solid var(--border); }
+.table tbody td{ border-top:1px solid var(--border); }
+.cell-title a{ font-weight:700; color:#0f172a; text-decoration:none; }
+.cell-title a:hover{ text-decoration:underline; }
+
+
+.status{ display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .55rem; border-radius:999px; font-size:.75rem; font-weight:700; letter-spacing:.2px; border:1px solid transparent; }
+.status .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+.status-open{ color:#b91c1c; background:#fff1f2; border-color:#fecaca; } .status-open .dot{ background:#ef4444; }
+.status-progress{ color:#b45309; background:#fff7ed; border-color:#fed7aa; } .status-progress .dot{ background:#f59e0b; }
+.status-done{ color:#065f46; background:#ecfdf5; border-color:#a7f3d0; } .status-done .dot{ background:#10b981; }
+.status-closed{ color:#334155; background:#f1f5f9; border-color:#cbd5e1; } .status-closed .dot{ background:#64748b; }
+
+
+.empty{ padding:36px 16px; color:var(--muted); }
+.empty .emoji{ font-size:2rem; line-height:1; }
+
+
+.flash-ok{
+  display:flex; align-items:center; gap:.8rem;
+  position:fixed; right:16px; bottom:16px; z-index:30;
+  background:#eafaf0; color:#14532d; border:1px solid #bbf7d0; border-radius:12px; padding:.7rem .9rem; box-shadow:var(--shadow);
+}
+.flash-ok.hide{ opacity:0; transform:translateY(6px); transition:.28s ease; }
+.flash-ok .title{ font-weight:700; margin:0; }
+.flash-ok .text{ margin:0; color:#166534; }
+
+
+@media (max-width: 768px){
+  .segmented{ width:100%; }
+  .segmented a{ flex:1; text-align:center; }
+}
+</style>
+
 {% if request.GET.ok %}
   <div id="flash-ok" class="flash-ok" role="status">
     <img src="{% static 'img/ticket-ok.svg' %}" alt="OK"
@@ -18,7 +93,7 @@
   <script>
     (function(){
       const el = document.getElementById('flash-ok');
-      setTimeout(()=>{ if(el){ el.classList.add('hide'); setTimeout(()=> el.remove(), 300); } }, 2000);
+      setTimeout(()=>{ if(el){ el.classList.add('hide'); setTimeout(()=> el.remove(), 280); } }, 2000);
       if (history.replaceState){
         const url = new URL(window.location.href);
         url.searchParams.delete('ok');
@@ -28,20 +103,14 @@
   </script>
 {% endif %}
 
-<div class="container-xxl py-4 help-view" style="max-width:1200px;">
+<div class="container-xxl py-4 help-ui" style="max-width:1200px;">
 
-  <!-- Encabezado -->
-  <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2 page-head">
-    <h4 class="mb-0">Solicitar ayuda</h4>
-    <div class="btn-group btn-group-sm">
-      <a href="?tab=crear&new=1"
-         class="btn {% if tab != 'lista' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-        Nuevo ticket
-      </a>
-      <a href="?tab=lista{% if base_qs %}&{{ base_qs }}{% endif %}"
-         class="btn {% if tab == 'lista' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-        Mis solicitudes
-      </a>
+  
+  <div class="d-flex flex-wrap justify-content-between align-items-center page-head">
+    <h4 class="mb-2">Solicitar ayuda</h4>
+    <div class="segmented" role="tablist" aria-label="Cambiar vista">
+      <a role="tab" href="?tab=crear&new=1" class="{% if tab != 'lista' %}is-active{% endif %}">Nuevo ticket</a>
+      <a role="tab" href="?tab=lista{% if base_qs %}&{{ base_qs }}{% endif %}" class="{% if tab == 'lista' %}is-active{% endif %}">Mis solicitudes</a>
     </div>
   </div>
 
@@ -53,21 +122,16 @@
     {% endfor %}
   {% endif %}
 
-  {# =================== CREAR =================== #}
+  {# ========== CREAR ========== #}
   {% if tab != 'lista' %}
     {% if form.errors or request.GET.new %}
     <div class="row g-4">
       <div class="col-12 col-lg-6 col-xl-5">
         <div id="ticket-form-card" class="card">
+          <div class="card-header">Nuevo ticket</div>
           <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <h5 class="mb-0">Nuevo ticket</h5>
-              <button id="btn-cancel-form" class="btn btn-light border btn-sm" type="button"
-                      aria-controls="ticket-form-card">Cancelar</button>
-            </div>
-
             {% if form.non_field_errors %}
-              <div class="alert alert-danger py-2">
+              <div class="alert alert-danger py-2 mb-3">
                 {% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}
               </div>
             {% endif %}
@@ -105,19 +169,25 @@
                 <button type="button" id="btn-cancel-form-2" class="btn btn-light border">Cancelar</button>
               </div>
             </form>
+
+            <div class="d-flex justify-content-end mt-2">
+              <button id="btn-cancel-form" class="btn btn-link text-muted btn-sm" type="button"
+                      aria-controls="ticket-form-card">Cerrar formulario</button>
+            </div>
           </div>
         </div>
       </div>
+      
     </div>
     {% endif %}
   {% endif %}
 
-  {# =================== LISTA =================== #}
+  {# ========== LISTA (Mis solicitudes) ========== #}
   {% if tab == 'lista' %}
   <div class="card">
     <div class="card-body">
-      <!-- FILTROS -->
-      <form method="get" class="row g-2 align-items-end mb-3">
+      
+      <form method="get" class="row g-2 align-items-end mb-3" role="search" aria-label="Filtrar mis solicitudes">
         <input type="hidden" name="tab" value="lista">
 
         <div class="col-md-4">
@@ -150,67 +220,74 @@
         </div>
       </form>
 
-
       {% if page_obj.object_list %}
-        <div class="table-responsive">
-          <table class="table table-sm table-hover align-middle">
-            <thead class="table-light">
-              <tr>
-                <th style="width:80px;">ID</th>
-                <th>Título</th>
-                <th style="width:240px;">Asignado / Actualizado</th>
-                <th style="min-width:260px;">Último mensaje</th>
-                <th class="text-end" style="width:120px;">Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for t in page_obj.object_list %}
-              <tr>
-                <td class="text-muted">#{{ t.id }}</td>
-                <td>
-                  <a class="fw-semibold link-dark text-decoration-none"
-                     href="{% url 'mi_ticket_detalle' t.id %}" title="{{ t.titulo }}">{{ t.titulo }}</a>
-                </td>
-                <td>
-                  <div class="small text-muted">
+        <div class="table-frame">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="width:80px;">ID</th>
+                  <th>Título</th>
+                  <th style="width:220px;">Actualizado</th>
+                  <th style="min-width:260px;">Último mensaje</th>
+                  <th class="text-end" style="width:140px;">Estado</th>
+                  <th class="text-end" style="width:150px;">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in page_obj.object_list %}
+                <tr>
+                  <td class="text-muted">#{{ t.id }}</td>
+                  <td class="cell-title">
+                    <a class="link-dark text-decoration-none"
+                       href="{% url 'mi_ticket_detalle' t.id %}" title="{{ t.titulo }}">{{ t.titulo }}</a>
                     {% if t.asignado_a %}
-                      <div>Asignado: <strong>{{ t.asignado_a.get_full_name|default:t.asignado_a.username }}</strong></div>
+                      <div class="small text-muted">Asignado: <strong>{{ t.asignado_a.get_full_name|default:t.asignado_a.username }}</strong></div>
                     {% endif %}
-                    <div>Act.: {{ t.fecha_actualizacion|date:"Y-m-d H:i" }}</div>
-                  </div>
-                </td>
-                <td>
-                  {% if t.ultimo_mensaje %}
-                    <div class="small text-muted" title="{{ t.ultimo_mensaje.mensaje }}">
-                      <strong>{{ t.ultimo_mensaje.autor.get_full_name|default:t.ultimo_mensaje.autor.username }}:</strong>
-                      {{ t.ultimo_mensaje.mensaje|truncatechars:200 }}
-                      <span>· {{ t.ultimo_mensaje.fecha|date:"Y-m-d H:i" }}</span>
-                    </div>
-                  {% else %}
-                    <span class="text-muted small">Sin respuestas.</span>
-                  {% endif %}
-                </td>
-                <td class="text-end">
-                  {% if t.estado == 'abierto' %}
-                    <span class="badge bg-danger-subtle text-danger border">Abierto</span>
-                  {% elif t.estado == 'en_proceso' or t.estado == 'en-proceso' %}
-                    <span class="badge bg-warning-subtle text-warning border">En proceso</span>
-                  {% elif t.estado == 'resuelto' %}
-                    <span class="badge bg-success-subtle text-success border">Resuelto</span>
-                  {% elif t.estado == 'cerrado' %}
-                    <span class="badge bg-secondary">Cerrado</span>
-                  {% else %}
-                    <span class="badge bg-secondary">{{ t.get_estado_display }}</span>
-                  {% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+                  </td>
+                  <td class="small text-muted">
+                    {{ t.fecha_actualizacion|date:"Y-m-d H:i" }}
+                  </td>
+                  <td>
+                    {% if t.ultimo_mensaje %}
+                      <div class="small text-muted" title="{{ t.ultimo_mensaje.mensaje }}">
+                        <strong>{{ t.ultimo_mensaje.autor.get_full_name|default:t.ultimo_mensaje.autor.username }}:</strong>
+                        {{ t.ultimo_mensaje.mensaje|truncatechars:200 }}
+                        <span>· {{ t.ultimo_mensaje.fecha|date:"Y-m-d H:i" }}</span>
+                      </div>
+                    {% else %}
+                      <span class="text-muted small">Sin respuestas.</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end">
+                    {% if t.estado == 'abierto' %}
+                      <span class="status status-open"><span class="dot"></span> Abierto</span>
+                    {% elif t.estado == 'en_progreso' or t.estado == 'en-progreso' %}
+                      <span class="status status-progress"><span class="dot"></span> En progreso</span>
+                    {% elif t.estado == 'resuelto' %}
+                      <span class="status status-done"><span class="dot"></span> Resuelto</span>
+                    {% elif t.estado == 'cerrado' %}
+                      <span class="status status-closed"><span class="dot"></span> Cerrado</span>
+                    {% else %}
+                      <span class="badge bg-secondary">{{ t.get_estado_display }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end">
+                    <a href="{% url 'mi_ticket_detalle' t.id %}"
+                       class="btn btn-sm btn-outline-secondary"
+                       aria-label="Abrir ticket #{{ t.id }}">
+                      Ver
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <!-- Paginación -->
-        <nav class="mt-3">
+        
+        <nav class="mt-3" aria-label="Paginación de mis solicitudes">
           <ul class="pagination pagination-sm mb-0">
             {% if page_obj.has_previous %}
               <li class="page-item">
@@ -236,13 +313,38 @@
           </ul>
         </nav>
       {% else %}
-        <div class="empty text-center">No hay resultados con esos filtros.</div>
+        <div class="empty text-center">
+          <div class="emoji mb-2">📭</div>
+          No hay resultados con esos filtros.
+        </div>
       {% endif %}
     </div>
   </div>
   {% endif %}
 
 </div>
+
+{% if request.GET.ok %}
+<script>
+(function(){
+  const el = document.getElementById('flash-ok');
+  setTimeout(()=>{
+    if (el){
+      el.classList.add('hide');
+      setTimeout(()=> el.remove(), 280); 
+    }
+  }, 2000);
+
+  if (history.replaceState){
+    const url = new URL(window.location.href);
+    url.searchParams.delete('ok');
+    const qs = url.searchParams.toString();
+    history.replaceState({}, '', url.pathname + (qs ? '?' + qs : '')); // ← usar .toString()
+  }
+})();
+</script>
+{% endif %}
+
 
 <script>
 (function(){
