@@ -9,8 +9,8 @@ import requests
 import time, hmac, hashlib
  
 # ---- ENDPOINTS REMOTOS (ajusta si cambias el dominio) ----
-NGROK_API_URL = "https://804103bbd425.ngrok-free.app/api/productos"
-NGROK_API_SOCIOS = "https://804103bbd425.ngrok-free.app/api/socios"
+NGROK_API_URL = "https://fb845bb0adc0.ngrok-free.app/api/productos"
+NGROK_API_SOCIOS = "https://fb845bb0adc0.ngrok-free.app/api/socios"
  
 # ---- HEADERS BASE (útiles para ngrok) ----
 HEADERS_BASE = {

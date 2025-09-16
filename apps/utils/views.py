@@ -25,3 +25,63 @@ class TestSupabaseUploadView(View):
             response_data['error'] = str(e)
 
         return JsonResponse(response_data)
+    
+
+
+    # --- QR: contador de solicitudes del usuario ---
+from io import BytesIO
+import qrcode
+
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.shortcuts import render
+
+from apps.usuarios.models import SolicitudCodigo
+
+
+@login_required
+def qr_png(request):
+    """
+    Devuelve un PNG con un código QR que apunta a la URL indicada en ?data
+    Ej: /utils/qr/?data=/utils/mis-solicitudes/contador/
+    """
+    data = (request.GET.get("data") or "").strip()
+    if not data:
+        return HttpResponseBadRequest("Falta el parámetro ?data")
+
+    # Si es path relativo, conviértelo a URL absoluta
+    if data.startswith("/"):
+        data = request.build_absolute_uri(data)
+
+    img = qrcode.make(data)
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return HttpResponse(buf.getvalue(), content_type="image/png")
+
+
+@login_required
+def mis_solicitudes_contador(request):
+    """
+    Muestra cuántas solicitudes ha enviado el usuario logueado.
+    """
+    count = SolicitudCodigo.objects.filter(solicitante=request.user).count()
+    return render(request, "mis_solicitudes_contador.html", {"count": count})
+
+
+# apps/utils/views.py
+from io import BytesIO
+from django.http import HttpResponse, HttpResponseBadRequest
+import qrcode
+
+def qr_png(request):
+    data = request.GET.get("data", "").strip()
+    if not data:
+        return HttpResponseBadRequest("Falta parámetro 'data'")
+    qr = qrcode.QRCode(version=None, box_size=6, border=2)
+    qr.add_data(data)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    return HttpResponse(buf.getvalue(), content_type="image/png")
