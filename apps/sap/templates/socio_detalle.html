@@ -1,50 +1,86 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block content %}
 <style>
-:root{ --ink:#111; --muted:#555; --line:#dcdcdc; --fill:#fff; --fill-soft:#f5f5f5; }
-body{ color:var(--ink); background:#fff; }
+:root {
+  --ink: #1c1c1c;
+  --muted: #6c757d;
+  --line: #dee2e6;
+  --fill: #ffffff;
+  --fill-soft: #f8f9fa;
+  --primary: #0d6efd;
+}
+.page-header {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: .75rem; margin-bottom: 1.5rem;
+}
+.page-title { margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--ink); }
+.ghost-btn {
+  padding: .45rem .9rem; border: 1px solid var(--line);
+  background: var(--fill); text-decoration: none; color: var(--ink);
+  border-radius: 6px; font-size: .9rem; font-weight: 500;
+  transition: all .2s ease;
+}
+.ghost-btn:hover { background: var(--fill-soft); color: var(--primary); }
 
-.page-header{ display:flex; align-items:center; justify-content:space-between; padding-bottom:.75rem; margin-bottom:1.25rem; border-bottom:2px solid var(--line);}
-.page-title{ margin:0; font-weight:800; font-size:1.6rem; }
-.ghost-btn{ display:inline-flex; align-items:center; gap:.5rem; padding:.4rem .75rem; border:1px solid var(--line); background:var(--fill); color:var(--ink); text-decoration:none; border-radius:6px;}
-.ghost-btn:hover{ background:var(--fill-soft); }
+.card {
+  background: var(--fill); border: 1px solid var(--line); border-radius: 8px;
+  padding: 1rem; margin-bottom: 1.25rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.section-title {
+  margin: 0 0 .85rem 0; font-weight: 700; font-size: 1rem;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .5px;
+}
 
-.card{ background:var(--fill); border:1px solid var(--line); border-radius:8px; padding:1rem; margin-bottom:1.5rem; box-shadow:0 2px 4px rgba(0,0,0,0.05);}
-.section-title{ margin:0 0 .75rem 0; font-weight:700; font-size:1rem; color:var(--muted); text-transform:uppercase; }
+.data-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.data-table thead th {
+  background: var(--fill-soft); font-weight: 600; padding: .6rem .7rem;
+  border: 1px solid var(--line); text-align: center; color: var(--ink);
+}
+.data-table tbody td {
+  border: 1px solid var(--line); padding: .55rem .7rem; text-align: center;
+}
+.data-table tbody tr:nth-child(odd) { background: #fcfcfc; }
+.data-table tbody tr:hover { background: #f1f3f5; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
 
-.data-table{ width:100%; border-collapse:collapse; font-size:.9rem; }
-.data-table thead th{ background:var(--fill-soft); font-weight:700; border:1px solid var(--line); padding:.55rem .65rem; text-align:center;}
-.data-table tbody td{ border:1px solid var(--line); padding:.55rem .65rem; text-align:center;}
-.data-table tbody tr:nth-child(odd){ background:#fafafa;}
-.num{ text-align:right; font-variant-numeric:tabular-nums; }
-
-.nav-tabs .nav-link{ border:1px solid var(--line); border-bottom:none; border-radius:0; color:var(--muted); font-weight:600; background:var(--fill-soft);}
-.nav-tabs .nav-link.active{ background:var(--fill); color:var(--ink); border-top:2px solid #000; border-bottom:1px solid var(--fill); font-weight:700;}
-.nav-tabs{ margin-bottom:1rem; border-bottom:1px solid var(--line);}
+.nav-tabs .nav-link {
+  border: 1px solid var(--line); border-bottom: none;
+  color: var(--muted); font-weight: 600; background: var(--fill-soft);
+  padding: .6rem 1rem;
+}
+.nav-tabs .nav-link.active {
+  background: var(--fill); color: var(--primary);
+  border-top: 2px solid var(--primary);
+  font-weight: 700;
+}
+.nav-tabs { margin-bottom: 1rem; border-bottom: 1px solid var(--line); }
 </style>
 
 <div class="container py-4">
   <div class="page-header">
     <h4 class="page-title">Detalle del Cliente</h4>
-    <a href="{{ request.META.HTTP_REFERER }}" class="ghost-btn">
-      <i class="fas fa-arrow-left"></i> Volver
+    <a href="{{ request.GET.next|default:request.META.HTTP_REFERER|default:'#' }}" class="ghost-btn">
+      <i class="fas fa-arrow-left"></i> Volver a la lista
     </a>
   </div>
 
-  {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
-
-  {% if detalle %}
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% else %}
     <!-- Información general -->
-    <div class="card mb-4">
+    <div class="card">
       <h5 class="section-title">Información General</h5>
-      <table class="table table-bordered">
+      <table class="table table-bordered table-sm">
         <tr><th>Código</th><td>{{ detalle.socio.CardCode }}</td></tr>
         <tr><th>Nombre</th><td>{{ detalle.socio.CardName }}</td></tr>
-        <tr><th>Límite de Crédito</th><td class="num">$ {{ detalle.socio.CreditLine }}</td></tr>
-        <tr><th>Saldo</th><td class="num">$ {{ detalle.socio.Balance }}</td></tr>
-        <tr><th>Crédito Disponible</th><td class="num">$ {{ detalle.socio.CreditoDisponible }}</td></tr>
+        <tr><th>Límite de Crédito</th><td class="num">$ {{ detalle.socio.CreditLine|puntos_miles }}</td></tr>
+        <tr><th>Saldo</th><td class="num">$ {{ detalle.socio.Balance|puntos_miles }}</td></tr>
+        <tr><th>Crédito Disponible</th><td class="num">$ {{ detalle.socio.CreditoDisponible|puntos_miles }}</td></tr>
       </table>
     </div>
 
@@ -63,7 +99,9 @@ body{ color:var(--ink); background:#fff; }
           <h5 class="section-title">Direcciones</h5>
           {% if detalle.direcciones %}
             <table class="data-table">
-              <thead><tr><th>Nombre</th><th>Tipo</th><th>Calle</th><th>Ciudad</th><th>Comuna</th><th>Región</th><th>País</th><th>Zip</th></tr></thead>
+              <thead>
+                <tr><th>Nombre</th><th>Tipo</th><th>Calle</th><th>Ciudad</th><th>Comuna</th><th>Región</th><th>País</th><th>Zip</th></tr>
+              </thead>
               <tbody>
                 {% for d in detalle.direcciones %}
                 <tr>
@@ -90,9 +128,11 @@ body{ color:var(--ink); background:#fff; }
                 {% for ov in ov_abiertas %}
                 <tr>
                   <td>{{ ov.DocNum }}</td><td>{{ ov.DocDate }}</td><td>{{ ov.DocDueDate }}</td>
-                  <td class="num">$ {{ ov.TotalNeto }}</td><td>{{ ov.DocCur }}</td><td>{{ ov.Vendedor }}</td>
+                  <td class="num">$ {{ ov.TotalNeto|puntos_miles }}</td>
+                  <td>{{ ov.DocCur }}</td><td>{{ ov.Vendedor }}</td>
                   <td>
-                    <a href="{% url 'ov_detalle' cardcode=cardcode docnum=ov.DocNum %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
+                    <a href="{% url 'ov_detalle' cardcode=cardcode docnum=ov.DocNum %}?next={{ request.get_full_path }}"
+                       class="btn btn-sm btn-outline-primary">Ver detalle</a>
                   </td>
                 </tr>
                 {% endfor %}
@@ -102,7 +142,7 @@ body{ color:var(--ink); background:#fff; }
         </div>
       </div>
 
-      <!-- Guías Pendientes -->
+      <!-- Guías -->
       <div class="tab-pane fade" id="guias">
         <div class="card">
           <h5 class="section-title">Guías Pendientes de Facturar</h5>
@@ -110,14 +150,14 @@ body{ color:var(--ink); background:#fff; }
             {% regroup guias_pendientes by DocNum as grouped_guias %}
             {% for guia in grouped_guias %}
               <div class="mb-3">
-                <h6 class="fw-bold">Guía {{ guia.grouper }} — {{ guia.list.0.DocDate }}</h6>
+                <h6 class="fw-bold text-dark">Guía {{ guia.grouper }} — {{ guia.list.0.DocDate }}</h6>
                 <table class="data-table">
                   <thead><tr><th>Item</th><th>Descripción</th><th>Cantidad</th><th>Pendiente</th></tr></thead>
                   <tbody>
                     {% for item in guia.list %}
                     <tr>
                       <td>{{ item.ItemCode }}</td><td>{{ item.Dscription }}</td>
-                      <td class="num">{{ item.Quantity }}</td><td class="num">{{ item.OpenQty }}</td>
+                      <td class="num">{{ item.Quantity|puntos_miles }}</td><td class="num">{{ item.OpenQty|puntos_miles }}</td>
                     </tr>
                     {% endfor %}
                   </tbody>
@@ -128,7 +168,7 @@ body{ color:var(--ink); background:#fff; }
         </div>
       </div>
 
-      <!-- Facturas Vencidas -->
+      <!-- Facturas -->
       <div class="tab-pane fade" id="facturas">
         <div class="card">
           <h5 class="section-title">Facturas Vencidas</h5>
@@ -139,7 +179,7 @@ body{ color:var(--ink); background:#fff; }
                 {% for fac in facturas_vencidas %}
                 <tr>
                   <td>{{ fac.DocNum }}</td><td>{{ fac.DocDate }}</td><td>{{ fac.DocDueDate }}</td>
-                  <td class="num">$ {{ fac.Saldo }}</td><td>{{ fac.DocCur }}</td>
+                  <td class="num">$ {{ fac.Saldo|puntos_miles }}</td><td>{{ fac.DocCur }}</td>
                 </tr>
                 {% endfor %}
               </tbody>

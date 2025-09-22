@@ -41,7 +41,7 @@
               <td class="text-end"><strong>${{ s.CreditoDisponible|floatformat:0 }}</strong></td>
               <td class="text-center">
                 <a class="btn btn-sm btn-outline-dark"
-                   href="{% url 'socio_detalle' s.CardCode %}">
+                   href="{% url 'socio_detalle' s.CardCode %}?next={{ request.get_full_path }}">
                   Ver detalle
                 </a>
               </td>
@@ -58,21 +58,11 @@
 </div>
 
 <style>
-  /* Estilo blanco y negro profesional */
   .table th, .table td { vertical-align: middle; }
   .table-hover tbody tr:hover { background-color: #f5f5f5; }
   .table-bordered { border-color: #000; }
-  thead.table-light th {
-    background-color: #e9ecef;
-    color: #000;
-  }
-  .btn-dark, .btn-outline-dark {
-    border-radius: 3px;
-  }
-  code {
-    background: transparent;
-    color: #000;
-    font-size: 0.9rem;
-  }
+  thead.table-light th { background-color: #e9ecef; color: #000; }
+  .btn-dark, .btn-outline-dark { border-radius: 3px; }
+  code { background: transparent; color: #000; font-size: 0.9rem; }
 </style>
 {% endblock %}
