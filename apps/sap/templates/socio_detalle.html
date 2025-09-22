@@ -6,144 +6,23 @@
 :root{ --ink:#111; --muted:#555; --line:#dcdcdc; --fill:#fff; --fill-soft:#f5f5f5; }
 body{ color:var(--ink); background:#fff; }
 
-.page-header{
-  display:flex; align-items:center; justify-content:space-between;
-  padding-bottom:.75rem; margin-bottom:1.25rem; border-bottom:2px solid var(--line);
-}
-.page-title{ margin:0; font-weight:800; font-size:1.6rem; letter-spacing:.2px; }
-.ghost-btn{
-  display:inline-flex; align-items:center; gap:.5rem; padding:.4rem .75rem;
-  border:1px solid var(--line); background:var(--fill); color:var(--ink);
-  text-decoration:none; border-radius:0;
-}
+.page-header{ display:flex; align-items:center; justify-content:space-between; padding-bottom:.75rem; margin-bottom:1.25rem; border-bottom:2px solid var(--line);}
+.page-title{ margin:0; font-weight:800; font-size:1.6rem; }
+.ghost-btn{ display:inline-flex; align-items:center; gap:.5rem; padding:.4rem .75rem; border:1px solid var(--line); background:var(--fill); color:var(--ink); text-decoration:none; border-radius:6px;}
 .ghost-btn:hover{ background:var(--fill-soft); }
 
-.card{ background:var(--fill); border:1px solid var(--line); padding:1rem; margin-bottom:1.5rem; border-radius:0; }
+.card{ background:var(--fill); border:1px solid var(--line); border-radius:8px; padding:1rem; margin-bottom:1.5rem; box-shadow:0 2px 4px rgba(0,0,0,0.05);}
 .section-title{ margin:0 0 .75rem 0; font-weight:700; font-size:1rem; color:var(--muted); text-transform:uppercase; }
 
-.kv-table{ width:100%; border-collapse:collapse; }
-.kv-table th, .kv-table td{ border:1px solid var(--line); padding:.55rem .65rem; vertical-align:middle; }
-.kv-table th{ width:28%; color:var(--muted); font-weight:700; background:var(--fill-soft); text-align:left; }
-.kv-table td{ font-weight:600; color:var(--ink); text-align:left; }
-
-.data-table{ width:100%; border-collapse:collapse; background:var(--fill); }
-.data-table thead th{ background:var(--fill-soft); color:var(--ink); font-weight:700; border:1px solid var(--line); padding:.55rem .65rem; text-align:center; }
-.data-table tbody td{ border:1px solid var(--line); padding:.55rem .65rem; text-align:center; }
-.data-table tbody tr:nth-child(odd){ background:#fafafa; }
+.data-table{ width:100%; border-collapse:collapse; font-size:.9rem; }
+.data-table thead th{ background:var(--fill-soft); font-weight:700; border:1px solid var(--line); padding:.55rem .65rem; text-align:center;}
+.data-table tbody td{ border:1px solid var(--line); padding:.55rem .65rem; text-align:center;}
+.data-table tbody tr:nth-child(odd){ background:#fafafa;}
 .num{ text-align:right; font-variant-numeric:tabular-nums; }
 
-.btn-primary{ background:#000; border:1px solid #000; color:#fff; padding:.5rem .9rem; border-radius:0; }
-.btn-primary:hover{ background:#333; border-color:#333; }
-
-/* --- RESPONSIVE --- */
-@media (max-width: 991px) {
-  .container {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.7rem;
-  }
-  .page-title {
-    font-size: 1.2rem;
-  }
-  .ghost-btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 767px) {
-  .kv-table, .data-table {
-    font-size: 0.97rem;
-  }
-  .kv-table th, .kv-table td,
-  .data-table thead th, .data-table tbody td {
-    padding: .5rem .4rem;
-  }
-  .card {
-    padding: 0.7rem;
-  }
-  .section-title {
-    font-size: 0.95rem;
-  }
-  .page-header {
-    padding-bottom: .5rem;
-    margin-bottom: 1rem;
-  }
-
-  /* Responsive tabla tipo tarjeta para .data-table */
-  .data-table thead {
-    display: none;
-  }
-  .data-table, .data-table tbody, .data-table tr, .data-table td {
-    display: block;
-    width: 100%;
-  }
-  .data-table tr {
-    margin-bottom: 1rem;
-    border-bottom: 2px solid var(--line);
-    background: var(--fill-soft);
-    border-radius: 6px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
-  }
-  .data-table td {
-    text-align: left;
-    padding-left: 45%;
-    position: relative;
-    border: none;
-    border-bottom: 1px solid var(--line);
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    font-size: 1rem;
-  }
-  .data-table td:before {
-    content: attr(data-label);
-    position: absolute;
-    left: 0.7rem;
-    top: 0.6rem;
-    width: 42%;
-    font-weight: 600;
-    color: var(--muted);
-    white-space: nowrap;
-    text-align: left;
-  }
-  .data-table td:last-child {
-    border-bottom: none;
-  }
-  .data-table td.num {
-    justify-content: flex-end;
-    text-align: left;
-  }
-}
-
-@media (max-width: 575.98px) {
-  .container {
-    padding-left: 0.2rem;
-    padding-right: 0.2rem;
-  }
-  .page-title {
-    font-size: 1rem;
-  }
-  .kv-table, .data-table {
-    font-size: 0.93rem;
-  }
-  .kv-table th, .kv-table td,
-  .data-table thead th, .data-table tbody td {
-    padding: .35rem .2rem;
-  }
-  .card {
-    padding: 0.4rem;
-    margin-bottom: 1rem;
-  }
-  .ghost-btn {
-    font-size: 0.97rem;
-    padding: .3rem .5rem;
-  }
-}
+.nav-tabs .nav-link{ border:1px solid var(--line); border-bottom:none; border-radius:0; color:var(--muted); font-weight:600; background:var(--fill-soft);}
+.nav-tabs .nav-link.active{ background:var(--fill); color:var(--ink); border-top:2px solid #000; border-bottom:1px solid var(--fill); font-weight:700;}
+.nav-tabs{ margin-bottom:1rem; border-bottom:1px solid var(--line);}
 </style>
 
 <div class="container py-4">
@@ -154,79 +33,121 @@ body{ color:var(--ink); background:#fff; }
     </a>
   </div>
 
-  {% if error %}
-    <div class="alert alert-danger">{{ error }}</div>
-  {% endif %}
+  {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
 
   {% if detalle %}
-    <div class="card">
+    <!-- Información general -->
+    <div class="card mb-4">
       <h5 class="section-title">Información General</h5>
-      <table class="kv-table">
-        <tr>
-          <th>Código</th>
-          <td>{{ detalle.socio.CardCode }}</td>
-        </tr>
-        <tr>
-          <th>Nombre</th>
-          <td>{{ detalle.socio.CardName }}</td>
-        </tr>
-        <tr>
-          <th>Límite de Crédito</th>
-          <td class="num">${{ detalle.socio.CreditLine|floatformat:0 }}</td>
-        </tr>
-        <tr>
-          <th>Saldo</th>
-          <td class="num">${{ detalle.socio.Balance|floatformat:0 }}</td>
-        </tr>
-        <tr>
-          <th>Crédito Disponible</th>
-          <td class="num">${{ detalle.socio.CreditoDisponible|floatformat:0 }}</td>
-        </tr>
+      <table class="table table-bordered">
+        <tr><th>Código</th><td>{{ detalle.socio.CardCode }}</td></tr>
+        <tr><th>Nombre</th><td>{{ detalle.socio.CardName }}</td></tr>
+        <tr><th>Límite de Crédito</th><td class="num">$ {{ detalle.socio.CreditLine }}</td></tr>
+        <tr><th>Saldo</th><td class="num">$ {{ detalle.socio.Balance }}</td></tr>
+        <tr><th>Crédito Disponible</th><td class="num">$ {{ detalle.socio.CreditoDisponible }}</td></tr>
       </table>
     </div>
 
-    <div class="card">
-      <h5 class="section-title">Direcciones</h5>
-      {% if detalle.direcciones %}
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Tipo</th>
-                <th>Calle</th>
-                <th>Ciudad</th>
-                <th>Comuna</th>
-                <th>Región</th>
-                <th>País</th>
-                <th>Zip</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for d in detalle.direcciones %}
-              <tr>
-                <td data-label="Nombre">{{ d.NombreDireccion }}</td>
-                <td data-label="Tipo">
-                  {% if d.Tipo == 'B' %}Facturación{% elif d.Tipo == 'S' %}Despacho{% else %}{{ d.Tipo }}{% endif %}
-                </td>
-                <td data-label="Calle">{{ d.Calle }}</td>
-                <td data-label="Ciudad">{{ d.Ciudad }}</td>
-                <td data-label="Comuna">{{ d.Comuna }}</td>
-                <td data-label="Región">{{ d.Region }}</td>
-                <td data-label="País">{{ d.Pais }}</td>
-                <td data-label="Zip">{{ d.ZipCode }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="detalleTabs">
+      <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#direcciones">Direcciones</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#ov">OV Abiertas</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#guias">Guías Pendientes</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#facturas">Facturas Vencidas</a></li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Direcciones -->
+      <div class="tab-pane fade show active" id="direcciones">
+        <div class="card">
+          <h5 class="section-title">Direcciones</h5>
+          {% if detalle.direcciones %}
+            <table class="data-table">
+              <thead><tr><th>Nombre</th><th>Tipo</th><th>Calle</th><th>Ciudad</th><th>Comuna</th><th>Región</th><th>País</th><th>Zip</th></tr></thead>
+              <tbody>
+                {% for d in detalle.direcciones %}
+                <tr>
+                  <td>{{ d.NombreDireccion }}</td>
+                  <td>{% if d.Tipo == 'B' %}Facturación{% elif d.Tipo == 'S' %}Despacho{% else %}{{ d.Tipo }}{% endif %}</td>
+                  <td>{{ d.Calle }}</td><td>{{ d.Ciudad }}</td><td>{{ d.Comuna }}</td>
+                  <td>{{ d.Region }}</td><td>{{ d.Pais }}</td><td>{{ d.ZipCode }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}<p class="text-muted">Sin direcciones registradas.</p>{% endif %}
         </div>
-      {% else %}
-        <p class="text-muted">Sin direcciones registradas.</p>
-      {% endif %}
+      </div>
+
+      <!-- OV Abiertas -->
+      <div class="tab-pane fade" id="ov">
+        <div class="card">
+          <h5 class="section-title">Órdenes de Venta Abiertas</h5>
+          {% if ov_abiertas %}
+            <table class="data-table">
+              <thead><tr><th>N° Doc</th><th>Fecha</th><th>Vencimiento</th><th>Total Neto</th><th>Moneda</th><th>Vendedor</th><th></th></tr></thead>
+              <tbody>
+                {% for ov in ov_abiertas %}
+                <tr>
+                  <td>{{ ov.DocNum }}</td><td>{{ ov.DocDate }}</td><td>{{ ov.DocDueDate }}</td>
+                  <td class="num">$ {{ ov.TotalNeto }}</td><td>{{ ov.DocCur }}</td><td>{{ ov.Vendedor }}</td>
+                  <td>
+                    <a href="{% url 'ov_detalle' cardcode=cardcode docnum=ov.DocNum %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}<p class="text-muted">No hay órdenes de venta abiertas.</p>{% endif %}
+        </div>
+      </div>
+
+      <!-- Guías Pendientes -->
+      <div class="tab-pane fade" id="guias">
+        <div class="card">
+          <h5 class="section-title">Guías Pendientes de Facturar</h5>
+          {% if guias_pendientes %}
+            {% regroup guias_pendientes by DocNum as grouped_guias %}
+            {% for guia in grouped_guias %}
+              <div class="mb-3">
+                <h6 class="fw-bold">Guía {{ guia.grouper }} — {{ guia.list.0.DocDate }}</h6>
+                <table class="data-table">
+                  <thead><tr><th>Item</th><th>Descripción</th><th>Cantidad</th><th>Pendiente</th></tr></thead>
+                  <tbody>
+                    {% for item in guia.list %}
+                    <tr>
+                      <td>{{ item.ItemCode }}</td><td>{{ item.Dscription }}</td>
+                      <td class="num">{{ item.Quantity }}</td><td class="num">{{ item.OpenQty }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% endfor %}
+          {% else %}<p class="text-muted">No hay guías pendientes de facturar.</p>{% endif %}
+        </div>
+      </div>
+
+      <!-- Facturas Vencidas -->
+      <div class="tab-pane fade" id="facturas">
+        <div class="card">
+          <h5 class="section-title">Facturas Vencidas</h5>
+          {% if facturas_vencidas %}
+            <table class="data-table">
+              <thead><tr><th>N° Factura</th><th>Fecha</th><th>Vencimiento</th><th>Saldo</th><th>Moneda</th></tr></thead>
+              <tbody>
+                {% for fac in facturas_vencidas %}
+                <tr>
+                  <td>{{ fac.DocNum }}</td><td>{{ fac.DocDate }}</td><td>{{ fac.DocDueDate }}</td>
+                  <td class="num">$ {{ fac.Saldo }}</td><td>{{ fac.DocCur }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}<p class="text-muted">No hay facturas vencidas.</p>{% endif %}
+        </div>
+      </div>
     </div>
   {% endif %}
 </div>
 {% endblock %}
-
-
- 

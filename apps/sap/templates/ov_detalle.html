@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<style>
+:root {
+  --ink:#111; --muted:#555; --line:#ddd; --fill:#fff; --fill-soft:#f9f9f9;
+}
+.page-header { display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--line); padding-bottom:.75rem; margin-bottom:1.5rem; }
+.page-title { margin:0; font-size:1.5rem; font-weight:700; }
+.ghost-btn { padding:.4rem .75rem; border:1px solid var(--line); background:var(--fill); text-decoration:none; color:var(--ink); border-radius:6px; }
+.ghost-btn:hover { background:var(--fill-soft); }
+
+.card { background:var(--fill); border:1px solid var(--line); border-radius:6px; padding:1rem; margin-bottom:1.5rem; }
+.section-title { margin:0 0 .75rem 0; font-weight:700; font-size:1.05rem; color:var(--muted); text-transform:uppercase; }
+
+.data-table { width:100%; border-collapse:collapse; margin-bottom:1rem; }
+.data-table thead th { background:var(--fill-soft); font-weight:600; padding:.55rem .65rem; border:1px solid var(--line); text-align:center; }
+.data-table tbody td { border:1px solid var(--line); padding:.55rem .65rem; text-align:center; }
+.data-table tbody tr:nth-child(odd) { background:#fcfcfc; }
+.num { text-align:right; font-variant-numeric:tabular-nums; }
+</style>
+
+<div class="container py-4">
+  <div class="page-header">
+    <h4 class="page-title">Detalle Orden de Venta</h4>
+    <a href="{% url 'socio_detalle' cardcode=ov.CardCode %}" class="ghost-btn">
+      <i class="fas fa-arrow-left"></i> Volver al Cliente
+    </a>
+  </div>
+
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% else %}
+    <!-- Datos generales -->
+    <div class="card">
+      <h5 class="section-title">Datos Generales</h5>
+      <table class="table table-bordered">
+        <tr><th>N° Documento</th><td>{{ ov.DocNum }}</td></tr>
+        <tr><th>Fecha</th><td>{{ ov.DocDate }}</td></tr>
+        <tr><th>Vencimiento</th><td>{{ ov.DocDueDate }}</td></tr>
+        <tr><th>Cliente</th><td>{{ ov.CardCode }} — {{ ov.CardName }}</td></tr>
+        <tr><th>Vendedor</th><td>{{ ov.Vendedor }}</td></tr>
+        <tr><th>Total Neto</th><td class="num">$ {{ ov.TotalNeto|puntos_miles }}</td></tr>
+        <tr><th>Moneda</th><td>{{ ov.DocCur }}</td></tr>
+      </table>
+    </div>
+
+    <!-- Detalle de líneas -->
+    <div class="card">
+      <h5 class="section-title">Detalle de Líneas</h5>
+      {% if detalle_items %}
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Línea</th>
+              <th>Item</th>
+              <th>Descripción</th>
+              <th>Cantidad</th>
+              <th>Pendiente</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in detalle_items %}
+            <tr>
+              <td>{{ item.LineNum }}</td>
+              <td>{{ item.ItemCode }}</td>
+              <td>{{ item.Dscription }}</td>
+              <td class="num">{{ item.Quantity|puntos_miles }}</td>
+              <td class="num">{{ item.OpenQty|puntos_miles }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="text-muted">No hay detalle disponible para esta orden de venta.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
