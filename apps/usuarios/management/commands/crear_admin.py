@@ -1186,12 +1186,6 @@ class Command(BaseCommand):
         if not usuarios:
             raise CommandError("La lista 'usuarios' está vacía. Pega tu data antes de ejecutar.")
 
-        if not opts["force"]:
-            self.stdout.write(self.style.WARNING("⚠ Esto ELIMINARÁ TODOS los usuarios."))
-            resp = input("¿Continuar? (escribe 'SI' para continuar): ").strip()
-            if resp != "SI":
-                self.stdout.write(self.style.NOTICE("Operación cancelada."))
-                return
 
         with transaction.atomic():
             # 1) Borrar todos los usuarios
