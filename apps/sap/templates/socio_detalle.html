@@ -15,7 +15,7 @@
 .page-header {
   display: flex; justify-content: space-between; align-items: center;
   border-bottom: 2px solid var(--line);
-  padding-bottom: .75rem; margin-bottom: 1.5rem;
+  padding-bottom: .75rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;
 }
 .page-title { margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--ink); }
 .ghost-btn {
@@ -36,6 +36,11 @@
   color: var(--muted); text-transform: uppercase; letter-spacing: .5px;
 }
 
+/* Tablas generales */
+.table th, .table td { vertical-align: middle; }
+.table-bordered { border-color: var(--line); }
+
+/* Tablas de datos */
 .data-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .data-table thead th {
   background: var(--fill-soft); font-weight: 600; padding: .6rem .7rem;
@@ -46,8 +51,9 @@
 }
 .data-table tbody tr:nth-child(odd) { background: #fcfcfc; }
 .data-table tbody tr:hover { background: #f1f3f5; }
-.num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
 
+/* Tabs */
 .nav-tabs .nav-link {
   border: 1px solid var(--line); border-bottom: none;
   color: var(--muted); font-weight: 600; background: var(--fill-soft);
@@ -58,7 +64,16 @@
   border-top: 2px solid var(--primary);
   font-weight: 700;
 }
-.nav-tabs { margin-bottom: 1rem; border-bottom: 1px solid var(--line); }
+.nav-tabs { margin-bottom: 1rem; border-bottom: 1px solid var(--line); overflow-x: auto; flex-wrap: nowrap; }
+.nav-tabs .nav-item { white-space: nowrap; }
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .page-header { flex-direction: column; align-items: flex-start; }
+  .page-title { font-size: 1.25rem; }
+  .nav-tabs { font-size: 0.9rem; }
+  .table-responsive { overflow-x: auto; }
+}
 </style>
 
 <div class="container py-4">
@@ -75,13 +90,15 @@
     <!-- Información general -->
     <div class="card">
       <h5 class="section-title">Información General</h5>
-      <table class="table table-bordered table-sm">
-        <tr><th>Código</th><td>{{ detalle.socio.CardCode }}</td></tr>
-        <tr><th>Nombre</th><td>{{ detalle.socio.CardName }}</td></tr>
-        <tr><th>Límite de Crédito</th><td class="num">$ {{ detalle.socio.CreditLine|puntos_miles }}</td></tr>
-        <tr><th>Saldo</th><td class="num">$ {{ detalle.socio.Balance|puntos_miles }}</td></tr>
-        <tr><th>Crédito Disponible</th><td class="num">$ {{ detalle.socio.CreditoDisponible|puntos_miles }}</td></tr>
-      </table>
+      <div class="table-responsive">
+        <table class="table table-bordered table-sm mb-0">
+          <tr><th>Código</th><td>{{ detalle.socio.CardCode }}</td></tr>
+          <tr><th>Nombre</th><td>{{ detalle.socio.CardName }}</td></tr>
+          <tr><th>Límite de Crédito</th><td>$ {{ detalle.socio.CreditLine|puntos_miles }}</td></tr>
+          <tr><th>Saldo</th><td>$ {{ detalle.socio.Balance|puntos_miles }}</td></tr>
+          <tr><th>Crédito Disponible</th><td>$ {{ detalle.socio.CreditoDisponible|puntos_miles }}</td></tr>
+        </table>
+      </div>
     </div>
 
     <!-- Tabs -->
@@ -98,21 +115,23 @@
         <div class="card">
           <h5 class="section-title">Direcciones</h5>
           {% if detalle.direcciones %}
-            <table class="data-table">
-              <thead>
-                <tr><th>Nombre</th><th>Tipo</th><th>Calle</th><th>Ciudad</th><th>Comuna</th><th>Región</th><th>País</th><th>Zip</th></tr>
-              </thead>
-              <tbody>
-                {% for d in detalle.direcciones %}
-                <tr>
-                  <td>{{ d.NombreDireccion }}</td>
-                  <td>{% if d.Tipo == 'B' %}Facturación{% elif d.Tipo == 'S' %}Despacho{% else %}{{ d.Tipo }}{% endif %}</td>
-                  <td>{{ d.Calle }}</td><td>{{ d.Ciudad }}</td><td>{{ d.Comuna }}</td>
-                  <td>{{ d.Region }}</td><td>{{ d.Pais }}</td><td>{{ d.ZipCode }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Nombre</th><th>Tipo</th><th>Calle</th><th>Ciudad</th><th>Comuna</th><th>Región</th><th>País</th><th>Zip</th></tr>
+                </thead>
+                <tbody>
+                  {% for d in detalle.direcciones %}
+                  <tr>
+                    <td>{{ d.NombreDireccion }}</td>
+                    <td>{% if d.Tipo == 'B' %}Facturación{% elif d.Tipo == 'S' %}Despacho{% else %}{{ d.Tipo }}{% endif %}</td>
+                    <td>{{ d.Calle }}</td><td>{{ d.Ciudad }}</td><td>{{ d.Comuna }}</td>
+                    <td>{{ d.Region }}</td><td>{{ d.Pais }}</td><td>{{ d.ZipCode }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           {% else %}<p class="text-muted">Sin direcciones registradas.</p>{% endif %}
         </div>
       </div>
@@ -122,22 +141,24 @@
         <div class="card">
           <h5 class="section-title">Órdenes de Venta Abiertas</h5>
           {% if ov_abiertas %}
-            <table class="data-table">
-              <thead><tr><th>N° Doc</th><th>Fecha</th><th>Vencimiento</th><th>Total Neto</th><th>Moneda</th><th>Vendedor</th><th></th></tr></thead>
-              <tbody>
-                {% for ov in ov_abiertas %}
-                <tr>
-                  <td>{{ ov.DocNum }}</td><td>{{ ov.DocDate }}</td><td>{{ ov.DocDueDate }}</td>
-                  <td class="num">$ {{ ov.TotalNeto|puntos_miles }}</td>
-                  <td>{{ ov.DocCur }}</td><td>{{ ov.Vendedor }}</td>
-                  <td>
-                    <a href="{% url 'ov_detalle' cardcode=cardcode docnum=ov.DocNum %}?next={{ request.get_full_path }}"
-                       class="btn btn-sm btn-outline-primary">Ver detalle</a>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead><tr><th>N° Doc</th><th>Fecha</th><th>Vencimiento</th><th>Total Neto</th><th>Moneda</th><th>Vendedor</th><th></th></tr></thead>
+                <tbody>
+                  {% for ov in ov_abiertas %}
+                  <tr>
+                    <td>{{ ov.DocNum }}</td><td>{{ ov.DocDate }}</td><td>{{ ov.DocDueDate }}</td>
+                    <td class="num">$ {{ ov.TotalNeto|puntos_miles }}</td>
+                    <td>{{ ov.DocCur }}</td><td>{{ ov.Vendedor }}</td>
+                    <td>
+                      <a href="{% url 'ov_detalle' cardcode=cardcode docnum=ov.DocNum %}?next={{ request.get_full_path }}"
+                         class="btn btn-sm btn-outline-primary">Ver detalle</a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           {% else %}<p class="text-muted">No hay órdenes de venta abiertas.</p>{% endif %}
         </div>
       </div>
@@ -151,17 +172,19 @@
             {% for guia in grouped_guias %}
               <div class="mb-3">
                 <h6 class="fw-bold text-dark">Guía {{ guia.grouper }} — {{ guia.list.0.DocDate }}</h6>
-                <table class="data-table">
-                  <thead><tr><th>Item</th><th>Descripción</th><th>Cantidad</th><th>Pendiente</th></tr></thead>
-                  <tbody>
-                    {% for item in guia.list %}
-                    <tr>
-                      <td>{{ item.ItemCode }}</td><td>{{ item.Dscription }}</td>
-                      <td class="num">{{ item.Quantity|puntos_miles }}</td><td class="num">{{ item.OpenQty|puntos_miles }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead><tr><th>Item</th><th>Descripción</th><th>Cantidad</th><th>Pendiente</th></tr></thead>
+                    <tbody>
+                      {% for item in guia.list %}
+                      <tr>
+                        <td>{{ item.ItemCode }}</td><td>{{ item.Dscription }}</td>
+                        <td class="num">{{ item.Quantity|puntos_miles }}</td><td class="num">{{ item.OpenQty|puntos_miles }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             {% endfor %}
           {% else %}<p class="text-muted">No hay guías pendientes de facturar.</p>{% endif %}
@@ -173,17 +196,19 @@
         <div class="card">
           <h5 class="section-title">Facturas Vencidas</h5>
           {% if facturas_vencidas %}
-            <table class="data-table">
-              <thead><tr><th>N° Factura</th><th>Fecha</th><th>Vencimiento</th><th>Saldo</th><th>Moneda</th></tr></thead>
-              <tbody>
-                {% for fac in facturas_vencidas %}
-                <tr>
-                  <td>{{ fac.DocNum }}</td><td>{{ fac.DocDate }}</td><td>{{ fac.DocDueDate }}</td>
-                  <td class="num">$ {{ fac.Saldo|puntos_miles }}</td><td>{{ fac.DocCur }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead><tr><th>N° Factura</th><th>Fecha</th><th>Vencimiento</th><th>Saldo</th><th>Moneda</th></tr></thead>
+                <tbody>
+                  {% for fac in facturas_vencidas %}
+                  <tr>
+                    <td>{{ fac.DocNum }}</td><td>{{ fac.DocDate }}</td><td>{{ fac.DocDueDate }}</td>
+                    <td class="num">$ {{ fac.Saldo|puntos_miles }}</td><td>{{ fac.DocCur }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           {% else %}<p class="text-muted">No hay facturas vencidas.</p>{% endif %}
         </div>
       </div>

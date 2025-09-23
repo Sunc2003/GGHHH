@@ -1,287 +1,182 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 
 <style>
-/* ===== Base look & feel ===== */
 .ticket-view{
-  --bg:#f6f7f9;
+  --bg:#f9fafb;
   --card:#ffffff;
   --text:#0f172a;
   --muted:#6b7280;
-  --border:#dfe3e8;
-  --border-strong:#c7ccd3;
-  --primary:#0d6efd;
-  --accent:#f2f4f7;
+  --border:#e5e7eb;
   --radius:10px;
-  --radius-sm:8px;
-  --shadow:0 6px 18px rgba(2,6,23,.06);
+  --shadow:0 2px 8px rgba(0,0,0,.05);
 }
-.ticket-view *{ box-sizing:border-box; }
-.ticket-view h4{ margin:0; font-weight:700; color:var(--text); }
-
-/* ===== Header Pro (chips + metadatos) ===== */
 .ticket-header{
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:14px 16px;
-  background:linear-gradient(180deg,#ffffff 0%, #f7f9ff 100%);
-  box-shadow:var(--shadow);
-}
-.ticket-header__top{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.ticket-title{ margin:0; font-size:1.25rem; font-weight:700; letter-spacing:.2px; color:var(--text); }
-.ticket-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.ticket-actions .btn{ border-radius:10px; }
-.ticket-actions .form-select{ height:32px; padding:.25rem .75rem; border-radius:10px; }
-.ticket-actions .btn-sm{ padding:.25rem .6rem; }
-
-.ticket-chips{ display:flex; align-items:center; gap:8px; margin-top:10px; }
-.chip{
-  display:inline-flex; align-items:center; gap:.45rem;
-  border-radius:999px; padding:.32rem .6rem;
-  font-weight:700; font-size:.72rem; letter-spacing:.3px;
-  border:1px solid var(--border-strong); background:#fff; color:#0f172a;
-}
-.chip svg{ width:14px; height:14px; }
-.chip--open{ background:#ffe5e5; color:#b91c1c; border-color:#fecaca; }
-.chip--progress{ background:#fff7ed; color:#b45309; border-color:#fed7aa; }
-.chip--done{ background:#ecfdf5; color:#065f46; border-color:#a7f3d0; }
-.chip--closed{ background:#f1f5f9; color:#334155; border-color:#cbd5e1; }
-
-.ticket-meta{
-  display:flex; flex-wrap:wrap; gap:10px 18px; margin:.6rem 0 0 0; padding:0; list-style:none;
-  color:var(--muted); font-size:.9rem;
-}
-.ticket-meta li{ display:inline-flex; align-items:center; gap:.4rem; white-space:nowrap; }
-.meta-ico{ width:16px; height:16px; display:inline-block; color:currentColor; }
-
-/* ===== Cards, forms, lists ===== */
-.ticket-view .card{
-  background:var(--card);
+  background:linear-gradient(180deg,#fff 0%,#f9fafb 100%);
   border:1px solid var(--border);
   border-radius:var(--radius);
-  box-shadow:none;
+  padding:1rem 1.25rem;
+  box-shadow:var(--shadow);
+  margin-bottom:1rem;
 }
-.ticket-view .card-header{
-  background:#fafbfc;
-  border-bottom:1px solid var(--border);
-  font-weight:600; color:var(--text);
+.ticket-header__top{
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:.8rem;
 }
-.ticket-view .card-body{ padding:1rem 1rem; }
+.ticket-title{ font-size:1.25rem; font-weight:700; color:var(--text); margin:0; }
+.ticket-actions{ display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+.ticket-actions .btn,
+.ticket-actions .form-select{ border-radius:8px; }
 
-.ticket-view .form-control,
-.ticket-view .form-select,
-.ticket-view textarea,
-.ticket-view input[type="file"]{
-  border:1px solid var(--border-strong);
-  border-radius:var(--radius-sm);
-  box-shadow:none!important;
+/* Estado chip */
+.chip{
+  display:inline-flex; align-items:center; gap:.4rem;
+  font-size:.8rem; font-weight:600;
+  border-radius:999px; padding:.35rem .75rem;
 }
-.ticket-view textarea{ min-height:120px; resize:vertical; }
+.chip-open{ background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; }
+.chip-progress{ background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
+.chip-closed{ background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; }
 
-.ticket-view .list-unstyled li{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:var(--radius-sm);
-  padding:.75rem .9rem;
+/* Metadata */
+.ticket-meta{
+  margin-top:.6rem; font-size:.9rem; color:var(--muted);
+  display:flex; flex-wrap:wrap; gap:1.2rem;
 }
-.ticket-view .list-unstyled li + li{ margin-top:.75rem; }
-.ticket-view .list-unstyled strong{ color:#0f172a; }
-.ticket-view .list-unstyled .mt-1{ white-space:pre-wrap; }
+.ticket-meta strong{ color:var(--text); }
 
-.ticket-view .list-group-flush .list-group-item{
-  border:1px solid var(--border)!important;
-  border-radius:var(--radius-sm)!important;
-  margin-bottom:.5rem;
-  background:#fff;
+/* Chat */
+.chat-body {
+  background:#ece5dd url("{% static 'img/chat-bg.png' %}") repeat;
+  border-radius:8px; padding:1rem; min-height:400px;
 }
-.ticket-view .list-group-flush .list-group-item .me-2{ min-width:0; }
+.chat-container { display:flex; flex-direction:column; gap:.8rem; }
+.chat-message {
+  max-width:70%; padding:.6rem .9rem; border-radius:14px;
+  font-size:.9rem; line-height:1.4; word-break:break-word;
+  position:relative;
+}
+.chat-user {
+  margin-left:auto; background:#dbeafe; color:#1e3a8a; border:1px solid #c7d2fe;
+  border-bottom-right-radius:4px;
+}
+.chat-user::after {
+  content:""; position:absolute; right:-10px; bottom:0;
+  border-top:10px solid #dbeafe; border-left:10px solid transparent;
+}
+.chat-respuesta {
+  margin-right:auto; background:#d4f8e8; color:#065f46; border:1px solid #a7f3d0;
+  border-bottom-left-radius:4px;
+}
+.chat-respuesta::after {
+  content:""; position:absolute; left:-10px; bottom:0;
+  border-top:10px solid #d4f8e8; border-right:10px solid transparent;
+}
+.chat-meta { font-size:.75rem; color:var(--muted); margin-top:.25rem; text-align:right; }
 
-.ticket-view .btn{ border-radius:8px; }
-
-/* Alerts + flash */
-.ticket-view .alert{ border-radius:8px; }
+/* Emoji picker */
+.emoji-picker {
+  position:absolute; bottom:120%; right:0; width:260px; max-height:200px;
+  overflow-y:auto; z-index:1000;
+}
+.emoji-grid {
+  display:flex; flex-wrap:wrap; gap:.3rem; font-size:1.4rem; cursor:pointer;
+}
+.emoji-grid span:hover { transform:scale(1.2); }
 
 /* Responsive */
-@media (max-width: 768px){
-  .ticket-actions{ width:100%; justify-content:flex-start; }
-  .ticket-title{ font-size:1.1rem; }
+@media (max-width:768px){
+  .ticket-header__top{ flex-direction:column; align-items:flex-start; }
+  .ticket-actions{ width:100%; justify-content:space-between; }
+  .chat-message{ max-width:85%; }
 }
 </style>
 
 <div class="container py-4 ticket-view" style="max-width:1100px;">
 
-  {# Flash messages #}
-  {% if messages %}
-    <div id="flash-messages">
-      {% for message in messages %}
-        <div class="alert
-             {% if 'success' in message.tags %}alert-success
-             {% elif 'error' in message.tags %}alert-danger
-             {% elif 'warning' in message.tags %}alert-warning
-             {% else %}alert-info{% endif %}
-             alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-        </div>
-      {% endfor %}
-    </div>
-    <script>
-      (function(){
-        const box = document.getElementById('flash-messages');
-        if(!box) return;
-        setTimeout(()=>{
-          box.querySelectorAll('.alert-success').forEach(el=>{
-            if (el.classList.contains('show')) el.classList.remove('show');
-            setTimeout(()=> el.remove(), 300);
-          });
-        }, 2000);
-      })();
-    </script>
-  {% endif %}
-
-  <!-- ===== Header Pro ===== -->
+  <!-- Header -->
   <div class="ticket-header">
     <div class="ticket-header__top">
       <h4 class="ticket-title">Ticket #{{ ticket.id }} — {{ ticket.titulo }}</h4>
-
       <div class="ticket-actions">
+        <a href="{% url 'tickets_bandeja' %}" class="btn btn-outline-secondary btn-sm">← Bandeja</a>
         {% if puede_gestionar %}
-          <form class="d-flex align-items-center gap-2" method="post" action="{% url 'tickets_cambiar_estado' ticket.id %}">
-            {% csrf_token %}
-            <select name="estado" class="form-select form-select-sm" aria-label="Cambiar estado">
-              {% for val,label in ticket.ESTADOS %}
-                <option value="{{ val }}" {% if ticket.estado == val %}selected{% endif %}>{{ label }}</option>
-              {% endfor %}
-            </select>
-            <button class="btn btn-outline-primary btn-sm">Actualizar</button>
-          </form>
-          <a href="{% url 'tickets_bandeja' %}" class="btn btn-outline-secondary btn-sm">← Bandeja</a>
-        {% else %}
-          <a href="{% url 'tickets_solicitar_ayuda' %}?tab=lista" class="btn btn-outline-secondary btn-sm">← Mis solicitudes</a>
+        <form method="post" action="{% url 'tickets_cambiar_estado' ticket.id %}" class="d-flex align-items-center gap-2">
+          {% csrf_token %}
+          <select name="estado" class="form-select form-select-sm">
+            {% for val,label in ticket.ESTADOS %}
+              {% if val != 'resuelto' %}
+                <option value="{{ val }}" {% if ticket.estado == val or ticket.estado == 'resuelto' and val == 'cerrado' %}selected{% endif %}>
+                  {% if val == 'cerrado' and ticket.estado == 'resuelto' %}Cerrado{% else %}{{ label }}{% endif %}
+                </option>
+              {% endif %}
+            {% endfor %}
+          </select>
+          <button class="btn btn-primary btn-sm">Actualizar</button>
+        </form>
         {% endif %}
       </div>
     </div>
-
-    <div class="ticket-chips">
+    <div class="mt-2">
       {% if ticket.estado == 'abierto' %}
-        <span class="chip chip--open">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>
-          Abierto
-        </span>
-      {% elif ticket.estado == 'en_progreso' or ticket.estado == 'en-progreso' %}
-        <span class="chip chip--progress">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-          En progreso
-        </span>
-      {% elif ticket.estado == 'resuelto' %}
-        <span class="chip chip--done">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5"/></svg>
-          Resuelto
-        </span>
-      {% elif ticket.estado == 'cerrado' %}
-        <span class="chip chip--closed">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6L6 18M6 6l12 12"/></svg>
-          Cerrado
-        </span>
-      {% else %}
-        <span class="chip">{{ ticket.get_estado_display }}</span>
+        <span class="chip chip-open">Abierto</span>
+      {% elif ticket.estado == 'en_progreso' %}
+        <span class="chip chip-progress">En progreso</span>
+      {% elif ticket.estado == 'cerrado' or ticket.estado == 'resuelto' %}
+        <span class="chip chip-closed">Cerrado</span>
       {% endif %}
     </div>
-
-    <ul class="ticket-meta" aria-label="Metadatos de ticket">
-      <li>
-        <svg class="meta-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-          <line x1="16" y1="2" x2="16" y2="6"></line>
-          <line x1="8" y1="2" x2="8" y2="6"></line>
-          <line x1="3" y1="10" x2="21" y2="10"></line>
-        </svg>
-        Creado: <strong>{{ ticket.fecha_creacion|date:"Y-m-d H:i" }}</strong>
-      </li>
-      <li>
-        <svg class="meta-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
-        Actualizado: <strong>{{ ticket.fecha_actualizacion|date:"Y-m-d H:i" }}</strong>
-      </li>
-      <li>
-        <svg class="meta-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20 21v-2a4 4 0 0 0-3-3.87M8 21v-2a4 4 0 0 1 3-3.87"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-        Solicitante: <strong>{{ ticket.solicitante.get_full_name|default:ticket.solicitante.username }}</strong>
-      </li>
-    </ul>
-  </div>
-  <!-- ===== /Header Pro ===== -->
-
-  {% if ticket.descripcion %}
-  <div class="card mt-3">
-    <div class="card-body">
-      <h6 class="card-title mb-2">Descripción</h6>
-      <div class="card-text">{{ ticket.descripcion|linebreaksbr }}</div>
+    <div class="ticket-meta">
+      <span>Creado: <strong>{{ ticket.fecha_creacion|date:"Y-m-d H:i" }}</strong></span>
+      <span>Actualizado: <strong>{{ ticket.fecha_actualizacion|date:"Y-m-d H:i" }}</strong></span>
+      <span>Solicitante: <strong>{{ ticket.solicitante.get_full_name|default:ticket.solicitante.username }}</strong></span>
     </div>
   </div>
-  {% endif %}
 
+  <!-- Conversación y respuesta -->
   <div class="row g-3 mt-3">
-    <!-- Conversación -->
     <div class="col-lg-8">
       <div class="card">
         <div class="card-header">Conversación</div>
-        <div class="card-body">
+        <div class="chat-body">
           {% if mensajes %}
-            <ul class="list-unstyled mb-0">
-              {% for m in mensajes %}
-              <li class="mb-3">
-                <div class="d-flex justify-content-between">
-                  <strong>{{ m.autor.get_full_name|default:m.autor.username }}</strong>
-                  <span class="text-muted small">{{ m.fecha|date:"Y-m-d H:i" }}</span>
-                </div>
-                <div class="mt-1">{{ m.mensaje|linebreaksbr }}</div>
-              </li>
-              {% endfor %}
-            </ul>
+          <div class="chat-container">
+            {% for m in mensajes %}
+              <div class="chat-message {% if m.autor.id == user.id %}chat-user{% else %}chat-respuesta{% endif %}">
+                <div>{{ m.mensaje|linebreaksbr }}</div>
+                <div class="chat-meta">{{ m.autor.get_full_name|default:m.autor.username }} · {{ m.fecha|date:"Y-m-d H:i" }}</div>
+              </div>
+            {% endfor %}
+          </div>
           {% else %}
-            <p class="text-muted mb-0">Sin mensajes aún.</p>
+          <p class="text-muted">Sin mensajes aún.</p>
           {% endif %}
-        </div>
-      </div>
 
-      <div class="card mt-3">
-        <div class="card-header">Responder</div>
-        <div class="card-body">
           {% if puede_responder %}
-          <form method="post" enctype="multipart/form-data" aria-label="Responder al ticket">
+          <form method="post" enctype="multipart/form-data" class="mt-3 position-relative">
             {% csrf_token %}
-            <div class="mb-3">
-              {{ form_msg.mensaje.label_tag }}
+            <div class="mb-2 position-relative">
               {{ form_msg.mensaje }}
-              {% if form_msg.mensaje.errors %}
-                <div class="invalid-feedback d-block">
-                  {% for e in form_msg.mensaje.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+              <button type="button" class="btn btn-light btn-sm position-absolute top-0 end-0 me-2 mt-2" id="btnEmoji">😀</button>
+              <div id="emojiPicker" class="emoji-picker shadow-sm border bg-white p-2 rounded d-none">
+                <div class="emoji-grid">
+                  <span>😀</span><span>😃</span><span>😄</span><span>😁</span><span>😆</span>
+                  <span>😂</span><span>😊</span><span>😉</span><span>😍</span><span>🤔</span>
+                  <span>😢</span><span>😭</span><span>😡</span><span>😱</span><span>😴</span>
+                  <span>👍</span><span>👎</span><span>👏</span><span>🙏</span><span>👌</span>
+                  <span>❤️</span><span>💛</span><span>💚</span><span>💙</span><span>💜</span>
                 </div>
-              {% endif %}
+              </div>
             </div>
             <div class="mb-3">
-              {{ form_msg.archivos.label_tag }}
               {{ form_msg.archivos }}
-              <div class="form-text">Puedes adjuntar varios archivos (imágenes, PDF, etc.).</div>
-              {% if form_msg.archivos.errors %}
-                <div class="invalid-feedback d-block">
-                  {% for e in form_msg.archivos.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
-                </div>
-              {% endif %}
+              <div class="form-text">Puedes adjuntar archivos.</div>
             </div>
-            <button class="btn btn-primary">Enviar</button>
+            <button class="btn btn-primary btn-sm">Enviar</button>
           </form>
           {% else %}
-            <div class="alert alert-warning mb-0" role="status">
-              Este ticket está <strong>resuelto/cerrado</strong>. No se pueden agregar más mensajes ni adjuntos.
-            </div>
+          <div class="alert alert-warning">Este ticket está <strong>cerrado</strong>. No se pueden agregar más mensajes ni adjuntos.</div>
           {% endif %}
         </div>
       </div>
@@ -293,30 +188,19 @@
         <div class="card-header">Adjuntos</div>
         <div class="card-body">
           {% if adjuntos %}
-            <ul class="list-group list-group-flush">
-              {% for adj in adjuntos %}
-              <li class="list-group-item d-flex align-items-center justify-content-between gap-2">
-                <div class="me-2" style="min-width:0;">
-                  <div class="small fw-semibold text-truncate" title="{{ adj.nombre|default:'Archivo' }}">
-                    {{ adj.nombre|default:"Archivo" }}
-                  </div>
-                  <div class="text-muted small">
-                    Subido por {{ adj.subido_por.get_full_name|default:adj.subido_por.username }}
-                    {% if adj.fecha_subida %} · {{ adj.fecha_subida|date:"Y-m-d H:i" }}{% endif %}
-                  </div>
-                </div>
-                <div class="flex-shrink-0">
-                  <a class="btn btn-sm btn-outline-secondary"
-                     href="{% url 'tickets_adjunto_ver' adj.id %}"
-                     title="Abrir {{ adj.nombre|default:'archivo' }}" target="_blank" rel="noopener">
-                    Ver
-                  </a>
-                </div>
-              </li>
-              {% endfor %}
-            </ul>
+          <ul class="list-group list-group-flush">
+            {% for adj in adjuntos %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <div class="small">{{ adj.nombre }}</div>
+                <div class="text-muted small">Subido por {{ adj.subido_por.get_full_name|default:adj.subido_por.username }}{% if adj.fecha_subida %} · {{ adj.fecha_subida|date:"Y-m-d H:i" }}{% endif %}</div>
+              </div>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'tickets_adjunto_ver' adj.id %}" target="_blank">Ver</a>
+            </li>
+            {% endfor %}
+          </ul>
           {% else %}
-            <p class="text-muted mb-0">No hay adjuntos.</p>
+          <p class="text-muted">No hay adjuntos.</p>
           {% endif %}
         </div>
       </div>
@@ -324,4 +208,29 @@
   </div>
 
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  const btn = document.getElementById("btnEmoji");
+  const picker = document.getElementById("emojiPicker");
+  const textarea = document.getElementById("id_mensaje");
+
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    picker.classList.toggle("d-none");
+  });
+  picker.addEventListener("click", (e) => {
+    if(e.target.tagName === "SPAN"){
+      textarea.value += e.target.textContent;
+      textarea.focus();
+      picker.classList.add("d-none");
+    }
+  });
+  document.addEventListener("click", (e) => {
+    if(!picker.contains(e.target) && e.target !== btn){
+      picker.classList.add("d-none");
+    }
+  });
+});
+</script>
 {% endblock %}
