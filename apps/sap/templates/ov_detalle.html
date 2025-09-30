@@ -5,51 +5,100 @@
 {% block content %}
 <style>
 :root {
-  --ink: #1c1c1c;
-  --muted: #6c757d;
-  --line: #dee2e6;
-  --fill: #ffffff;
-  --fill-soft: #f8f9fa;
-  --primary: #0d6efd;
+  --ink: #333333;         /* gris oscuro para texto */
+  --title: #111111;       /* casi negro, solo para títulos */
+  --muted: #555555;       /* gris medio */
+  --line: #d0d0d0;        /* bordes suaves */
+  --fill: #ffffff;        /* fondo */
+  --fill-soft: #f8f9fa;   /* fondo alterno */
+  --platinum: #E5E4E2;    /* platino */
 }
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: #f7f9fb;
+}
+
 .page-header {
   display: flex; justify-content: space-between; align-items: center;
-  border-bottom: 2px solid var(--line);
-  padding-bottom: .75rem; margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: .75rem; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem;
 }
-.page-title { margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--ink); }
+.page-title {
+  margin: 0; font-size: 1.3rem; font-weight: 600; color: var(--title);
+}
 .ghost-btn {
   padding: .45rem .9rem; border: 1px solid var(--line);
-  background: var(--fill); text-decoration: none; color: var(--ink);
-  border-radius: 6px; font-size: .9rem; font-weight: 500;
+  background: var(--platinum); text-decoration: none; color: var(--ink);
+  border-radius: 4px; font-size: .85rem; font-weight: 600;
   transition: all .2s ease;
 }
-.ghost-btn:hover { background: var(--fill-soft); color: var(--primary); }
+.ghost-btn:hover { background: var(--title); color: #fff; border-color: var(--title); }
 
 .card {
-  background: var(--fill); border: 1px solid var(--line); border-radius: 8px;
-  padding: 1rem; margin-bottom: 1.25rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  background: var(--fill); border: 1px solid var(--line); border-radius: 6px;
+  padding: 1rem; margin-bottom: 1rem;
 }
 .section-title {
-  margin: 0 0 .85rem 0; font-weight: 700; font-size: 1rem;
-  color: var(--muted); text-transform: uppercase; letter-spacing: .5px;
+  margin: 0 0 .85rem 0; font-weight: 600; font-size: .95rem;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .3px;
+  border-bottom: 2px solid var(--platinum);
+  padding-bottom: .3rem;
 }
 
-.data-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+/* Datos Generales */
+.table-general {
+  width: 100%; border-collapse: collapse; font-size: .9rem;
+}
+.table-general th {
+  width: 35%; text-align: left; padding: .5rem .7rem;
+  background: var(--platinum); color: var(--muted);
+  border: 1px solid var(--line); font-weight: 600;
+}
+.table-general td {
+  padding: .5rem .7rem; border: 1px solid var(--line);
+  text-align: left; color: var(--ink);
+}
+
+/* Responsive en móvil */
+@media (max-width: 768px) {
+  .table-general, .table-general tbody, .table-general tr, .table-general td, .table-general th {
+    display: block; width: 100%;
+  }
+  .table-general tr { margin-bottom: .7rem; }
+  .table-general th {
+    background: none; border: none; padding: 0; font-weight: 600; color: var(--muted);
+  }
+  .table-general td {
+    border: none; padding: 0 0 .5rem 0;
+  }
+}
+
+/* Detalle de líneas */
+.table-responsive {
+  width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.data-table {
+  width: 100%; border-collapse: collapse; font-size: .85rem; min-width: 650px;
+}
 .data-table thead th {
-  background: var(--fill-soft); font-weight: 600; padding: .6rem .7rem;
-  border: 1px solid var(--line); text-align: center; color: var(--ink);
+  background: var(--platinum); font-weight: 600;
+  padding: .6rem; border: 1px solid var(--line);
+  text-align: center; color: var(--muted);
 }
 .data-table tbody td {
-  border: 1px solid var(--line); padding: .55rem .7rem; text-align: center;
+  border: 1px solid var(--line); padding: .55rem;
+  text-align: center; vertical-align: middle; color: var(--ink);
 }
-.data-table tbody tr:nth-child(odd) { background: #fcfcfc; }
-.data-table tbody tr:hover { background: #f1f3f5; }
+.data-table tbody tr:nth-child(even) { background: var(--fill-soft); }
+.data-table tbody tr:hover { background: #ededed; }
 .num { text-align: right; font-variant-numeric: tabular-nums; }
 </style>
 
-<div class="container py-4">
+
+<div class="container py-3">
   <div class="page-header">
     <h4 class="page-title">Detalle de Orden de Venta</h4>
     <a href="{{ request.GET.next|default:request.META.HTTP_REFERER|default:'#' }}" class="ghost-btn">
@@ -63,13 +112,13 @@
     <!-- Datos generales -->
     <div class="card">
       <h5 class="section-title">Datos Generales</h5>
-      <table class="table table-bordered table-sm">
+      <table class="table-general">
         <tr><th>N° Documento</th><td>{{ ov.DocNum }}</td></tr>
         <tr><th>Fecha</th><td>{{ ov.DocDate }}</td></tr>
         <tr><th>Vencimiento</th><td>{{ ov.DocDueDate }}</td></tr>
         <tr><th>Cliente</th><td>{{ ov.CardCode }} — {{ ov.CardName }}</td></tr>
         <tr><th>Vendedor</th><td>{{ ov.Vendedor }}</td></tr>
-        <tr><th>Total Neto</th><td class="num">$ {{ ov.TotalNeto|puntos_miles }}</td></tr>
+        <tr><th>Total Neto</th><td>$ {{ ov.TotalNeto|puntos_miles }}</td></tr>
         <tr><th>Moneda</th><td>{{ ov.DocCur }}</td></tr>
       </table>
     </div>
@@ -97,7 +146,7 @@
               <tr>
                 <td>{{ item.LineNum }}</td>
                 <td>{{ item.ItemCode }}</td>
-                <td>{{ item.Dscription }}</td>
+                <td style="text-align:left">{{ item.Dscription }}</td>
                 <td class="num">{{ item.Quantity|puntos_miles }}</td>
                 <td class="num">{{ item.OpenQty|puntos_miles }}</td>
                 <td>{{ item.Moneda }}</td>
