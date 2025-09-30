@@ -13,8 +13,9 @@
       <input type="text" name="q" class="form-control border-platino"
              placeholder="Buscar por código o nombre" value="{{ q }}">
     </div>
-    <div class="col-12 col-sm-3">
-      <button class="btn btn-platino w-100" type="submit">Buscar</button>
+    <div class="col-12 col-sm-3 d-flex gap-2">
+      <button class="btn btn-platino flex-fill" type="submit">Buscar</button>
+      <a href="{% url 'socios_lista' %}" class="btn btn-outline-platino flex-fill">Limpiar</a>
     </div>
   </form>
 
