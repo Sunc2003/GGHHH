@@ -171,6 +171,7 @@ main { flex: 1; padding: 2.2rem 0 1rem 0; }
   * { transition: none !important; animation: none !important; }
 }
 
+
 /* ======= NAVBAR - versión móvil ordenada ======= */
 @media (max-width: 991.98px) {
   /* Fondo del collapse/offcanvas */
@@ -247,7 +248,7 @@ main { flex: 1; padding: 2.2rem 0 1rem 0; }
     width: 120px; /* Ajusta el tamaño del logo en móviles */
   }
 }
-/* ======= END OF BASE CSS ======= */
+
 
 
 
@@ -319,7 +320,7 @@ main { flex: 1; padding: 2.2rem 0 1rem 0; }
     opacity:.95;
   }
 
-  /* ---------- Navbar y logo ---------- */
+
   .navbar .navbar-brand img.logo-ggh {
     height:140px !important;
     width:auto !important;
@@ -344,7 +345,7 @@ main { flex: 1; padding: 2.2rem 0 1rem 0; }
     padding-bottom:.5rem;
   }
 
-  /* ---------- Formularios dentro del offcanvas ---------- */
+  
   #offcanvasMenu .nav-item form {
     width:100%;
     margin:0;
@@ -366,7 +367,7 @@ main { flex: 1; padding: 2.2rem 0 1rem 0; }
     transform:scale(0.99);
   }
 
-  /* ---------- Edge para swipe ---------- */
+
   #offcanvas-edge {
     position:fixed;
     top:0;
@@ -392,17 +393,17 @@ main { flex: 1; padding: 2.2rem 0 1rem 0; }
   /* Responsivo: móviles y tablets */
   @media (max-width: 767.98px) {
     .site-footer .container {
-      text-align:center;        /* Centrar todo en móvil */
+      text-align:center;       
     }
     .site-footer .footer-contact {
-      margin-top:1rem;          /* Espacio entre logo y contacto */
+      margin-top:1rem;          
     }
     .site-footer .d-flex.gap-3 a {
-      font-size:1.6rem;         /* Íconos más grandes para tocar */
+      font-size:1.6rem;         
     }
   }
 
-  /* ---------- Ajustes offcanvas en pantallas pequeñas ---------- */
+
   .offcanvas .nav-link {
     font-size:1rem;
     padding:.75rem 1rem;
@@ -410,3 +411,5 @@ main { flex: 1; padding: 2.2rem 0 1rem 0; }
   .offcanvas .offcanvas-title img {
     max-height:50px;
   }
+
+

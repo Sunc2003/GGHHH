@@ -289,14 +289,13 @@ def socio_detalle_view(request, cardcode: str):
         },
     )
 
-
 @login_required
 @permiso_requerido('BUSCAR_SOCIOS')
 def ov_detalle_view(request, cardcode: str, docnum: int):
     detalle_ov, detalle_items, error = None, [], None
 
     try:
-        # Buscar la OV específica en abiertas
+        # Buscar la OV específica
         r_ov = requests.get(
             NGROK_API_OV_ABIERTAS,
             params={"cardcode": cardcode},
@@ -307,9 +306,9 @@ def ov_detalle_view(request, cardcode: str, docnum: int):
         abiertas = r_ov.json()
         detalle_ov = next((ov for ov in abiertas if ov["DocNum"] == docnum), None)
 
-        # Buscar los ítems pendientes de esa OV
+        # Buscar los ítems pendientes de esa OV (ya con precios, descuentos, etc.)
         r_pend = requests.get(
-            NGROK_API_OV_PENDIENTES,
+            NGROK_API_OV_PENDIENTES,   # este es tu endpoint corregido
             params={"cardcode": cardcode},
             headers=_hmac_headers(),
             timeout=int(getattr(settings, "API_TIMEOUT", 7)),

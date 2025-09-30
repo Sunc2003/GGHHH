@@ -81,7 +81,16 @@
         <div class="table-responsive">
           <table class="data-table">
             <thead>
-              <tr><th>Línea</th><th>Item</th><th>Descripción</th><th>Cantidad</th><th>Pendiente</th></tr>
+              <tr>
+                <th>Línea</th>
+                <th>Item</th>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>Pendiente</th>
+                <th>Moneda</th>
+                <th>Precio Venta Unit.</th>
+                <th>Total Línea Neto</th>
+              </tr>
             </thead>
             <tbody>
               {% for item in detalle_items %}
@@ -91,6 +100,9 @@
                 <td>{{ item.Dscription }}</td>
                 <td class="num">{{ item.Quantity|puntos_miles }}</td>
                 <td class="num">{{ item.OpenQty|puntos_miles }}</td>
+                <td>{{ item.Moneda }}</td>
+                <td class="num">{{ item.PrecioVentaUnit|floatformat:0|puntos_miles }}</td>
+                <td class="num">{{ item.TotalLineaNeto|floatformat:0|puntos_miles }}</td>
               </tr>
               {% endfor %}
             </tbody>

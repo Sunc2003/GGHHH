@@ -10,23 +10,23 @@
   <!-- Buscador -->
   <form method="get" class="row g-2 mb-3">
     <div class="col-12 col-sm-6">
-      <input type="text" name="q" class="form-control border-dark"
+      <input type="text" name="q" class="form-control border-platino"
              placeholder="Buscar por código o nombre" value="{{ q }}">
     </div>
     <div class="col-12 col-sm-3">
-      <button class="btn btn-dark w-100" type="submit">Buscar</button>
+      <button class="btn btn-platino w-100" type="submit">Buscar</button>
     </div>
   </form>
 
   {% if error %}
-    <div class="alert alert-dark border-dark">{{ error }}</div>
+    <div class="alert alert-platino border-platino">{{ error }}</div>
   {% endif %}
 
   {% if socios %}
     <div class="table-responsive">
       <table class="table table-hover table-bordered align-middle mb-0">
-        <thead class="table-light border-dark sticky-top">
-          <tr class="text-dark">
+        <thead class="table-platino sticky-top">
+          <tr>
             <th class="fw-semibold">Código</th>
             <th class="fw-semibold">Nombre</th>
             <th class="text-end fw-semibold">Límite Crédito</th>
@@ -46,7 +46,7 @@
               <td class="text-end">${{ s.Balance|floatformat:0 }}</td>
               <td class="text-end"><strong>${{ s.CreditoDisponible|floatformat:0 }}</strong></td>
               <td class="text-center">
-                <a class="btn btn-sm btn-outline-dark"
+                <a class="btn btn-sm btn-outline-platino"
                    href="{% url 'socio_detalle' s.CardCode %}?next={{ request.get_full_path }}">
                   Ver detalle
                 </a>
@@ -57,26 +57,74 @@
       </table>
     </div>
   {% elif q %}
-    <div class="alert alert-secondary border-dark">Sin resultados para “{{ q }}”.</div>
+    <div class="alert alert-secondary border-platino">Sin resultados para “{{ q }}”.</div>
   {% else %}
     <p class="text-muted fst-italic">Ingresa un término de búsqueda para listar clientes.</p>
   {% endif %}
 </div>
 
 <style>
-/* Ajustes generales */
-.socios-view .table th, 
-.socios-view .table td { vertical-align: middle; }
-.socios-view .table-hover tbody tr:hover { background-color: #f8f9fa; }
-.socios-view .table-bordered { border-color: #000; }
-.socios-view thead.table-light th { background-color: #e9ecef; color: #000; }
-.socios-view .btn-dark, 
-.socios-view .btn-outline-dark { border-radius: 4px; }
+/* 🎨 Paleta platino */
+:root {
+  --platino: #e5e4e2;
+  --platino-dark: #b3b3b3;
+  --platino-hover: #d6d6d6;
+  --text-dark: #1e1e1e;
+}
+
+/* Botones */
+.btn-platino {
+  background-color: var(--platino);
+  color: var(--text-dark);
+  border: 1px solid var(--platino-dark);
+  border-radius: 4px;
+  font-weight: 600;
+  transition: all .2s ease;
+}
+.btn-platino:hover {
+  background-color: var(--platino-hover);
+  border-color: var(--text-dark);
+}
+
+.btn-outline-platino {
+  background-color: #fff;
+  color: var(--text-dark);
+  border: 1px solid var(--platino-dark);
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all .2s ease;
+}
+.btn-outline-platino:hover {
+  background-color: var(--platino-hover);
+  color: var(--text-dark);
+  border-color: var(--text-dark);
+}
+
+/* Inputs */
+.border-platino {
+  border: 1px solid var(--platino-dark)!important;
+}
+
+/* Alertas */
+.alert-platino {
+  background-color: var(--platino);
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+/* Tablas */
+.table-platino th {
+  background-color: var(--platino);
+  color: var(--text-dark);
+  border: 1px solid var(--platino-dark);
+}
+.table-bordered { border-color: var(--platino-dark); }
+.table-hover tbody tr:hover { background-color: #f9f9f9; }
 
 /* Responsividad extra */
 @media (max-width: 768px) {
   .socios-view h4 { font-size: 1.1rem; }
-  .socios-view .table th, 
+  .socios-view .table th,
   .socios-view .table td { font-size: 0.85rem; padding: .4rem; }
   .socios-view .btn-sm { font-size: 0.75rem; padding: .2rem .4rem; }
 }
