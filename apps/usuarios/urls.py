@@ -12,7 +12,8 @@ from .views import (
     UsuariosADListView,
     perfil_usuario,
     solicitudes_enviadas_view,
-    EditarPerfilYPermisosUsuarioView
+    EditarPerfilYPermisosUsuarioView,
+    SolicitudProduccionCreateView
 )
 from apps.organizaciones.views import cargos_por_area
 from .views import procesos_view
@@ -38,7 +39,11 @@ urlpatterns = [
     path('usuarios/<int:pk>/editar/', EditarPerfilYPermisosUsuarioView.as_view(), name='editar_perfil_usuario'),
     path('permisos/nuevo/', CrearPermisoView.as_view(), name='crear_permiso'),
     # path('permisos/', PermisosListView.as_view(), name='lista_permisos'),  # si usas success_url
- 
+    path(
+        "solicitudes/produccion/nueva/",
+        SolicitudProduccionCreateView.as_view(),
+        name="solicitud_produccion_nueva",
+    ),
     path("logout/", LogoutView.as_view(next_page="login"), name="logout"),
     # API para carga dinámica de cargos
  
@@ -48,6 +53,6 @@ urlpatterns = [
     views.api_contador_solicitudes_pendientes,
     name="api_solicitudes_pendientes_count",
 ),
-
-
+ 
+ 
 ]

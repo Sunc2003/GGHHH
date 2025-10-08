@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% load static %}
+ 
+{% block extra_css %}
+<style>
+  .form-section {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: .5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .form-section h5 { font-weight: 600; color: #333; margin-bottom: 1rem; }
+  label { font-weight: 500; color: #444; }
+  .btn-volver { background: #f8f9fa; border: 1px solid #ced4da; }
+  .btn-volver:hover { background: #e9ecef; }
+</style>
+{% endblock %}
+ 
+{% block content %}
+<div class="container py-4">
+  <h3 class="mb-4"><i class="fa-solid fa-gears me-2"></i>Solicitud de Código — Producción</h3>
+ 
+  <div class="form-section mb-4">
+    <form method="post" novalidate>
+      {% csrf_token %}
+ 
+      <!-- Cabecera: Receptor + Empresa -->
+      <h5 class="mb-3">Información General</h5>
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Enviar a</label>
+          {{ header_form.receptor }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Empresa</label>
+          {{ header_form.empresa }}
+        </div>
+      </div>
+ 
+      <hr class="my-4">
+ 
+      <!-- Detalle de Producción -->
+      <h5 class="mb-3">Detalle del Producto</h5>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">¿Padre o Hijo?</label>
+          {{ form.tipo_padre_hijo }}
+        </div>
+ 
+        <div class="col-md-4">
+          <label class="form-label">Origen</label>
+          {{ form.origen }}
+        </div>
+ 
+        <div class="col-md-4">
+          <label class="form-label">Marca</label>
+          {{ form.marca }}
+        </div>
+ 
+        <div class="col-md-6">
+          <label class="form-label">Nombre Proveedor</label>
+          {{ form.proveedor }}
+        </div>
+ 
+        <div class="col-md-3 form-check mt-4">
+          {{ form.sin_sku }} <label class="form-check-label">Sin SKU</label>
+        </div>
+        <div class="col-md-3 form-check mt-4">
+          {{ form.sin_codigo }} <label class="form-check-label">Sin Código</label>
+        </div>
+ 
+        <div class="col-12">
+          <label class="form-label">Descripción</label>
+          {{ form.descripcion }}
+        </div>
+ 
+        <div class="col-md-3">
+          <label class="form-label">Largo (cm)</label>
+          {{ form.largo }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Ancho (cm)</label>
+          {{ form.ancho }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Alto (cm)</label>
+          {{ form.alto }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Peso (kg)</label>
+          {{ form.peso }}
+        </div>
+ 
+        <div class="col-md-4">
+          <label class="form-label">Costo ($)</label>
+          {{ form.costo }}
+        </div>
+      </div>
+ 
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <a href="{% url 'panel_admin_usuarios' %}" class="btn btn-volver">
+          <i class="fa-solid fa-arrow-left me-2"></i>Volver
+        </a>
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-paper-plane me-1"></i>Enviar Solicitud
+        </button>
+      </div>
+    </form>
+  </div>
+ 
+  <div class="form-section">
+    <h5 class="mb-3">Solicitudes enviadas recientemente</h5>
+    {% if solicitudes_enviadas %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tipo</th>
+              <th>Estado</th>
+              <th>Receptor</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in solicitudes_enviadas|slice:":5" %}
+              <tr>
+                <td>{{ s.id }}</td>
+                <td>{{ s.get_tipo_solicitud_display }}</td>
+                <td>
+                  {% if s.estado == 'pendiente' %}
+                    <span class="badge bg-warning text-dark">Pendiente</span>
+                  {% else %}
+                    <span class="badge bg-success">Creado</span>
+                  {% endif %}
+                </td>
+                <td>{{ s.receptor.get_full_name|default:s.receptor.username }}</td>
+                <td>{{ s.fecha_creacion|date:"d/m/Y H:i" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted">No tienes solicitudes recientes.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+ 
+ 

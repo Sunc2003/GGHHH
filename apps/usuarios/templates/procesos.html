@@ -19,15 +19,30 @@
     </div>
   </div>
 
-  <!-- ✅ Alerta de archivo subido -->
-  {% if url_archivo %}
-    <div class="alert alert-success border border-success-subtle text-dark">
-      Archivo subido correctamente:
-      <a href="{{ url_archivo }}" target="_blank" class="text-dark text-decoration-underline">
-        {{ url_archivo }}
-      </a>
+  <!-- ✅ Modal unificado (mismo diseño para archivo y carpeta) -->
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md" style="max-width: 600px;">
+      <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden">
+        <div class="row g-0">
+
+          <!-- 🖼️ Columna con imagen -->
+          <div class="col-md-5 d-none d-md-flex align-items-center justify-content-center bg-light">
+            <img id="modalImage" src="{% static 'img/ggh.png' %}" alt="GGH Logo"
+                 class="img-fluid p-3"
+                 style="max-height:220px; object-fit:contain; border-radius:.3rem 0 0 .3rem;">
+          </div>
+
+          <!-- 📝 Columna con texto -->
+          <div class="col-md-7 d-flex align-items-center">
+            <div class="modal-body text-center">
+              <h5 class="modal-title mb-3 fw-bold text-dark" id="modalMessage">Acción completada</h5>
+              <p class="text-secondary" id="modalDescription">Tu archivo o carpeta se ha procesado correctamente.</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  {% endif %}
+  </div>
 
   <!-- 🗂️ Formulario: Crear nueva carpeta -->
   <div id="form-carpeta" class="card border-0 shadow-sm mb-4 d-none">
@@ -56,12 +71,11 @@
           <input type="file" name="archivo" class="form-control border-dark" required>
         </div>
         <button type="submit" class="btn btn-dark">Subir archivo</button>
-
       </form>
-    </d iv>
+    </div>
   </div>
 
-  <!-- 🔙 Navegación (volver a carpeta anterior) -->
+  <!-- 🔙 Navegación -->
   {% if carpeta_actual %}
     <div class="mb-3">
       <a href="?path={{ carpeta_padre }}" class="btn btn-sm btn-outline-secondary">← Volver</a>
@@ -73,10 +87,12 @@
     <h5 class="fw-semibold mt-4 text-dark">Carpetas</h5>
     <ul class="list-group list-group-flush mb-4 border border-dark-subtle">
       {% for carpeta in carpetas %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <span class="text-dark">{{ carpeta }}</span>
-          <a href="?path={{ carpetas_full_paths|dict_get:carpeta }}" class="btn btn-sm btn-outline-dark">Abrir</a>
-        </li>
+        {% if carpeta != "tickets" %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="text-dark">{{ carpeta }}</span>
+            <a href="?path={{ carpetas_full_paths|dict_get:carpeta }}" class="btn btn-sm btn-outline-dark">Abrir</a>
+          </li>
+        {% endif %}
       {% endfor %}
     </ul>
   {% endif %}
@@ -95,10 +111,9 @@
       {% endfor %}
     </ul>
   {% endif %}
-
 </div>
 
-<!-- 📜 Script para alternar visibilidad de formularios -->
+<!-- 📜 Scripts -->
 <script>
   function toggleForm(id) {
     const forms = ['form-subida', 'form-carpeta'];
@@ -107,5 +122,42 @@
       if (el) el.classList.toggle('d-none', f !== id || !el.classList.contains('d-none'));
     });
   }
+
+  // ✅ Modal igual para subir archivo o crear carpeta
+  function showModal(message) {
+    const modalElement = document.getElementById('confirmModal');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalDescription = document.getElementById('modalDescription');
+    const modalImage = document.getElementById('modalImage');
+    const modal = new bootstrap.Modal(modalElement);
+
+    modalMessage.textContent = message;
+
+    // Usa la misma imagen y diseño para ambos
+    modalImage.src = "{% static 'img/ggh.png' %}";
+
+    if (message.includes("Archivo")) {
+      modalDescription.textContent = "Tu archivo ha sido subido exitosamente.";
+    } else if (message.includes("Carpeta")) {
+      modalDescription.textContent = "Tu carpeta ha sido creada exitosamente.";
+    } else {
+      modalDescription.textContent = "La acción se ha completado correctamente.";
+    }
+
+    modal.show();
+    setTimeout(() => modal.hide(), 2300);
+  }
 </script>
+
+<!-- ✅ Mostrar modal al cargar (según messages Django) -->
+{% if messages %}
+  {% for message in messages %}
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        showModal("{{ message|escapejs }}");
+      });
+    </script>
+  {% endfor %}
+{% endif %}
+
 {% endblock %}
