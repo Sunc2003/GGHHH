@@ -1,32 +1,137 @@
 {% extends "base.html" %}
 {% load static %}
- 
+
 {% block extra_css %}
 <style>
-  .form-section {
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: .5rem;
-    padding: 1.5rem;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  }
-  .form-section h5 { font-weight: 600; color: #333; margin-bottom: 1rem; }
-  label { font-weight: 500; color: #444; }
-  .btn-volver { background: #f8f9fa; border: 1px solid #ced4da; }
-  .btn-volver:hover { background: #e9ecef; }
+/* ======== ESTILO PROFESIONAL PLATINO ======== */
+body {
+  background-color: #f0f2f5;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  color: #2b2b2b;
+}
+
+.container h3 {
+  font-weight: 700;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.container h3 i {
+  color: #5a5f66;
+}
+
+/* Sección general */
+.form-section {
+  background: #fdfdfd;
+  border: 1px solid #dcdcdc;
+  border-radius: 0.6rem;
+  padding: 2rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.form-section:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Encabezados */
+.form-section h5 {
+  font-weight: 600;
+  color: #5a5f66;
+  margin-bottom: 1rem;
+  border-left: 4px solid #a8adb3;
+  padding-left: 0.75rem;
+}
+
+/* Etiquetas */
+label.form-label {
+  font-weight: 500;
+  color: #444;
+}
+
+/* Campos */
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+  border-radius: 0.5rem !important;
+  border: 1px solid #c9cccf !important;
+  background-color: #fafafa;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  background-color: #ffffff;
+  border-color: #a8adb3 !important;
+  box-shadow: 0 0 0 0.2rem rgba(168, 173, 179, 0.2);
+}
+
+/* Checkboxes */
+.form-check-input {
+  accent-color: #6c757d;
+  transform: scale(1.1);
+}
+
+/* Botones */
+.btn-volver {
+  background: #ececec;
+  border: 1px solid #d0d0d0;
+  color: #333;
+  border-radius: 0.5rem;
+  padding: 0.55rem 1.3rem;
+  transition: all 0.2s ease;
+}
+
+.btn-volver:hover {
+  background: #e2e2e2;
+  color: #000;
+  border-color: #c0c0c0;
+}
+
+.btn-enviar {
+  background: linear-gradient(90deg, #bfc3c7, #a8adb3);
+  border: none;
+  color: #fff;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-enviar:hover {
+  background: linear-gradient(90deg, #a8adb3, #959aa0);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsivo */
+@media (max-width: 992px) {
+  .form-section { padding: 1.5rem; }
+}
+@media (max-width: 576px) {
+  .form-section { padding: 1rem; }
+  .container h3 { font-size: 1.2rem; }
+  button, .btn-volver { width: 100%; margin-top: 0.5rem; }
+}
 </style>
 {% endblock %}
- 
+
 {% block content %}
 <div class="container py-4">
-  <h3 class="mb-4"><i class="fa-solid fa-gears me-2"></i>Solicitud de Código — Producción</h3>
- 
+  <h3 class="mb-4"><i class="fa-solid fa-gears"></i>Solicitud de Código — Producción</h3>
+
   <div class="form-section mb-4">
     <form method="post" novalidate>
       {% csrf_token %}
- 
+
       <!-- Cabecera: Receptor + Empresa -->
-      <h5 class="mb-3">Información General</h5>
+      <h5>Información General</h5>
       <div class="row g-3 mb-3">
         <div class="col-md-6">
           <label class="form-label">Enviar a</label>
@@ -37,44 +142,44 @@
           {{ header_form.empresa }}
         </div>
       </div>
- 
+
       <hr class="my-4">
- 
+
       <!-- Detalle de Producción -->
-      <h5 class="mb-3">Detalle del Producto</h5>
+      <h5>Detalle del Producto</h5>
       <div class="row g-3">
         <div class="col-md-4">
           <label class="form-label">¿Padre o Hijo?</label>
           {{ form.tipo_padre_hijo }}
         </div>
- 
+
         <div class="col-md-4">
           <label class="form-label">Origen</label>
           {{ form.origen }}
         </div>
- 
+
         <div class="col-md-4">
           <label class="form-label">Marca</label>
           {{ form.marca }}
         </div>
- 
+
         <div class="col-md-6">
           <label class="form-label">Nombre Proveedor</label>
           {{ form.proveedor }}
         </div>
- 
+
         <div class="col-md-3 form-check mt-4">
-          {{ form.sin_sku }} <label class="form-check-label">Sin SKU</label>
+          {{ form.sin_sku }} <label class="form-check-label ms-1">Sin SKU</label>
         </div>
         <div class="col-md-3 form-check mt-4">
-          {{ form.sin_codigo }} <label class="form-check-label">Sin Código</label>
+          {{ form.sin_codigo }} <label class="form-check-label ms-1">Sin Código</label>
         </div>
- 
+
         <div class="col-12">
           <label class="form-label">Descripción</label>
           {{ form.descripcion }}
         </div>
- 
+
         <div class="col-md-3">
           <label class="form-label">Largo (cm)</label>
           {{ form.largo }}
@@ -91,62 +196,22 @@
           <label class="form-label">Peso (kg)</label>
           {{ form.peso }}
         </div>
- 
+
         <div class="col-md-4">
           <label class="form-label">Costo ($)</label>
           {{ form.costo }}
         </div>
       </div>
- 
-      <div class="d-flex justify-content-between align-items-center mt-4">
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center mt-4">
         <a href="{% url 'panel_admin_usuarios' %}" class="btn btn-volver">
           <i class="fa-solid fa-arrow-left me-2"></i>Volver
         </a>
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-enviar">
           <i class="fa-solid fa-paper-plane me-1"></i>Enviar Solicitud
         </button>
       </div>
     </form>
   </div>
- 
-  <div class="form-section">
-    <h5 class="mb-3">Solicitudes enviadas recientemente</h5>
-    {% if solicitudes_enviadas %}
-      <div class="table-responsive">
-        <table class="table table-sm align-middle">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Tipo</th>
-              <th>Estado</th>
-              <th>Receptor</th>
-              <th>Fecha</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for s in solicitudes_enviadas|slice:":5" %}
-              <tr>
-                <td>{{ s.id }}</td>
-                <td>{{ s.get_tipo_solicitud_display }}</td>
-                <td>
-                  {% if s.estado == 'pendiente' %}
-                    <span class="badge bg-warning text-dark">Pendiente</span>
-                  {% else %}
-                    <span class="badge bg-success">Creado</span>
-                  {% endif %}
-                </td>
-                <td>{{ s.receptor.get_full_name|default:s.receptor.username }}</td>
-                <td>{{ s.fecha_creacion|date:"d/m/Y H:i" }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="text-muted">No tienes solicitudes recientes.</p>
-    {% endif %}
-  </div>
 </div>
 {% endblock %}
- 
- 

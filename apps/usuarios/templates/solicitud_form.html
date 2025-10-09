@@ -46,17 +46,18 @@
       <img src="{% static 'img/ggh.png' %}" alt="">Nuevo artículo
     </button>
  
-    <!-- Producción → a su propia vista -->
-    <a href="{% url 'solicitud_produccion_nueva' %}" class="btn-cuadrado text-decoration-none">
-      <img src="{% static 'img/ggh.png' %}" alt="">Producción
-    </a>
- 
     <button class="btn-cuadrado opcion-solicitud" data-tipo="activacion">
       <img src="{% static 'img/ggh.png' %}" alt="">Activación
     </button>
     <button class="btn-cuadrado opcion-solicitud" data-tipo="modificacion">
       <img src="{% static 'img/ggh.png' %}" alt="">Modificación
     </button>
+
+        <!-- Producción → a su propia vista -->
+    <a href="{% url 'solicitud_produccion_nueva' %}" class="btn-cuadrado text-decoration-none">
+      <img src="{% static 'img/ggh.png' %}" alt="">Producción
+    </a>
+    
   </div>
  
   <!-- Formulario NUEVO ARTÍCULO -->
