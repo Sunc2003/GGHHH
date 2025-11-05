@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cotización {{ quotation.DocNum }}</title>
+<style>
+  body {
+    font-family: 'Helvetica', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+
+  /* ===== ENCABEZADO ===== */
+  .header {
+    background: linear-gradient(to right, #0B3C91, #6F8FC4);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 4px solid #0B3C91;
+  }
+
+  .header-info h1 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+  }
+
+  .header-logo {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  .header-logo img {
+    height: 110px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  /* ===== BANDA CORPORATIVA ===== */
+  .corp-bar {
+    background: #EEF3FB;
+    color: #0B3C91;
+    font-size: 11.5px;
+    text-align: center;
+    padding: 6px 25px;
+    font-weight: bold;
+    border-bottom: 2px solid #0B3C91;
+  }
+
+  /* ===== INFO PRINCIPAL ===== */
+  .info {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 25px 30px;
+  }
+
+  .box {
+    border: 1px solid #0B3C91;
+    border-radius: 8px;
+    padding: 15px 20px;
+    width: 50%;
+    background: #F8FAFF;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+
+  .box h3 {
+    background: #0B3C91;
+    color: white;
+    padding: 8px;
+    font-size: 13px;
+    border-radius: 4px;
+    margin: 0 0 10px 0;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .box p { margin: 3px 0; font-size: 12px; }
+
+  /* ===== TABLA PRODUCTOS ===== */
+  .tabla-productos {
+    width: 90%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .tabla-productos th {
+    background: #0B3C91;
+    color: white;
+    padding: 10px 8px;
+    text-align: left;
+  }
+
+  .tabla-productos td {
+    border-bottom: 1px solid #ccc;
+    padding: 6px 8px;
+    vertical-align: top;
+  }
+
+  /* ===== BLOQUE TOTALES ===== */
+  .bloque-totales {
+    width: 45%;
+    margin: 20px 30px 0 auto;
+    border: 1px solid #0B3C91;
+    border-radius: 6px;
+    background: #EEF3FB;
+    padding: 12px 18px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+
+  .totales {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .totales td { padding: 6px 0; vertical-align: middle; }
+  .totales .label {
+  text-align: left; /* <-- cambia a left para alinearlos verticalmente */
+  color: #333;
+  font-weight: bold;
+  width: 60%; /* antes 65%, puedes ajustar a gusto */
+  padding-left: 10px; /* alinea mejor el inicio de texto */
+}
+.totales .value {
+  text-align: right;
+  color: #333;
+  width: 40%;
+  white-space: nowrap;
+  padding-right: 10px;
+}
+
+  .totales .total-final {
+    border-top: 2px solid #0B3C91;
+  }
+  .totales .total-final .label {
+    color: #0B3C91;
+    font-size: 13px;
+  }
+  .totales .total-final .value {
+    color: #0B3C91;
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  /* ===== COMENTARIOS Y FIRMA ===== */
+  .comentarios-firma {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 90%;
+    margin: 50px auto 100px auto;
+  }
+
+  .comentarios {
+    width: 50%;
+  }
+
+  .comentarios label {
+    font-weight: bold;
+    font-size: 13px;
+    color: #0B3C91;
+  }
+
+  .comentarios .cuadro {
+    border: 1px solid #0B3C91;
+    height: 80px;
+    border-radius: 4px;
+    margin-top: 5px;
+    background: #F8FAFF;
+  }
+
+  .firma {
+    text-align: center;
+    width: 40%;
+  }
+
+  .firma-line {
+    width: 200px;
+    border-top: 1px solid #0B3C91;
+    margin: 0 auto 5px auto;
+  }
+
+  /* ===== PIE DE PÁGINA ===== */
+  .footer {
+    background: linear-gradient(to right, #0B3C91, #6F8FC4);
+    color: white;
+    padding: 10px 25px;
+    font-size: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+    box-sizing: border-box;
+  }
+
+  .footer-logo img {
+    height: 55px;
+    width: auto;
+    margin-left: 25px;
+  }
+
+  .footer-info {
+    text-align: right;
+    line-height: 1.4;
+    margin-right: 30px;
+    font-size: 10px;
+  }
+
+  .footer-info p { margin: 1px 0; }
+</style>
+</head>
+<body>
+
+<!-- ===== ENCABEZADO ===== -->
+<div class="header">
+  <div class="header-info">
+    <h1>FERRETERÍA MARSELLA SPA</h1>
+    <p>RUT: 79.996.420-1 | Giro: Ferretería Industrial</p>
+  </div>
+  <div class="header-logo">
+    <img src="/static/img/ggh.png" alt="Logo GGH">
+  </div>
+</div>
+
+<!-- ===== BANDA CORPORATIVA ===== -->
+<div class="corp-bar">
+  Casa Matriz: Av. España 2501, Batuco, Lampa, Santiago |
+  Sucursal Norte: El Quisco 678, Antofagasta |
+  Tel: (56) 2 23539700 |
+  Email: ventas@ggh.cl |
+  Web: www.ferreteriamarsella.cl
+</div>
+
+<!-- ===== CUADROS DE INFORMACIÓN ===== -->
+<div class="info">
+  <div class="box">
+    <h3>Datos del Cliente</h3>
+    <p><b>Nombre:</b> {{ quotation.CardName }}</p>
+    <p><b>RUT:</b> {{ quotation.FederalTaxID }}</p>
+    <p><b>Dirección:</b> {{ quotation.Address }}</p>
+    <p><b>Teléfono:</b> {{ quotation.Phone1 }}</p>
+    <p><b>Solicitado por:</b> {{ quotation.SolicitadoPor }}</p>
+  </div>
+
+  <div class="box">
+    <h3>Datos de la Cotización</h3>
+    <p><b>N° Cotización:</b> {{ quotation.DocNum }}</p>
+    <p><b>Fecha:</b> {{ quotation.DocDate }}</p>
+    <p><b>Vendedor:</b> {{ quotation.SalesPersonName }}</p>
+    <p><b>Email:</b> {{ quotation.SalesPersonEmail }}</p>
+  </div>
+</div>
+
+<!-- ===== TABLA DE PRODUCTOS ===== -->
+<table class="tabla-productos">
+  <thead>
+    <tr>
+      <th style="width:50%">Producto</th>
+      <th style="width:15%; text-align:center;">Cantidad</th>
+      <th style="width:20%; text-align:right;">Precio Unitario</th>
+      <th style="width:15%; text-align:right;">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for line in quotation.DocumentLines %}
+    <tr>
+      <td>{{ line.ItemDescription }}</td>
+      <td style="text-align:center;">{{ line.Quantity|floatformat:0 }}</td>
+      <td style="text-align:right;">${{ line.UnitPrice_fmt }}</td>
+      <td style="text-align:right;">${{ line.LineTotal_fmt }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- ===== BLOQUE DE TOTALES ===== -->
+<div class="bloque-totales">
+  <table class="totales">
+    <tr>
+      <td class="label">Subtotal:</td>
+      <td class="value">${{ neto }}</td>
+    </tr>
+    <tr>
+      <td class="label">IVA (19%):</td>
+      <td class="value">${{ iva }}</td>
+    </tr>
+    <tr class="total-final">
+      <td class="label">TOTAL:</td>
+      <td class="value">${{ total }}</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ===== COMENTARIOS Y FIRMA ===== -->
+<div class="comentarios-firma">
+  <div class="comentarios">
+    <label>Comentarios:</label>
+    <div class="cuadro"></div>
+  </div>
+  <div class="firma">
+    <div class="firma-line"></div>
+    <p>Aceptación de Cliente</p>
+  </div>
+</div>
+
+<!-- ===== PIE ===== -->
+<div class="footer">
+  <div class="footer-logo">
+    <img src="/static/img/logomarsella.png" alt="Logo Ferretería Marsella">
+  </div>
+  <div class="footer-info">
+    <p>cobranzas@ggh.cl | www.ggh.cl</p>
+    <p>{{ quotation.DocDate }}</p>
+  </div>
+</div>
+
+</body>
+</html>

@@ -8,12 +8,13 @@
   --platino: #e5e4e2;
   --platino-dark: #b3b3b3;
   --platino-hover: #d6d6d6;
-  --ink: #1c1c1c;    /* Títulos */
-  --muted: #6c757d;  /* Texto secundario */
+  --ink: #1c1c1c;
+  --muted: #6c757d;
   --line: #dee2e6;
   --fill: #ffffff;
   --fill-soft: #f8f9fa;
 }
+
 .page-header {
   display: flex; justify-content: space-between; align-items: center;
   border-bottom: 2px solid var(--platino);
@@ -65,6 +66,75 @@
 }
 .nav-tabs { margin-bottom: 1rem; border-bottom: 1px solid var(--platino-dark); overflow-x: auto; flex-wrap: nowrap; }
 .nav-tabs .nav-item { white-space: nowrap; }
+
+/* Guías Pendientes - Cuadro limpio */
+.guia-block {
+  border: 1px solid var(--platino-dark);
+  border-radius: 10px;
+  background: var(--fill);
+  padding: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+/* Encabezado de cada guía */
+.guia-header-box {
+  background: var(--platino);
+  border-bottom: 1px solid var(--platino-dark);
+  border-radius: 10px 10px 0 0;
+  padding: 0.8rem 1rem;
+  cursor: pointer;               /* <- permite click para abrir/cerrar */
+}
+
+/* Contenido del encabezado */
+.guia-numero {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+.guia-numero span { color: #003366; } /* Azul profesional */
+.guia-cliente {
+  font-size: .9rem;
+  color: var(--muted);
+  margin: 0;
+}
+.guia-fecha {
+  font-size: .9rem;
+  color: var(--ink);
+  font-weight: 500;
+  background: var(--fill-soft);
+  border: 1px solid var(--platino-dark);
+  border-radius: 6px;
+  padding: 0.3rem 0.75rem;
+}
+
+/* Toggle chevron */
+.guia-toggle {
+  display: inline-flex; align-items: center; gap: .5rem;
+}
+.guia-toggle .chev {
+  display: inline-block;
+  transition: transform .2s ease;
+}
+.guia-block.is-open .guia-toggle .chev {
+  transform: rotate(90deg);
+}
+
+/* Cuerpo colapsable con transición suave */
+.guia-body {
+  border-top: 1px solid var(--platino-dark);
+  padding: 0 1rem;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height .25s ease, opacity .2s ease;
+}
+.guia-block.is-open .guia-body {
+  padding: 1rem;
+  max-height: 1000px;  /* suficiente para tablas medianas */
+  opacity: 1;
+}
 
 /* Responsivo */
 @media (max-width: 768px) {
@@ -162,35 +232,75 @@
         </div>
       </div>
 
-      <!-- Guías -->
+      <!-- Guías Pendientes Clientes (con abrir/cerrar por guía) -->
       <div class="tab-pane fade" id="guias">
         <div class="card">
           <h5 class="section-title">Guías Pendientes de Facturar</h5>
+
           {% if guias_pendientes %}
             {% regroup guias_pendientes by DocNum as grouped_guias %}
-            {% for guia in grouped_guias %}
-              <div class="mb-3">
-                <h6 class="fw-bold text-dark">Guía {{ guia.grouper }} — {{ guia.list.0.DocDate }}</h6>
-                <div class="table-responsive">
-                  <table class="data-table">
-                    <thead><tr><th>Item</th><th>Descripción</th><th>Cantidad</th><th>Pendiente</th></tr></thead>
-                    <tbody>
-                      {% for item in guia.list %}
+            {% for grupo in grouped_guias %}
+              <div class="guia-block js-guia">
+                <!-- Encabezado de guía (click para abrir/cerrar) -->
+                <div class="guia-header-box js-toggle">
+                  <div class="row align-items-center">
+                    <div class="col-md-8 col-sm-12 guia-toggle">
+                      <span class="chev">➤</span>
+                      <div>
+                        <h6 class="guia-numero mb-1">
+                          <i class="fa-regular fa-file-lines me-1 text-primary"></i>
+                          Guía <span>#{{ grupo.grouper }}</span>
+                        </h6>
+                        <p class="guia-cliente mb-0">
+                          <i class="fa-regular fa-user me-1"></i>
+                          {{ grupo.list.0.CardName|default:"Sin nombre" }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-4 col-sm-12 text-md-end mt-2 mt-md-0">
+                      <span class="guia-fecha">
+                        <i class="fa-regular fa-calendar me-1"></i>
+                        {{ grupo.list.0.DocDate }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cuerpo colapsable -->
+                <div class="guia-body">
+                  <div class="table-responsive">
+                    <table class="data-table mb-0">
+                      <thead>
                       <tr>
-                        <td>{{ item.ItemCode }}</td><td>{{ item.Dscription }}</td>
-                        <td class="num">{{ item.Quantity|puntos_miles }}</td><td class="num">{{ item.OpenQty|puntos_miles }}</td>
+                        <th style="width:15%;">Código</th>
+                        <th>Descripción</th>
+                        <th style="width:10%;">Cantidad</th>
+                        <th style="width:10%;">Pendiente</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for item in grupo.list %}
+                      <tr>
+                        <td class="fw-semibold">{{ item.ItemCode }}</td>
+                        <td class="text-start">{{ item.Dscription }}</td>
+                        <td class="num">{{ item.Quantity|puntos_miles }}</td>
+                        <td class="num">{{ item.OpenQty|puntos_miles }}</td>
                       </tr>
                       {% endfor %}
                     </tbody>
-                  </table>
+
+                    </table>
+                  </div>
                 </div>
               </div>
             {% endfor %}
-          {% else %}<p class="text-muted">No hay guías pendientes de facturar.</p>{% endif %}
+          {% else %}
+            <p class="text-muted">No hay guías pendientes de facturar.</p>
+          {% endif %}
         </div>
       </div>
 
-      <!-- Facturas -->
+      <!-- Facturas Vencidas -->
       <div class="tab-pane fade" id="facturas">
         <div class="card">
           <h5 class="section-title">Facturas Vencidas</h5>
@@ -214,4 +324,18 @@
     </div>
   {% endif %}
 </div>
+
+<script>
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.js-guia').forEach(function(card){
+    var header = card.querySelector('.js-toggle');
+    header.addEventListener('click', function(){
+
+      card.classList.toggle('is-open');
+    });
+  });
+});
+</script>
 {% endblock %}

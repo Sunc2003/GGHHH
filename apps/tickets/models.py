@@ -58,7 +58,7 @@ class TicketMensaje(models.Model):
         ordering = ['fecha']
 
     def clean(self):
-        # ⚠️ No accedas a self.ticket aquí: aún puede no estar asignado
+       
         tid = getattr(self, "ticket_id", None)
         if not tid:
             return

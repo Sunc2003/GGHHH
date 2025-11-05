@@ -38,9 +38,9 @@ from apps.permisos.decorators import permiso_requerido
 from apps.utils.supabase_storage import SupabaseStorage
  
  
-# =========================
-#   LOGIN / LOGOUT
-# =========================
+
+
+
 class IniciarSesionView(LoginView):
     template_name = 'login.html'
  
@@ -78,9 +78,8 @@ def es_admin(user):
     return user.is_authenticated and user.has_perm('permisos.CREACION_USUARIO')
  
  
-# =========================
-#   HELPERS
-# =========================
+
+
 register = template.Library()
  
 @register.filter
@@ -92,10 +91,9 @@ def formatear_tiempo(td):
     minutes, _ = divmod(remainder, 60)
     return f"{hours}h {minutes}min"
  
- 
-# =========================
-#   PANEL ADMIN
-# =========================
+
+
+
 def panel_admin_usuarios(request):
     usuarios = CustomUser.objects.all()
     for u in usuarios:
@@ -136,10 +134,8 @@ def panel_admin_usuarios(request):
     return render(request, 'panel_admin.html', context)
  
  
- 
-# =========================
-#   CREAR SOLICITUD
-# =========================
+
+
 @method_decorator(permiso_requerido('SOLICITUD_CODIGO'), name='dispatch')
 class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
     template_name = 'solicitud_form.html'
@@ -161,13 +157,13 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
     def post(self, request):
         tipo_opcion = request.POST.get("tipo_opcion")
  
-        # --- Caso A: formulario reducido (Activación / Modificación) ---
+
         if tipo_opcion in ["activacion", "modificacion"]:
             form = SolicitudActivacionForm(request.POST)
             if form.is_valid():
                 solicitud = form.save(commit=False)
                 solicitud.solicitante = request.user
-                solicitud.tipo_solicitud = tipo_opcion  # 👈 activación o modificación
+                solicitud.tipo_solicitud = tipo_opcion  
                 solicitud.save()
                 messages.success(
                     request,
@@ -177,7 +173,7 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
             else:
                 messages.error(request, "⚠️ Hay errores en el formulario de Activación/Modificación.")
                 return render(request, self.template_name, {
-                    'form': SolicitudCodigoForm(),  # formulario grande vacío
+                    'form': SolicitudCodigoForm(), 
                     'formset': DetalleCodigoFormSet(),
                     'solicitudes_enviadas': SolicitudCodigo.objects.filter(
                         solicitante=request.user
@@ -185,7 +181,8 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
                     'usuario': request.user
                 })
  
-        # --- Caso B: formulario completo ---
+
+
         form = SolicitudCodigoForm(request.POST, request.FILES)
         formset = DetalleCodigoFormSet(request.POST)
         archivos = request.FILES.getlist('archivos')
@@ -231,10 +228,8 @@ class SolicitudConDetallesCreateView(LoginRequiredMixin, View):
         })
  
  
- 
-# =========================
-#   SOLICITUDES RECIBIDAS
-# =========================
+
+
 @method_decorator(permiso_requerido('VER_SOLICITUDES_RECIBIDAS'), name='dispatch')
 class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
     model = SolicitudCodigo
@@ -264,9 +259,7 @@ class SolicitudesRecibidasView(LoginRequiredMixin, ListView):
         return context
  
  
-# =========================
-#   DETALLE SOLICITUD
-# =========================
+
 @method_decorator(permiso_requerido('VER_SOLICITUDES_RECIBIDA'), name='dispatch')
 class SolicitudDetailView(DetailView):
     model = SolicitudCodigo
@@ -286,6 +279,8 @@ class SolicitudDetailView(DetailView):
             context['form'] = CambiarEstadoForm(instance=self.object)
         return context
  
+
+
  
 class CambiarEstadoView(UpdateView):
     model = SolicitudCodigo
@@ -304,9 +299,9 @@ class CambiarEstadoView(UpdateView):
         return reverse_lazy('detalle_solicitud', kwargs={'pk': self.object.pk})
  
  
-# =========================
-#   USUARIOS AD
-# =========================
+
+
+
 @method_decorator(permiso_requerido('VER_AD'), name='dispatch')
 class UsuariosADListView(ListView):
     model = CustomUser
@@ -345,9 +340,8 @@ class UsuariosADListView(ListView):
         return context
  
  
-# =========================
-#   OTROS
-# =========================
+
+
 def perfil_usuario(request):
     return render(request, 'perfil.html', {'usuario': request.user})
  
@@ -362,6 +356,7 @@ def solicitudes_enviadas_view(request):
     })
  
  
+
 @login_required
 @permiso_requerido('PROCESOS')
 def procesos_view(request):
@@ -415,6 +410,7 @@ def procesos_view(request):
     })
  
  
+
 @method_decorator(permiso_requerido('GESTIONAR_PERMISOS'), name='dispatch')
 class CrearPermisoView(CreateView):
     model = Permiso
@@ -498,13 +494,13 @@ class EditarPerfilYPermisosUsuarioView(LoginRequiredMixin, UpdateView):
             self.object.save(update_fields=["username"])
         return response
  
-# ==== IMPORTS necesarios (añade si no los tienes ya) ====
+
 from django.db import transaction
 from apps.sap.models import UDM
-# ProduccionDetalleForm ya debe estar importado desde apps.usuarios.forms
+
  
  
-# ==== Helper: obtener UDM por defecto (requerida por tu modelo) ====
+
 def _get_default_udm():
     """
     Retorna una UDM por defecto.
@@ -514,7 +510,7 @@ def _get_default_udm():
     return UDM.objects.filter(nombre__iexact="UN").first() or UDM.objects.first()
  
  
-# ==== VISTA EXCLUSIVA PARA PRODUCCIÓN ====
+
 from apps.usuarios.forms import ProduccionDetalleForm, ProduccionHeaderForm
  
 def _get_default_udm():
@@ -587,7 +583,7 @@ class SolicitudProduccionCreateView(LoginRequiredMixin, View):
         detalle_kwargs = detail_form.build_detalle_kwargs()
         detalle_kwargs["udm"] = udm_default
  
-        # Reglas SKU (Producción): si no se proveen, se guardan como cadena vacía
+
         if detail_form.cleaned_data.get("sin_sku"):
             detalle_kwargs["sku_proveedor"] = ""
         else:
@@ -597,7 +593,7 @@ class SolicitudProduccionCreateView(LoginRequiredMixin, View):
         else:
             detalle_kwargs.setdefault("sku_fabricante", "")
  
-        # 2.1) Registrar "Padre/Hijo" en el mensaje (modelo no tiene ese campo)
+
         tipo_ph = detail_form.cleaned_data.get("tipo_padre_hijo")
         solicitud.mensaje = (solicitud.mensaje or "") + f"\n[Producción] Estructura: {tipo_ph}"
         solicitud.save(update_fields=['mensaje'])

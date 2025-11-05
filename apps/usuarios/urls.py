@@ -1,3 +1,4 @@
+
 from django.urls import path
 from . import views  # Asegúrate de importar views si usas views.cargos_por_area
 from .views import (

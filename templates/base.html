@@ -213,6 +213,12 @@
                 </a>
               </li>
 
+            <li class="nav-item">
+                <a class="nav-link text-white" href="{% url 'cotizacion_form' %}">
+                  <i class="fa fa-shopping-cart"></i> Ventas
+                </a>
+            </li>
+ 
             {% if request.user.is_authenticated and request.user|tiene_permiso:"SOLICITUD_CODIGO" %}
             <li class="nav-item">
               <a class="nav-link text-white" href="{% url 'nueva_solicitud' %}">
@@ -279,6 +285,13 @@
             </a>
           </li>
           {% endif %}
+
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'guias_pendientes' %}">
+              <i class="fa fa-truck"></i> Guías Pendientes Vendedor
+            </a>
+          </li>
+        
         </ul>
 
       <hr class="text-secondary my-3 w-100">

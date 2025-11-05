@@ -9,13 +9,32 @@ import requests
 import time, hmac, hashlib
 from collections import defaultdict
 
+# apps/sap/views.py
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from apps.permisos.decorators import permiso_requerido
+
+import requests
+import time, hmac, hashlib
+from collections import defaultdict
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+import requests
+
+
 # ---- ENDPOINTS REMOTOS ----
-NGROK_API_URL = "https://4391c8832496.ngrok-free.app/api/productos"
-NGROK_API_SOCIOS = "https://4391c8832496.ngrok-free.app/api/socios"
-NGROK_API_OV_ABIERTAS = "https://4391c8832496.ngrok-free.app/api/ventas/ov_abiertas"
-NGROK_API_OV_PENDIENTES = "https://4391c8832496.ngrok-free.app/api/ventas/ov_pendientes_entrega"
-NGROK_API_GUIAS_PENDIENTES = "https://4391c8832496.ngrok-free.app/api/ventas/guias_pendientes_facturar"
-NGROK_API_FACTURAS_VENCIDAS = "https://4391c8832496.ngrok-free.app/api/ventas/facturas_vencidas"
+NGROK_API_URL = "https://2ebf3b44ae60.ngrok-free.app/api/productos"
+NGROK_API_SOCIOS = "https://2ebf3b44ae60.ngrok-free.app/api/socios"
+NGROK_API_OV_ABIERTAS = "https://2ebf3b44ae60.ngrok-free.app/api/ventas/ov_abiertas"
+NGROK_API_OV_PENDIENTES = "https://2ebf3b44ae60.ngrok-free.app/api/ventas/ov_pendientes_entrega"
+NGROK_API_GUIAS_PENDIENTES = "https://2ebf3b44ae60.ngrok-free.app/api/ventas/guias_pendientes_facturar"
+NGROK_API_FACTURAS_VENCIDAS = "https://2ebf3b44ae60.ngrok-free.app/api/ventas/facturas_vencidas"
+NGROK_API_ITEMS = "https://2ebf3b44ae60.ngrok-free.app/api/public/items/inventario"  # ✅ Ruta corregida
+
+
+
 
 # ---- HEADERS BASE ----
 HEADERS_BASE = {
@@ -327,3 +346,314 @@ def ov_detalle_view(request, cardcode: str, docnum: int):
         "detalle_items": detalle_items,
         "error": error,
     })
+
+
+
+
+
+import json
+import logging
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_protect
+from django.views.generic import TemplateView
+
+from .services import SapQuotationsService  # usa el service enfocado a cotizaciones
+
+log = logging.getLogger(__name__)
+
+class Cotizacion(TemplateView):
+    """
+    Renderiza el formulario HTML de creación de cotización.
+    """
+    template_name = "Cotizacion.html"
+
+
+@require_POST
+@csrf_protect
+def crear_cotizacion(request):
+    """
+    Recibe JSON desde el front (fetch) y crea la cotización en SAP.
+    Espera al menos: DocDate, DocDueDate, CardCode y DocumentLines.
+    """
+    try:
+        try:
+            payload = json.loads(request.body.decode("utf-8"))
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest("Body no es JSON válido.")
+
+        # (Opcional) validaciones rápidas de campos clave:
+        for k in ("DocDate", "DocDueDate", "CardCode", "DocumentLines"):
+            if k not in payload:
+                return HttpResponseBadRequest(f"Falta campo requerido: {k}")
+
+        svc = SapQuotationsService()
+        data = svc.create(payload)  # llama al Service Layer
+
+        # Respuesta limpia para el front (lo que muestra el “✅ Cotización creada…”)
+        return JsonResponse({
+            "DocEntry": data.get("DocEntry"),
+            "DocNum":   data.get("DocNum"),
+            "raw":      data,  # útil para debugging; quítalo si no lo necesitas
+        }, status=201)
+
+    except Exception as e:
+        # Log interno y mensaje “bonito” hacia el front
+        log.exception("Error creando cotización")
+        msg = str(e)
+        return JsonResponse(
+            {"detail": msg},
+            status=400 if "400" in msg or "Falta" in msg else 500
+        )
+    
+
+@login_required
+def guias_pendientes_view(request):
+    vendedor = request.GET.get("vendedor", "")
+    solo_no_recepcionadas = request.GET.get("solo_no_recepcionadas", "false")
+
+    NGROK_API_GUIAS_PENDIENTES = "https://2ebf3b44ae60.ngrok-free.app/api/guias-pendientes"
+
+    
+    vendedores = [
+        "Rodrigo Gomez",
+        "Alexis Bustamante",
+        "Web",
+        "Asistente - Jacqueline Pizarro",
+        "Karen Oporto",
+        "Mariana Cortés",
+        "Asistente - Carolina Herrera",
+        "Carlos Pinto",
+        "Grecia Castro",
+        "Daniel Canto",
+        "Andres Rojas Machuca",
+        "Carlos Solis",
+        "Alfredo Garretón",
+        "Dorka Molina",
+        "Patricio Toro",
+        "Alfredo Gomez",
+        "Asistente - Sebastian Mella",
+        "Israel Vergara",
+        "Paola Rivera",
+        "Silvina Araya",
+        "Mercado Libre",
+        "Sebastián Valdivia",
+        "Hernán Ahumada",
+    ]
+
+    data = []
+    error = None
+
+    try:
+        params = {
+            "vendedor": vendedor,
+            "solo_no_recepcionadas": solo_no_recepcionadas.lower() == "true"
+        }
+
+        response = requests.get(NGROK_API_GUIAS_PENDIENTES, params=params, timeout=15)
+        if response.status_code == 200:
+            raw_data = response.json()
+
+            # 🔹 Normaliza nombres de campos con espacios
+            def normalize_keys(d):
+                return {k.replace(" ", "_"): v for k, v in d.items()}
+
+            data = [normalize_keys(item) for item in raw_data]
+        else:
+            error = f"Error al obtener datos del servidor (HTTP {response.status_code})"
+    except Exception as e:
+        error = f"Error de conexión: {e}"
+
+    return render(
+        request,
+        "guias_pendientes.html",
+        {
+            "data": data,
+            "vendedor": vendedor,
+            "solo_no_recepcionadas": solo_no_recepcionadas,
+            "error": error,
+            "vendedores": vendedores,
+        },
+    )
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.contrib.auth.decorators import login_required
+import requests
+import logging
+
+log = logging.getLogger(__name__)
+
+@login_required
+@require_GET
+def buscar_items_inventario(request):
+    """
+    Consulta la API FastAPI pública (SAP HANA / Inventario) para buscar productos.
+    Endpoint actualizado: /api/public/items/inventario
+    Retorna los campos principales requeridos por el buscador de cotizaciones.
+    """
+    termino = (request.GET.get("q") or "").strip()
+    if not termino:
+        return JsonResponse([], safe=False)
+
+    # 🔹 Nueva ruta corregida (endpoint público)
+    url = f"https://2ebf3b44ae60.ngrok-free.app/api/public/items/inventario?q={termino}"
+
+    try:
+        response = requests.get(
+            url,
+            timeout=10,
+            headers={"ngrok-skip-browser-warning": "true", "accept": "application/json"},
+        )
+        response.raise_for_status()
+        data = response.json()
+
+        # 🔹 Normalización de campos
+        resultados = []
+        for item in data:
+            resultados.append({
+                "Codigo": item.get("Codigo"),
+                "ItemName": item.get("ItemName"),
+                "FirmName": item.get("FirmName"),
+                "Origen": item.get("Origen"),
+                "ProveedorCode": item.get("ProveedorCode"),
+                "ProveedorName": item.get("ProveedorName"),
+                "Stock_A01": item.get("Stock_A01", 0),
+                "Stock_A02": item.get("Stock_A02", 0),
+                "Stock_A08": item.get("Stock_A08", 0),
+                "UltimoPrecioCompra": item.get("UltimoPrecioCompra"),
+                "UltimaFechaCompra": item.get("UltimaFechaCompra"),
+                "PMV": item.get("PMV"),
+                
+            })
+
+        return JsonResponse(resultados, safe=False)
+
+    except requests.exceptions.HTTPError as e:
+        status = e.response.status_code if e.response else 500
+        log.error(f"[buscar_items_inventario] Error HTTP {status}: {e}")
+        return JsonResponse(
+            {"error": f"Error HTTP {status}: {str(e)}"}, status=status
+        )
+
+    except requests.exceptions.RequestException as e:
+        log.error(f"[buscar_items_inventario] Error de conexión: {e}")
+        return JsonResponse(
+            {"error": f"Error conectando al API remoto: {str(e)}"},
+            status=500
+        )
+
+    except Exception as e:
+        log.exception("[buscar_items_inventario] Error inesperado")
+        return JsonResponse(
+            {"error": f"Error procesando la respuesta: {str(e)}"},
+            status=500
+        )
+# ============================================================
+# 🔹 Detalle de Cotización (para JSON del front)
+# ============================================================
+# ============================================================
+# 🔹 Detalle de Cotización (para JSON del front)
+# ============================================================
+from django.http import JsonResponse, HttpResponse
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def cotizacion_detalle(request, doc_entry: int):
+    """
+    Devuelve el detalle completo de una cotización desde SAP
+    para generar el PDF o mostrar en el front-end.
+    """
+    try:
+        from .services import SapQuotationsService
+        svc = SapQuotationsService()
+
+        quotation = svc.get(doc_entry)
+        if not quotation:
+            return JsonResponse({'error': 'Cotización no encontrada'}, status=404)
+
+        detalle = {
+            "DocNum": quotation.get("DocNum"),
+            "DocEntry": quotation.get("DocEntry"),
+            "DocDate": quotation.get("DocDate"),
+            "DocDueDate": quotation.get("DocDueDate"),
+            "CardCode": quotation.get("CardCode"),
+            "CardName": quotation.get("CardName"),
+            "FederalTaxID": quotation.get("FederalTaxID"),
+            "Address": quotation.get("Address"),
+            "Phone1": quotation.get("Phone1"),
+            "U_ContactoCliente": quotation.get("U_ContactoCliente"),
+            "NumAtCard": quotation.get("NumAtCard"),
+            "PaymentGroupCode": quotation.get("PaymentGroupCode"),
+            "SalesPersonName": quotation.get("SalesPersonName"),
+            "DocTotal": quotation.get("DocTotal"),
+            "DocumentLines": quotation.get("DocumentLines", []),
+        }
+        return JsonResponse(detalle, safe=False)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+from django.shortcuts import render
+
+def preview_cotizacion(request):
+    from .services import SapQuotationsService
+    svc = SapQuotationsService()
+    quotation = svc.get(183185)  # usa una cotización real
+    return render(request, "cotizacion_pdf.html", {"quotation": quotation, "logo_path": "/static/img/ggh.png"})
+
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from weasyprint import HTML
+from io import BytesIO
+from .services import SapQuotationsService
+
+@login_required
+def cotizacion_pdf(request, doc_entry: int):
+    try:
+        svc = SapQuotationsService()
+        quotation = svc.get_full_quotation(doc_entry)
+        if not quotation:
+            return JsonResponse({"error": "Cotización no encontrada"}, status=404)
+
+        # 🔹 Calcular valores base
+        total = quotation.get("DocTotal", 0) or 0
+        neto = round(total / 1.19)
+        iva = round(total - neto)
+
+        # ✅ Nueva función compatible: usa format con separadores CLP
+        def fmt(valor):
+            return f"{valor:,.0f}".replace(",", ".")  # ejemplo: 191.590
+
+        neto_fmt = fmt(neto)
+        iva_fmt = fmt(iva)
+        total_fmt = fmt(total)
+
+        # 🔹 Formatea precios de las líneas
+        for line in quotation.get("DocumentLines", []):
+            if line.get("UnitPrice"):
+                line["UnitPrice_fmt"] = fmt(line["UnitPrice"])
+            if line.get("LineTotal"):
+                line["LineTotal_fmt"] = fmt(line["LineTotal"])
+
+        context = {
+            "quotation": quotation,
+            "neto": neto_fmt,
+            "iva": iva_fmt,
+            "total": total_fmt,
+            "logo_path": "/static/img/ggh.png",
+        }
+
+        # 🔹 Render HTML y generar PDF
+        html_string = render(request, "cotizacion_pdf.html", context).content.decode("utf-8")
+        pdf_file = BytesIO()
+        HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(pdf_file)
+
+        response = HttpResponse(pdf_file.getvalue(), content_type="application/pdf")
+        response["Content-Disposition"] = f'inline; filename="Cotizacion_{doc_entry}.pdf"'
+        return response
+
+    except Exception as e:
+        return JsonResponse({"error": f"Ocurrió un error al generar el PDF: {e}"}, status=500)
