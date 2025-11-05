@@ -106,7 +106,7 @@
   /* ===== BLOQUE TOTALES ===== */
   .bloque-totales {
     width: 45%;
-    margin: 20px 30px 0 auto;
+    margin: 20px 40px 0 auto; /* mueve el cuadro más a la derecha */
     border: 1px solid #0B3C91;
     border-radius: 6px;
     background: #EEF3FB;
@@ -122,20 +122,19 @@
 
   .totales td { padding: 6px 0; vertical-align: middle; }
   .totales .label {
-  text-align: left; /* <-- cambia a left para alinearlos verticalmente */
-  color: #333;
-  font-weight: bold;
-  width: 60%; /* antes 65%, puedes ajustar a gusto */
-  padding-left: 10px; /* alinea mejor el inicio de texto */
-}
-.totales .value {
-  text-align: right;
-  color: #333;
-  width: 40%;
-  white-space: nowrap;
-  padding-right: 10px;
-}
-
+    text-align: left;
+    color: #333;
+    font-weight: bold;
+    width: 60%;
+    padding-left: 12px;
+  }
+  .totales .value {
+    text-align: right;
+    color: #333;
+    width: 40%;
+    white-space: nowrap;
+    padding-right: 12px;
+  }
   .totales .total-final {
     border-top: 2px solid #0B3C91;
   }
@@ -259,6 +258,7 @@
     <p><b>Fecha:</b> {{ quotation.DocDate }}</p>
     <p><b>Vendedor:</b> {{ quotation.SalesPersonName }}</p>
     <p><b>Email:</b> {{ quotation.SalesPersonEmail }}</p>
+    <p><b>Forma de Pago:</b> {{ quotation.FormaPago }}</p> <!-- ✅ nueva línea -->
   </div>
 </div>
 

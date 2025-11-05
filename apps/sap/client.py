@@ -1,4 +1,3 @@
-# app/sap/client.py
 import json
 import requests
 from django.conf import settings
@@ -21,25 +20,24 @@ class ServiceLayerClient:
             q = sl.post("Quotations", {...})
     """
     def __init__(self):
-        cfg = settings.SAP_SL
-        self.base = cfg["BASE_URL"].rstrip("/")
-        self.company = cfg["COMPANY"]
-        self.user = cfg["USER"]
-        self.password = cfg["PASS"]
-        self.timeout = int(cfg.get("TIMEOUT", 20))
-        self.verify = cfg.get("VERIFY_SSL", False)  # ajusta en settings si usas cert corporativo
+        # ✅ En lugar de settings.SAP_SL usamos variables sueltas (compatibles con tu sistema actual)
+        self.base = getattr(settings, "SAP_BASE_URL", "https://192.168.0.23:50000/b1s/v1").rstrip("/")
+        self.company = getattr(settings, "SAP_COMPANY", "SBO_MARSELLA_TEST_DESARROLLO")
+        self.user = getattr(settings, "SAP_USER", "manager")
+        self.password = getattr(settings, "SAP_PASS", "Manzana")
+        self.timeout = int(getattr(settings, "SAP_TIMEOUT", 20))
+        self.verify = getattr(settings, "SAP_VERIFY_SSL", False)
 
         self.s = requests.Session()
         # Headers básicos para OData v4
         self.s.headers.update({
             "Content-Type": "application/json",
             "Accept": "application/json",
-            # hace que POST/PUT devuelvan el objeto creado/actualizado
             "Prefer": "return=representation",
         })
 
         # Si quieres que PATCH de colecciones reemplace en vez de merge:
-        if cfg.get("REPLACE_COLLECTIONS_ON_PATCH", True):
+        if getattr(settings, "SAP_REPLACE_COLLECTIONS_ON_PATCH", True):
             self.s.headers["B1S-ReplaceCollectionsOnPatch"] = "true"
 
         self._logged_in = False
@@ -53,7 +51,6 @@ class ServiceLayerClient:
         try:
             self.logout()
         finally:
-            # no bloquear excepciones del bloque with
             return False
 
     # -------- Autenticación --------
@@ -112,13 +109,11 @@ class ServiceLayerClient:
             return self._request(method, path, params=params, json=json, _retry=True)
 
         self._raise_if_error(r)
-        # Algunos endpoints devuelven 204 sin contenido
         if r.status_code == 204 or not r.content:
             return None
-        # Asegurar JSON (el SL a veces envía HTML si hay reverse proxy)
+
         ctype = r.headers.get("content-type", "")
         if "application/json" not in ctype.lower():
-            # intenta parsear igual y si no, lanza error con el cuerpo en texto
             try:
                 return r.json()
             except ValueError:
@@ -130,15 +125,12 @@ class ServiceLayerClient:
     def _raise_if_error(self, resp):
         if resp.status_code < 400:
             return
-        # intenta parsear error JSON del SL
         try:
             data = resp.json()
             code = data.get("error", {}).get("code")
             msg = data.get("error", {}).get("message", {}).get("value")
-            # algunos -1116 vienen sin estructura completa
             if not msg:
                 msg = data.get("Message") or data.get("message") or json.dumps(data)[:500]
             raise ServiceLayerError(resp.status_code, code=code, message=msg, payload=data)
         except ValueError:
-            # cuando el SL (o el reverse proxy) devuelve HTML
             raise ServiceLayerError(resp.status_code, message=resp.text[:500])
