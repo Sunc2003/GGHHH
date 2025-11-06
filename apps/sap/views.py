@@ -609,6 +609,7 @@ from django.contrib.auth.decorators import login_required
 from weasyprint import HTML
 from io import BytesIO
 from .services import SapQuotationsService
+from datetime import datetime
 
 @login_required
 def cotizacion_pdf(request, doc_entry: int):
@@ -618,35 +619,53 @@ def cotizacion_pdf(request, doc_entry: int):
         if not quotation:
             return JsonResponse({"error": "Cotización no encontrada"}, status=404)
 
+        # 🔹 Función para convertir a formato DD-MM-YYYY
+        def format_date(d):
+            if not d:
+                return "-"
+            try:
+                return datetime.strptime(d[:10], "%Y-%m-%d").strftime("%d-%m-%Y")
+            except Exception:
+                return d
+
+        # 🔹 Formatear fechas
+        quotation["DocDate_fmt"] = format_date(quotation.get("DocDate"))
+        quotation["DocDueDate_fmt"] = format_date(quotation.get("DocDueDate"))
+
         # 🔹 Calcular valores base
         total = quotation.get("DocTotal", 0) or 0
         neto = round(total / 1.19)
         iva = round(total - neto)
 
-        # ✅ Nueva función compatible: usa format con separadores CLP
+        # 🔹 Obtener forma de pago desde SAP (nombre real)
+        payment_name = quotation.get("PaymentTermsGroupName") or "No informado"
+
+        # 🔹 Formatear valores CLP
         def fmt(valor):
-            return f"{valor:,.0f}".replace(",", ".")  # ejemplo: 191.590
+            return f"{valor:,.0f}".replace(",", ".")
 
         neto_fmt = fmt(neto)
         iva_fmt = fmt(iva)
         total_fmt = fmt(total)
 
-        # 🔹 Formatea precios de las líneas
+        # 🔹 Formatear precios de líneas
         for line in quotation.get("DocumentLines", []):
             if line.get("UnitPrice"):
                 line["UnitPrice_fmt"] = fmt(line["UnitPrice"])
             if line.get("LineTotal"):
                 line["LineTotal_fmt"] = fmt(line["LineTotal"])
 
+        # 🔹 Contexto al template
         context = {
             "quotation": quotation,
             "neto": neto_fmt,
             "iva": iva_fmt,
             "total": total_fmt,
+            "payment_name": payment_name,
             "logo_path": "/static/img/ggh.png",
         }
 
-        # 🔹 Render HTML y generar PDF
+        # 🔹 Renderizar PDF
         html_string = render(request, "cotizacion_pdf.html", context).content.decode("utf-8")
         pdf_file = BytesIO()
         HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(pdf_file)

@@ -11,32 +11,40 @@
     color: #333;
   }
 
+  @page {
+    size: A4;
+    margin: 12mm 10mm 15mm 10mm;
+  }
+
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
+
   /* ===== ENCABEZADO ===== */
   .header {
-    background: linear-gradient(to right, #0B3C91, #6F8FC4);
+    background: linear-gradient(to right, #0B3C91, #0B3C91);
     color: white;
-    padding: 20px 30px;
+    padding: 10px 25px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 4px solid #0B3C91;
+    border-bottom: 3px solid #0B3C91;
   }
 
-  .header-info h1 {
-    margin: 0;
-    font-size: 22px;
-    letter-spacing: 0.5px;
+  .header-logo-main img {
+    height: 68px;
+    width: auto;
+    object-fit: contain;
   }
 
   .header-logo {
-    background: white;
-    padding: 10px 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .header-logo img {
-    height: 110px;
+    height: 140px;
     width: auto;
     object-fit: contain;
   }
@@ -45,9 +53,9 @@
   .corp-bar {
     background: #EEF3FB;
     color: #0B3C91;
-    font-size: 11.5px;
+    font-size: 11px;
     text-align: center;
-    padding: 6px 25px;
+    padding: 6px 20px;
     font-weight: bold;
     border-bottom: 2px solid #0B3C91;
   }
@@ -56,36 +64,69 @@
   .info {
     display: flex;
     justify-content: space-between;
-    gap: 20px;
-    padding: 25px 30px;
+    gap: 15px;
+    padding: 20px 25px 5px 25px;
   }
 
   .box {
     border: 1px solid #0B3C91;
-    border-radius: 8px;
-    padding: 15px 20px;
-    width: 50%;
+    border-radius: 6px;
+    padding: 12px 15px;
+    width: 49%;
     background: #F8FAFF;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   }
 
   .box h3 {
     background: #0B3C91;
     color: white;
-    padding: 8px;
+    padding: 7px;
     font-size: 13px;
     border-radius: 4px;
-    margin: 0 0 10px 0;
+    margin: 0 0 8px 0;
     text-align: center;
     text-transform: uppercase;
   }
 
-  .box p { margin: 3px 0; font-size: 12px; }
+  .box p {
+    margin: 3px 0;
+    font-size: 12.2px;
+    line-height: 1.3;
+  }
+
+  /* ===== MÉTODOS DE PAGO ===== */
+  .metodos-container {
+    text-align: center;
+    margin: 18px 0 15px 0;
+  }
+
+  .metodos-titulo {
+    color: #0B3C91;
+    font-size: 12.8px;
+    margin-bottom: 5px;
+    font-weight: 700;
+  }
+
+  .metodos-bar {
+    margin: 0 auto;
+    width: 90%;
+    border: 1px solid #0B3C91;
+    background: #EEF3FB;
+    border-radius: 6px;
+    text-align: center;
+    padding: 7px 10px;
+    font-size: 12px;
+    color: #0B3C91;
+    font-weight: bold;
+    letter-spacing: 0.3px;
+    word-spacing: 3px;
+  }
+
+  .metodos-bar span { margin: 0 6px; }
 
   /* ===== TABLA PRODUCTOS ===== */
   .tabla-productos {
     width: 90%;
-    margin: 20px auto;
+    margin: 18px auto 15px auto;
     border-collapse: collapse;
     font-size: 12px;
   }
@@ -93,47 +134,43 @@
   .tabla-productos th {
     background: #0B3C91;
     color: white;
-    padding: 10px 8px;
-    text-align: left;
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid #0B3C91;
   }
 
   .tabla-productos td {
     border-bottom: 1px solid #ccc;
     padding: 6px 8px;
-    vertical-align: top;
+    vertical-align: middle;
   }
 
   /* ===== BLOQUE TOTALES ===== */
   .bloque-totales {
-    width: 45%;
-    margin: 20px 40px 0 auto; /* mueve el cuadro más a la derecha */
+    width: 38%;
+    margin: 20px 45px 0 auto;
     border: 1px solid #0B3C91;
     border-radius: 6px;
     background: #EEF3FB;
-    padding: 12px 18px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 10px 14px;
   }
 
   .totales {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: 12.2px;
   }
 
-  .totales td { padding: 6px 0; vertical-align: middle; }
+  .totales td { padding: 6px 0; }
   .totales .label {
     text-align: left;
-    color: #333;
     font-weight: bold;
     width: 60%;
-    padding-left: 12px;
   }
   .totales .value {
     text-align: right;
-    color: #333;
     width: 40%;
     white-space: nowrap;
-    padding-right: 12px;
   }
   .totales .total-final {
     border-top: 2px solid #0B3C91;
@@ -145,7 +182,7 @@
   .totales .total-final .value {
     color: #0B3C91;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 13.5px;
   }
 
   /* ===== COMENTARIOS Y FIRMA ===== */
@@ -154,7 +191,8 @@
     justify-content: space-between;
     align-items: flex-end;
     width: 90%;
-    margin: 50px auto 100px auto;
+    margin: 35px auto 20px auto;
+    page-break-inside: avoid;
   }
 
   .comentarios {
@@ -169,9 +207,9 @@
 
   .comentarios .cuadro {
     border: 1px solid #0B3C91;
-    height: 80px;
+    height: 65px;
     border-radius: 4px;
-    margin-top: 5px;
+    margin-top: 6px;
     background: #F8FAFF;
   }
 
@@ -181,54 +219,22 @@
   }
 
   .firma-line {
-    width: 200px;
+    width: 180px;
     border-top: 1px solid #0B3C91;
-    margin: 0 auto 5px auto;
+    margin: 0 auto 6px auto;
   }
 
-  /* ===== PIE DE PÁGINA ===== */
-  .footer {
-    background: linear-gradient(to right, #0B3C91, #6F8FC4);
-    color: white;
-    padding: 10px 25px;
-    font-size: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 90px;
-    box-sizing: border-box;
-  }
-
-  .footer-logo img {
-    height: 55px;
-    width: auto;
-    margin-left: 25px;
-  }
-
-  .footer-info {
-    text-align: right;
-    line-height: 1.4;
-    margin-right: 30px;
-    font-size: 10px;
-  }
-
-  .footer-info p { margin: 1px 0; }
 </style>
 </head>
 <body>
 
 <!-- ===== ENCABEZADO ===== -->
 <div class="header">
-  <div class="header-info">
-    <h1>FERRETERÍA MARSELLA SPA</h1>
-    <p>RUT: 79.996.420-1 | Giro: Ferretería Industrial</p>
+  <div class="header-logo-main">
+    <img src="/static/img/logomarsella.png" alt="Ferretería Marsella Logo">
   </div>
   <div class="header-logo">
-    <img src="/static/img/ggh.png" alt="Logo GGH">
+    <img src="/static/img/letrablanca.png" alt="Logo GGH">
   </div>
 </div>
 
@@ -255,10 +261,23 @@
   <div class="box">
     <h3>Datos de la Cotización</h3>
     <p><b>N° Cotización:</b> {{ quotation.DocNum }}</p>
-    <p><b>Fecha:</b> {{ quotation.DocDate }}</p>
+    <p><b>Fecha emisión:</b> {{ quotation.DocDate_fmt }}</p>
+    <p><b>Fecha vencimiento:</b> {{ quotation.DocDueDate_fmt }}</p>
     <p><b>Vendedor:</b> {{ quotation.SalesPersonName }}</p>
     <p><b>Email:</b> {{ quotation.SalesPersonEmail }}</p>
-    <p><b>Forma de Pago:</b> {{ quotation.FormaPago }}</p> <!-- ✅ nueva línea -->
+    <p><b>Forma de Pago:</b> {{ quotation.FormaPago }}</p>
+  </div>
+</div>
+
+<!-- ===== MÉTODOS DE PAGO ===== -->
+<div class="metodos-container">
+  <h4 class="metodos-titulo">MÉTODOS DE PAGO</h4>
+  <div class="metodos-bar">
+    <span>Transferencia</span> |
+    <span>Khipu</span> |
+    <span>WebPay</span> |
+    <span>Mercado Pago</span> |
+    <span><b>cobranzas@ggh.cl</b></span>
   </div>
 </div>
 
@@ -266,17 +285,23 @@
 <table class="tabla-productos">
   <thead>
     <tr>
-      <th style="width:50%">Producto</th>
-      <th style="width:15%; text-align:center;">Cantidad</th>
-      <th style="width:20%; text-align:right;">Precio Unitario</th>
-      <th style="width:15%; text-align:right;">Total</th>
+      <th style="width:10%">Código</th>
+      <th style="width:30%">Descripción</th>
+      <th style="width:8%">Cant.</th>
+      <th style="width:10%">Unidad</th>
+      <th style="width:12%">Plazo Entrega</th>
+      <th style="width:15%">Precio Unitario</th>
+      <th style="width:15%">Total</th>
     </tr>
   </thead>
   <tbody>
     {% for line in quotation.DocumentLines %}
     <tr>
+      <td style="text-align:center;">{{ line.ItemCode }}</td>
       <td>{{ line.ItemDescription }}</td>
       <td style="text-align:center;">{{ line.Quantity|floatformat:0 }}</td>
+      <td style="text-align:center;">{{ line.MeasureUnit|default:"-" }}</td>
+      <td style="text-align:center;">{{ line.U_GGH_TIM|default:"-" }}</td>
       <td style="text-align:right;">${{ line.UnitPrice_fmt }}</td>
       <td style="text-align:right;">${{ line.LineTotal_fmt }}</td>
     </tr>
@@ -311,17 +336,6 @@
   <div class="firma">
     <div class="firma-line"></div>
     <p>Aceptación de Cliente</p>
-  </div>
-</div>
-
-<!-- ===== PIE ===== -->
-<div class="footer">
-  <div class="footer-logo">
-    <img src="/static/img/logomarsella.png" alt="Logo Ferretería Marsella">
-  </div>
-  <div class="footer-info">
-    <p>cobranzas@ggh.cl | www.ggh.cl</p>
-    <p>{{ quotation.DocDate }}</p>
   </div>
 </div>
 
