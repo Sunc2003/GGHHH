@@ -31,7 +31,7 @@ NGROK_API_OV_ABIERTAS = "https://2ebf3b44ae60.ngrok-free.app/api/ventas/ov_abier
 NGROK_API_OV_PENDIENTES = "https://2ebf3b44ae60.ngrok-free.app/api/ventas/ov_pendientes_entrega"
 NGROK_API_GUIAS_PENDIENTES = "https://2ebf3b44ae60.ngrok-free.app/api/ventas/guias_pendientes_facturar"
 NGROK_API_FACTURAS_VENCIDAS = "https://2ebf3b44ae60.ngrok-free.app/api/ventas/facturas_vencidas"
-NGROK_API_ITEMS = "https://2ebf3b44ae60.ngrok-free.app/api/public/items/inventario"  # ✅ Ruta corregida
+NGROK_API_ITEMS = "https://2ebf3b44ae60.ngrok-free.app/api/public/items/inventario"  # 
 
 
 
@@ -390,7 +390,6 @@ def crear_cotizacion(request):
         svc = SapQuotationsService()
         data = svc.create(payload)  # llama al Service Layer
 
-        # Respuesta limpia para el front (lo que muestra el “✅ Cotización creada…”)
         return JsonResponse({
             "DocEntry": data.get("DocEntry"),
             "DocNum":   data.get("DocNum"),
@@ -549,9 +548,7 @@ def buscar_items_inventario(request):
             {"error": f"Error procesando la respuesta: {str(e)}"},
             status=500
         )
-# ============================================================
-# 🔹 Detalle de Cotización (para JSON del front)
-# ============================================================
+
 # ============================================================
 # 🔹 Detalle de Cotización (para JSON del front)
 # ============================================================
@@ -619,7 +616,6 @@ def cotizacion_pdf(request, doc_entry: int):
         if not quotation:
             return JsonResponse({"error": "Cotización no encontrada"}, status=404)
 
-        # 🔹 Función para convertir a formato DD-MM-YYYY
         def format_date(d):
             if not d:
                 return "-"
@@ -676,3 +672,5 @@ def cotizacion_pdf(request, doc_entry: int):
 
     except Exception as e:
         return JsonResponse({"error": f"Ocurrió un error al generar el PDF: {e}"}, status=500)
+    
+    
