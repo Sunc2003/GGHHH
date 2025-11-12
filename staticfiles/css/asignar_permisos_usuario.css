@@ -1,0 +1,102 @@
+#asignar-permisos-panel {
+    max-width: 850px;
+    margin: 40px auto 48px auto;
+    padding: 0;
+  }
+  #asignar-permisos-panel .card {
+    border: 1px solid #222 !important;
+    background: #fff !important;
+    border-radius: 4px !important;
+    margin-bottom: 2rem !important;
+  }
+  #asignar-permisos-panel .card-title {
+    font-size: 1.35rem !important;
+    font-weight: 700 !important;
+    color: #111 !important;
+    margin-bottom: 1.1rem !important;
+    text-align: left;
+  }
+   
+  /* CUSTOM CHECKBOX */
+  #asignar-permisos-panel .custom-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: .7rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  #asignar-permisos-panel .custom-checkbox input[type="checkbox"] {
+    /* Oculta el checkbox real */
+    opacity: 0;
+    position: absolute;
+    width: 0; height: 0;
+  }
+  #asignar-permisos-panel .checkmark {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #111;
+    border-radius: 4px;
+    background: #fff;
+    margin-right: 9px;
+    display: inline-block;
+    position: relative;
+    transition: background 0.14s;
+  }
+  #asignar-permisos-panel .custom-checkbox input[type="checkbox"]:checked + .checkmark {
+    background: #111;
+    border-color: #111;
+  }
+  #asignar-permisos-panel .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  #asignar-permisos-panel .custom-checkbox input[type="checkbox"]:checked + .checkmark:after {
+    display: block;
+  }
+  #asignar-permisos-panel .custom-checkbox .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 12px;
+    border: solid #fff;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+    content: "";
+    position: absolute;
+  }
+   
+  #asignar-permisos-panel .form-check-label {
+    font-weight: 400 !important;
+    color: #111 !important;
+    font-size: .98rem !important;
+    margin-left: 0;
+    cursor: pointer;
+  }
+   
+  #asignar-permisos-panel .btn-black {
+    display: inline-block;
+    background: #111 !important;
+    color: #fff !important;
+    border: none !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    border-radius: 4px !important;
+    padding: 0.8rem 1.6rem !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+  }
+   
+  #asignar-permisos-panel .btn-black:hover,
+  #asignar-permisos-panel .btn-black:focus {
+    background: #000 !important;
+    color: #fff !important;
+  }
+   
+  #asignar-permisos-panel .text-danger.small {
+    font-size: 92% !important;
+    margin-top: 7px !important;
+    font-weight: 600 !important;
+    color: #b8001f !important;
+  }

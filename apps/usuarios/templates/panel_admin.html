@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% load permisos_tags %}
+{% load custom_filters %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/panel_admin.css' %}">
+<style>
+  /* === Tarjetas KPI sobrias === */
+  .card-kpi {
+    border: 1px solid #e5e7eb;
+    border-radius: 0;
+    background: #fff;
+    text-align: center;
+    padding: 1.2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .card-kpi h4 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0.2rem 0;
+    color: #181b1f;
+  }
+  .card-kpi small {
+    color: #6b7280;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+
+  /* === Gráfico flotante === */
+  #graficoSolicitudesUsuario {
+    max-width: 100%;
+    height: 260px;
+    margin: 0 auto;
+    display: block;
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+    100% { transform: translateY(0px); }
+  }
+
+  /* === Tabla usuarios sobria === */
+  .table thead th {
+    background: #23262f;
+    color: #fff;
+    font-weight: 600;
+  }
+  .table td, .table th {
+    font-size: 0.92rem;
+    padding: 0.6rem 0.75rem;
+    vertical-align: middle;
+  }
+  .table tbody tr:hover {
+    background: #f8f9fa;
+  }
+
+  /* === Estado tipo chip === */
+  .estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    color: #444;
+  }
+  .estado::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #9ca3af;
+    display: inline-block;
+  }
+  .estado.enlinea::before { background: #16a34a; }
+  .estado.desconectado::before { background: #9ca3af; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# --- Administración de Usuarios --- #}
+{% if request.user|tiene_permiso:"CREACION_USUARIO" %}
+<div class="container py-5">
+  <h4 class="mb-4 text-dark">Administración de Usuarios</h4>
+
+  <div class="mb-3 text-end">
+    <a href="{% url 'registro' %}" class="btn btn-dark btn-sm">+ Registrar nuevo usuario</a>
+  </div>
+
+  <div class="mb-3">
+    <label for="filtro-estado" class="form-label">Filtrar por estado:</label>
+    <select id="filtro-estado" class="form-select d-inline-block" style="width: auto; margin-left: 10px;">
+      <option value="todos">Todos</option>
+      <option value="enlinea" selected>En línea</option>
+      <option value="desconectado">Desconectado</option>
+    </select>
+  </div>
+
+  <table class="table table-sm table-hover align-middle border">
+    <thead>
+      <tr>
+        <th>Usuario</th>
+        <th>Email</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-usuarios">
+      {% for u in usuarios %}
+      <tr data-estado="{{ u.en_linea|yesno:'enlinea,desconectado' }}">
+        <td>{{ u.username }}</td>
+        <td>{{ u.email }}</td>
+        <td>
+          {% if u.en_linea %}
+            <span class="estado enlinea">En línea</span>
+          {% else %}
+            <span class="estado desconectado">Desconectado</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{# --- Estadísticas de Solicitudes (KPI) --- #}
+{% if request.user|tiene_permiso:"DASHBOARD_RESPUESTAKPI" %}
+<div class="container py-4">
+  <hr class="my-4">
+  <h4 class="mb-4 text-dark">Estadísticas de Solicitudes</h4>
+  <div class="row text-center">
+    <div class="col-md-3 mb-3">
+      <div class="card-kpi">
+        <h4>{{ total_recibidas|default_if_none:"0" }}</h4>
+        <small>Recibidas</small>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card-kpi">
+        <h4>{{ pendientes|default_if_none:"0" }}</h4>
+        <small>Pendientes</small>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card-kpi">
+        <h4>{{ completadas|default_if_none:"0" }}</h4>
+        <small>Completadas</small>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card-kpi">
+        <h4>
+          {% if promedio_respuesta %}
+            {{ promedio_respuesta|formatear_tiempo }}
+          {% else %}
+            -
+          {% endif %}
+        </h4>
+        <small>Promedio Respuesta</small>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{# --- Panel Usuario (KPI personales + gráfico) --- #}
+{% if request.user|tiene_permiso:"PANEL_USUARIO" %}
+<div class="container py-4 mt-4">
+  
+
+  <div id="kpi-data"
+       data-total="{{ total_solicitudes|default:0 }}"
+       data-respondidas="{{ solicitudes_respondidas|default:0 }}"></div>
+
+  <div class="card bg-white p-3 mt-2">
+    <canvas id="graficoSolicitudesUsuario"></canvas>
+  </div>
+</div>
+{% endif %}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const el = document.getElementById('kpi-data');
+  const total = Number(el?.dataset.total ?? 0);
+  const respondidas = Number(el?.dataset.respondidas ?? 0);
+  const pendientes = Math.max(total - respondidas, 0);
+
+  const ctx = document.getElementById('graficoSolicitudesUsuario');
+  if (ctx && window.Chart) {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Respondidas', 'Pendientes'],
+        datasets: [{
+          label: 'Solicitudes',
+          data: [respondidas, pendientes],
+          backgroundColor: ['#198754', '#dc3545'], // Verde y rojo
+          borderWidth: 1,
+          borderColor: '#d1d5db',
+          borderRadius: 6,
+          barThickness: 50
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.formattedValue + ' solicitudes';
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1, color: '#495057' },
+            grid: { color: '#f1f1f1' }
+          },
+          x: {
+            ticks: { color: '#495057' },
+            grid: { display: false }
+          }
+        },
+        animation: {
+          duration: 1200,
+          easing: 'easeInOutQuad'
+        }
+      }
+    });
+  }
+
+  // Filtro usuarios
+  const filtro = document.getElementById('filtro-estado');
+  const cuerpo = document.getElementById('tabla-usuarios');
+  function filtrar() {
+    const valor = filtro?.value || 'todos';
+    if (!cuerpo) return;
+    cuerpo.querySelectorAll('tr').forEach(row => {
+      const estado = row.dataset.estado;
+      row.style.display = (valor === 'todos' || estado === valor) ? '' : 'none';
+    });
+  }
+  if (filtro) {
+    filtro.addEventListener('change', filtrar);
+    filtrar();
+  }
+});
+</script>
+
+{% endblock %}

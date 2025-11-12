@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/detalle_producto.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container mt-4">
+
+  <div class="page-header">
+    <h3 class="page-title">Detalles del Producto</h3>
+    {# ⬇️ Conservamos exactamente el querystring con el que llegaste #}
+    <a href="{% url 'buscar_productos_ui' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="ghost-btn">← Volver</a>
+  </div>
+
+  <div class="card">
+    <h6 class="section-title">Ficha</h6>
+    <table class="kv-table">
+      <tr><th>Código</th><td>{{ producto.Codigo }}</td></tr>
+      <tr><th>Descripción</th><td>{{ producto.Descripcion }}</td></tr>
+      <tr><th>Precio Mínimo de Venta</th><td>$ {{ producto.PrecioMinVta|puntos_miles }}</td></tr>
+      <tr><th>Proveedor</th><td>{{ producto.ProveedorPredeterminado }}</td></tr>
+      <tr><th>SKU del Proveedor</th><td>{{ producto.SKUProveedor }}</td></tr>
+      <tr><th>Nombre del Proveedor</th><td>{{ producto.NombreProveedor }}</td></tr>
+      <tr><th>Unidad de Medida</th><td>{{ producto.UnidadMedida }}</td></tr>
+      <tr><th>Origen del Artículo</th><td>{{ producto.OrigenArticulo }}</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h6 class="section-title">Stock por Almacén</h6>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Almacén</th>
+          <th>Nombre Almacén</th>
+          <th>Stock</th>
+          <th>Comprometido</th>
+          <th>Pedido</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for almacen, datos in producto.Almacenes.items %}
+          <tr>
+            <td>{{ almacen }}</td>
+            <td>{{ datos.NombreAlmacen }}</td>
+            <td class="num">{{ datos.Stock|puntos_miles }}</td>
+            <td class="num">{{ datos.Compromiso|puntos_miles }}</td>
+            <td class="num">{{ datos.Pedido|puntos_miles }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">No hay almacenes disponibles para este producto.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

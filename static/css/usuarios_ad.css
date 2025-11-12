@@ -1,0 +1,115 @@
+body {
+  background-color: #e4e8ed;
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+
+/* Contenedor del formulario de filtros */
+form.row.mb-4.g-3.align-items-end {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  margin-bottom: 2rem;
+}
+
+/* Etiquetas del formulario */
+.form-label {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Inputs y selects del formulario */
+.form-control,
+.form-select {
+  border-radius: 6px;
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ced4da;
+  transition: border-color 0.2s;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #495057;
+  box-shadow: 0 0 0 0.1rem rgba(33,37,41,.15);
+}
+
+/* Botón de buscar */
+.btn-dark.w-100 {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 6px;
+  padding: 0.5rem 0;
+}
+
+
+/* ...existing code... */
+
+/* Responsive: Ajustes para tablets y celulares */
+@media (max-width: 991.98px) {
+  form.row.mb-4.g-3.align-items-end {
+    padding: 1rem;
+    border-radius: 6px;
+  }
+  .col-md-4, .col-md-3, .col-md-1 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 1rem;
+  }
+  .col-md-1 {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .container-fluid.py-4 {
+    padding: 1rem 0.5rem !important;
+  }
+  h3.text-center.mb-4 {
+    font-size: 1.2rem;
+  }
+  form.row.mb-4.g-3.align-items-end {
+    padding: 0.5rem;
+  }
+  .table-responsive {
+    font-size: 0.92rem;
+  }
+  .table th, .table td {
+    font-size: 0.9rem;
+    padding: 0.4rem;
+  }
+}
+
+/* Opcional: Hace la tabla más desplazable horizontalmente en móviles */
+.table-responsive {
+  overflow-x: auto;
+}
+
+
+/* Paginación: estilos negro/blanco */
+.pagination .page-item .page-link {
+  color: #000 !important;
+  background-color: #fff !important;
+  border: 1px solid #000 !important;
+  transition: background 0.2s, color 0.2s;
+}
+
+.pagination .page-item.active .page-link,
+.pagination .page-item .page-link:hover,
+.pagination .page-item .page-link:focus {
+  color: #fff !important;
+  background-color: #000 !important;
+  border-color: #000 !important;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #aaa !important;
+  background-color: #fff !important;
+  border-color: #ddd !important;
+  cursor: not-allowed;
+}

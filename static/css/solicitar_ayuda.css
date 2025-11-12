@@ -1,0 +1,232 @@
+/* ==========================================================================
+   AYUDA / TICKETS – Estilo profesional y sobrio
+   Scope: .help-view
+   ========================================================================== */
+
+/* ---------- Variables base ---------- */
+.help-view {
+  --bg: #f9fafb;
+  --card: #ffffff;
+  --text: #1e293b;         /* Gris más legible */
+  --muted: #6b7280;        /* Gris accesible para secundarios */
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --primary: #2563eb;
+  --primary-600: #1e40af;
+  --success: #22c55e;
+  --warning: #fbbf24;
+  --danger: #ef4444;
+  --accent: #f3f4f6;
+  --radius: 6px;
+  --radius-sm: 4px;
+  --pad: 1.25rem;
+  --shadow: 0 2px 8px rgba(0,0,0,0.03);
+
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.help-view * { box-sizing: border-box; }
+.help-view a { color: var(--primary); transition: color .15s; text-decoration: none; }
+.help-view a:hover { color: var(--primary-600); text-decoration: underline; }
+.help-view h4, .help-view h5 {
+  margin: 0 0 .5rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .2px;
+}
+
+/* ---------- Contenedor principal ---------- */
+.help-container { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+
+/* ---------- Encabezado ---------- */
+.help-view .page-head {
+  padding-bottom: .5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* ---------- Card ---------- */
+.help-view .card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: box-shadow .2s, transform .15s;
+}
+.help-view .card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,.05);
+  transform: translateY(-1px);
+}
+.help-view .card-body { padding: var(--pad); }
+
+/* ---------- Botones ---------- */
+.help-view .btn {
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: .95rem;
+  padding: 0.55rem 1.25rem;
+  border: 1.5px solid transparent;
+  transition: all .15s;
+  min-width: 110px;
+  text-align: center;
+  letter-spacing: .02em;
+  cursor: pointer;
+}
+
+/* Primario */
+.help-view .btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.help-view .btn-primary:hover {
+  background: var(--primary-600);
+  border-color: var(--primary-600);
+}
+
+/* Secundario */
+.help-view .btn-outline-secondary {
+  background: #fff;
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.help-view .btn-outline-secondary:hover {
+  background: var(--accent);
+  border-color: var(--primary-600);
+  color: var(--primary-600);
+}
+
+/* Cancelar */
+#btn-cancel-form, #btn-cancel-form-2 {
+  background: #fff;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-weight: 500;
+  min-width: 100px;
+}
+#btn-cancel-form:hover, #btn-cancel-form-2:hover {
+  background: var(--accent);
+  border-color: var(--primary-600);
+  color: var(--primary-600);
+}
+
+/* ---------- Formularios ---------- */
+.help-view .form-label {
+  font-weight: 600;
+  margin-bottom: .35rem;
+  color: var(--text);
+}
+.help-view .form-control,
+.help-view .form-select,
+.help-view textarea,
+.help-view input[type="file"] {
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: #f9fafb;
+  font-size: 1rem;
+  transition: border-color .15s, box-shadow .15s;
+}
+.help-view .form-control:focus,
+.help-view .form-select:focus,
+.help-view textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+.help-view textarea { min-height: 140px; resize: vertical; }
+
+/* ---------- Banner de éxito ---------- */
+.flash-ok {
+  border: 1.5px solid #d1fae5;
+  background: #f0fdf4;
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  transition: opacity .25s, transform .25s;
+  box-shadow: 0 2px 6px rgba(34,197,94,.08);
+}
+.flash-ok .title { font-weight: 700; color: #15803d; }
+.flash-ok .text { color: #166534; }
+
+/* ---------- Tabla ---------- */
+.help-view .table {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: .96rem;
+}
+.help-view .table thead th {
+  background: #f9fafb;
+  border-bottom: 2px solid var(--border-strong);
+  font-weight: 700;
+  color: var(--text);
+}
+.help-view .table-hover tbody tr:hover { background: #f3f4f6; }
+
+/* ---------- Badges ---------- */
+.help-view .badge {
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: .78rem;
+  padding: .3rem .65rem;
+  text-transform: uppercase;
+}
+.help-view .badge.bg-danger-subtle {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+.help-view .badge.bg-warning-subtle {
+  background: #fef9c3;
+  color: #92400e;
+}
+.help-view .badge.bg-success-subtle {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+/* ---------- Paginación ---------- */
+.help-view .pagination { gap: .25rem; }
+.help-view .page-item .page-link {
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  padding: .4rem .7rem;
+  background: #fff;
+  transition: all .15s;
+}
+.help-view .page-item.active .page-link {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* ---------- Estados vacíos ---------- */
+.help-view .empty {
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 1.5rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ---------- Accesibilidad ---------- */
+.help-view a:focus-visible,
+.help-view button:focus-visible,
+.help-view input:focus-visible {
+  outline: 2px solid rgba(37,99,235,.3);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

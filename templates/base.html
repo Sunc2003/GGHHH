@@ -1,0 +1,545 @@
+{% load static %}
+{% load permisos_tags %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}GGH{% endblock %}</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <link href="{% static 'css/base.css' %}" rel="stylesheet" />
+
+
+  <style>
+    
+    .badge-counter {
+      background:#dc3545;
+      color:#fff;
+      font-size:.75rem;
+      padding:.25em .6em;
+      border-radius:10rem;
+    }
+
+    
+    #offcanvasMenu .offcanvas-body {
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      padding-left:1.25rem;
+      padding-right:1rem;
+      gap:.5rem;
+    }
+    #offcanvasMenu .navbar-nav {
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:.25rem;
+    }
+    #offcanvasMenu .nav-link,
+    .navbar .nav-link {
+      color:#fff !important;
+      border-radius:.6rem;
+      padding:.55rem .8rem;
+      display:inline-flex;
+      align-items:center;
+      gap:.55rem;
+      transition: background-color .18s ease,
+      color .18s ease,
+      transform .05s ease,
+      box-shadow .18s ease;
+      text-decoration:none;
+    }
+    #offcanvasMenu .nav-link:hover,
+    .navbar .nav-link:hover {
+      background: var(--bs-primary);
+      color:#fff !important;
+      box-shadow: 0 2px 8px rgba(13,110,253,.35);
+    }
+    #offcanvasMenu .nav-link:focus-visible,
+    .navbar .nav-link:focus-visible {
+      outline:2px solid var(--bs-primary);
+      outline-offset:2px;
+    }
+    #offcanvasMenu .nav-link.active,
+    .navbar .nav-link.active {
+      background: rgba(13,110,253,.22);
+      color:#fff !important;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+    }
+    #offcanvasMenu .nav-link:active,
+    .navbar .nav-link:active {
+    transform:scale(0.99);
+    }
+    #offcanvasMenu .nav-link .fa,
+    .navbar .nav-link .fa,
+    #offcanvasMenu .nav-link .fas,
+    .navbar .nav-link .fas {
+      width:1.15em;
+      text-align:center;
+      opacity:.95;
+    }
+
+    /* ---------- Navbar y logo ---------- */
+    .navbar .navbar-brand img.logo-ggh {
+      height:140px !important;
+      width:auto !important;
+      filter: drop-shadow(2px 2px 10px #232323);
+    }
+    @media (min-width: 576px) and (max-width: 991.98px){
+      .navbar .navbar-brand img.logo-ggh {
+        height:100px !important;
+      }
+    }
+    @media (max-width:575.98px){
+      .navbar .navbar-brand img.logo-ggh {
+        height:90px !important;
+      }
+    }
+    #offcanvasMenu .offcanvas-title img {
+      height:60px;
+      width:auto;
+    }
+    .navbar {
+      padding-top:.5rem;
+      padding-bottom:.5rem;
+    }
+
+    /* ---------- Formularios dentro del offcanvas ---------- */
+    #offcanvasMenu .nav-item form {
+      width:100%;
+      margin:0;
+    }
+    #offcanvasMenu .nav-item form .nav-link {
+      padding:.55rem .8rem;
+      border-radius:.6rem;
+    }
+    #offcanvasMenu .nav-item form .nav-link:hover {
+      background: var(--bs-primary);
+      color:#fff !important;
+      box-shadow:0 2px 8px rgba(13,110,253,.35);
+    }
+    #offcanvasMenu .nav-item form .nav-link:focus-visible {
+      outline:2px solid var(--bs-primary);
+      outline-offset:2px;
+    }
+    #offcanvasMenu .nav-item form .nav-link:active {
+      transform:scale(0.99);
+    }
+
+    /* ---------- Edge para swipe ---------- */
+    #offcanvas-edge {
+      position:fixed;
+      top:0;
+      left:0;
+      bottom:0;
+      width:24px;
+      background:transparent;
+      z-index:1040;
+      touch-action: pan-y;
+    }
+    @media (min-width: 992px){
+      #offcanvas-edge{ display:none; }
+    }
+
+    /* ---------- Footer ---------- */
+    .site-footer .footer-logo img {
+      height:50px;
+      max-width:100%;
+    }
+    .site-footer .footer-contact p {
+      margin-bottom:.3rem;
+    }
+    /* Responsivo: móviles y tablets */
+    @media (max-width: 767.98px) {
+      .site-footer .container {
+        text-align:center;        /* Centrar todo en móvil */
+      }
+      .site-footer .footer-contact {
+        margin-top:1rem;          /* Espacio entre logo y contacto */
+      }
+      .site-footer .d-flex.gap-3 a {
+        font-size:1.6rem;         /* Íconos más grandes para tocar */
+      }
+    }
+
+    /* ---------- Ajustes offcanvas en pantallas pequeñas ---------- */
+    .offcanvas .nav-link {
+      font-size:1rem;
+      padding:.75rem 1rem;
+    }
+    .offcanvas .offcanvas-title img {
+      max-height:50px;
+    }
+  </style>
+
+    
+
+        {% block extra_css %}{% endblock %}
+        </head>
+        <body class="d-flex flex-column min-vh-100">
+
+        <!-- Navbar -->
+        <nav class="navbar navbar-dark bg-dark">
+          <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="/">
+              <img class="logo-ggh" src="{% static 'img/ggh.png' %}" alt="GGH">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu" aria-label="Menú">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="d-none d-lg-flex w-100 justify-content-between"></div>
+          </div>
+        </nav>
+
+        <!-- Offcanvas -->
+        <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasMenuLabel" style="margin:0;">
+              <img src="{% static 'img/logomarsella.png' %}" alt="Logo">
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+          </div>
+
+          <div class="offcanvas-body d-flex flex-column">
+            <ul class="navbar-nav w-100">
+              <li class="nav-item">
+                <a class="nav-link text-white" href="{% url 'panel_admin_usuarios' %}">
+                  <i class="fa fa-house"></i> Home
+                </a>
+              </li>
+
+            <li class="nav-item">
+                <a class="nav-link text-white" href="{% url 'cotizacion_form' %}">
+                  <i class="fa fa-shopping-cart"></i> Ventas
+                </a>
+            </li>
+ 
+            {% if request.user.is_authenticated and request.user|tiene_permiso:"SOLICITUD_CODIGO" %}
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{% url 'nueva_solicitud' %}">
+                <i class="fa fa-plus-square"></i> Solicitud de código
+              </a>
+            </li>
+            {% endif %}
+            
+            {% if request.user.is_authenticated and request.user|tiene_permiso:"VER_AD" %}
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{% url 'usuarios_ad' %}">
+                <i class="fa fa-users"></i> Usuarios AD
+              </a>
+            </li>
+            {% endif %}
+
+        
+          {% if request.user.is_authenticated and request.user|tiene_permiso:"TICKETS_CREAR" %}
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'tickets_solicitar_ayuda' %}">
+              <i class="fa fa-life-ring"></i> Solicitar ayuda
+            </a>
+          </li>
+        {% endif %}
+
+        {% if request.user.is_authenticated and request.user|tiene_permiso:"TICKETS_ACCESO_MENU" %}
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'tickets_bandeja' %}">
+              <i class="fa fa-inbox"></i> Tickets
+            </a>
+          </li>
+        {% endif %}
+
+        {% if request.user.is_authenticated and request.user|tiene_permiso:"GESTIONAR_PERMISOS" %}
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{% url 'crear_permiso' %}">
+            <i class="fa fa-key"></i> Gestión de Permisos
+          </a>
+        </li>
+        {% endif %}
+   
+
+      
+          {% if request.user.is_authenticated and request.user|tiene_permiso:"PROCESOS" %}
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'procesos' %}">
+              <i class="fa fa-diagram-project"></i> Procesos
+            </a>
+          </li>
+          {% endif %}
+
+          {% if request.user.is_authenticated and request.user|tiene_permiso:"BUSCAR_PRODUCTOS_SAP" %}
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'buscar_productos_ui' %}">
+              <i class="fa fa-magnifying-glass"></i> Buscar Productos
+            </a>
+          </li>
+          {% endif %}
+
+          {% if request.user.is_authenticated and request.user|tiene_permiso:"BUSCAR_SOCIOS" %}
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'socios_lista' %}">
+              <i class="fa fa-address-book"></i> Buscar Clientes
+            </a>
+          </li>
+          {% endif %}
+
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'guias_pendientes' %}">
+              <i class="fa fa-truck"></i> Guías Pendientes Vendedor
+            </a>
+          </li>
+        
+        </ul>
+
+      <hr class="text-secondary my-3 w-100">
+
+      <ul class="navbar-nav w-100">
+        {% if user.is_authenticated %}
+          {% if request.user|tiene_permiso:"VER_SOLICITUDES_RECIBIDAS" %}
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'solicitudes_recibidas' %}">
+              <i class="fa fa-bell"></i> Solicitudes
+              <span id="badge-solicitudes-mobile" class="badge bg-danger ms-2" style="display:none;">0</span>
+            </a>
+          </li>
+          {% endif %}
+
+          {% if user.tipo_usuario == 'admin' %}
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'panel_admin_usuarios' %}">
+              <i class="fa fa-gauge"></i> Panel Admin
+            </a>
+          </li>
+          {% endif %}
+
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'perfil_usuario' %}">
+              <i class="fa fa-user"></i> {{ user.get_full_name|default:user.username }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <form method="post" action="{% url 'logout' %}" class="w-100 m-0">
+              {% csrf_token %}
+              <button type="button"
+                      class="nav-link text-white w-100 text-start d-inline-flex align-items-center gap-2"
+                      style="background:none;border:0;"
+                      data-bs-toggle="modal" data-bs-target="#logoutModal">
+                <i class="fas fa-power-off"></i> Cerrar sesión
+              </button>
+            </form>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{% url 'login' %}">
+              <i class="fa fa-right-to-bracket"></i> Iniciar sesión
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-md" style="max-width: 600px;">
+            <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden">
+              <div class="row g-0">
+                
+                <!-- Columna de la imagen -->
+                <div class="col-md-5 d-none d-md-flex align-items-center justify-content-center bg-light">
+                  <img src="{% static 'img/ggh.png' %}" alt="Logo Marsella"
+                      class="img-fluid p-3"
+                      style="max-height:220px; object-fit:contain; border-radius:.3rem 0 0 .3rem;">
+                </div>
+
+                <!-- Columna del texto -->
+                <div class="col-md-7 d-flex align-items-center">
+                  <div class="modal-body text-center">
+                    <h5 class="modal-title mb-3">Cerrar sesión</h5>
+                    <p>¿Está seguro que desea salir del sistema?</p>
+
+                    <!-- Formulario POST para logout -->
+                    <form method="post" action="{% url 'logout' %}">
+                      {% csrf_token %}
+                      <div class="d-flex justify-content-center gap-2 mt-3">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                          Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-danger">
+                          Cerrar sesión
+                        </button>
+                      </div>
+                    </form>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+        <!-- Contenido principal -->
+        <main class="flex-grow-1">
+          <div class="container mt-5">
+            {% block content %}{% endblock %}
+          </div>
+        </main>
+
+      <footer class="site-footer bg-dark text-white mt-auto">
+        <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between py-4">
+          
+          <!-- Logo -->
+          <div class="footer-logo mb-3 mb-md-0 text-center text-md-start">
+            <img src="{% static 'img/logomarsella.png' %}" alt="Logo Marsella" height="50"
+                style="filter: drop-shadow(2px 2px 10px #434040);">
+          </div>
+
+          <!-- Contacto -->
+          <div class="footer-contact text-center text-md-start">
+            <p class="fw-bold mb-2" style="font-size:1.1rem;">CONTACTO</p>
+            <p class="mb-1">Casa central: Av. España #2501, Batuco, Lampa.</p>
+            <p class="mb-1">Antofagasta: El Quisco #678</p>
+            <div class="d-flex gap-3 justify-content-center justify-content-md-start mt-2">
+              <a href="mailto:contacto@ggh.cl" class="text-white fs-4"><i class="fas fa-envelope"></i></a>
+              <a href="https://wa.me/56952167864" class="text-white fs-4"><i class="fab fa-whatsapp"></i></a>
+              <a href="https://www.google.com/maps/place/Batuco,+Lampa" target="_blank" class="text-white fs-4"><i class="fas fa-map-marker-alt"></i></a>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+
+
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+      {% if request.user.is_authenticated and request.user|tiene_permiso:"VER_SOLICITUDES_RECIBIDAS" %}
+      <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
+        <div id="toast-nueva-solicitud" class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+            data-bs-autohide="true" data-bs-delay="3000">
+          <div class="toast-header">
+            <i class="fa fa-bell me-2"></i>
+            <strong class="me-auto">Nueva solicitud</strong>
+            <small class="text-muted">justo ahora</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+          </div>
+          <div class="toast-body">
+            ¡Tienes una nueva solicitud de: <strong id="toast-remitente">—</strong>
+            (<span id="toast-titulo">—</span>)!
+            <a id="toast-link" href="{% url 'solicitudes_recibidas' %}" class="link-dark fw-semibold ms-1">Ver</a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <audio id="snd-nueva-solicitud" preload="auto">
+        <source src="{% static 'sonidos/notify.mp3' %}" type="audio/mpeg">
+      </audio>
+
+      <!-- Scripts existentes (contador/toast + gestos offcanvas) -->
+<script>
+(function(){
+  const badge      = document.getElementById('badge-solicitudes');
+  const badgeMob   = document.getElementById('badge-solicitudes-mobile');
+  const toastEl    = document.getElementById('toast-nueva-solicitud');
+  const toast      = toastEl ? bootstrap.Toast.getOrCreateInstance(toastEl, { autohide: true, delay: 3000 }) : null;
+  const toastRem   = document.getElementById('toast-remitente');
+  const toastTit   = document.getElementById('toast-titulo');
+  const toastLink  = document.getElementById('toast-link');
+  const snd        = document.getElementById('snd-nueva-solicitud');
+
+  let audioUnlocked = false;
+  function unlockAudioOnce(){
+    if (!snd || audioUnlocked) return;
+    snd.play().then(()=>{
+      snd.pause();
+      snd.currentTime = 0;
+      audioUnlocked = true;
+    }).catch(()=>{});
+  }
+  document.addEventListener('click', unlockAudioOnce, { once:false });
+  document.addEventListener('keydown', unlockAudioOnce, { once:false });
+
+  let lastSeenId = parseInt(localStorage.getItem('ultima_solicitud_id') || '0', 10);
+  let initialized = !!lastSeenId;
+
+  async function refresh(){
+    try{
+      const res = await fetch("{% url 'api_solicitudes_pendientes_count' %}", {
+        headers:{ 'X-Requested-With':'XMLHttpRequest' }
+      });
+
+      if (!res.ok) {
+        if (res.status === 403) {
+          // Usuario sin permisos → ocultar badges y salir limpio
+          if (badge) badge.style.display = 'none';
+          if (badgeMob) badgeMob.style.display = 'none';
+          return;
+        }
+        throw new Error("API error " + res.status);
+      }
+
+      const data = await res.json();
+      const n   = data.count || 0;
+      const uid = data.ultimo_id || 0;
+
+      if (n > 0){
+        if (badge){ badge.textContent = n > 99 ? '99+' : n; badge.style.display = 'inline-block'; }
+        if (badgeMob){ badgeMob.textContent = n > 99 ? '99+' : n; badgeMob.style.display = 'inline-block'; }
+      } else {
+        if (badge) badge.style.display = 'none';
+        if (badgeMob) badgeMob.style.display = 'none';
+      }
+
+      if (!uid) return;
+
+      if (!initialized){
+        lastSeenId = uid;
+        localStorage.setItem('ultima_solicitud_id', String(uid));
+        initialized = true;
+        return;
+      }
+
+      if (uid !== lastSeenId){
+        lastSeenId = uid;
+        localStorage.setItem('ultima_solicitud_id', String(uid));
+
+        if (toast){
+          if (toastRem) toastRem.textContent = data.remitente || '—';
+          if (toastTit) toastTit.textContent = data.titulo || '—';
+          if (toastLink){ toastLink.href = "{% url 'detalle_solicitud' 0 %}".replace('/0/', `/${uid}/`); }
+          toast.show();
+        }
+
+        if (snd){ try{ snd.currentTime = 0; await snd.play(); }catch(e){} }
+      }
+
+    }catch(e){
+      console.warn('Error consultando notificaciones:', e);
+    }
+  }
+
+  let timer = null;
+  function start(){ if(!timer){ timer = setInterval(refresh, 10000); } }
+  function stop(){ if(timer){ clearInterval(timer); timer = null; } }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else { refresh(); start(); }
+  });
+
+  refresh(); 
+  start();
+})();
+</script>
+
+
+      {% block extra_js %}{% endblock %}
+    </body>
+    </html>

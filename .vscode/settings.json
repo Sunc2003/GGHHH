@@ -1,0 +1,6 @@
+{
+    "python.defaultInterpreterPath": "/Users/millaray/Downloads/GGHHH-main/venv/bin/python",
+    "python.analysis.extraPaths": [
+        "/Users/millaray/Downloads/GGHHH-main/venv/lib/python3.11/site-packages"
+    ]
+}

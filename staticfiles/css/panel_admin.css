@@ -1,0 +1,251 @@
+/* PANEL ADMIN CSS - CUADRADO, SOBRIO Y CORPORATIVO */
+ 
+/* FUENTE Y BASE */
+html, body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    background: #f7f7fa;
+    color: #23262f;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+ 
+/* ENCABEZADOS */
+h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #181b1f;
+    margin-bottom: 2rem;
+    letter-spacing: 0.2px;
+}
+h4 {
+    font-size: 1.09rem;
+    font-weight: 600;
+    color: #23262f;
+    margin-bottom: 1.1rem;
+}
+ 
+/* BOTÓN DE REGISTRO */
+.btn-success {
+    font-weight: 600;
+    border-radius: 0;           /* Sin bordes redondeados */
+    background: #23262f !important;
+    border: none;
+    color: #fff !important;
+    box-shadow: none;
+    transition: background 0.16s, color 0.16s;
+    padding: 0.55rem 1.5rem;
+}
+.btn-success:hover,
+.btn-success:focus {
+    background: #dc3545 !important;
+    color: #fff !important;
+}
+ 
+/* TABLA */
+.table {
+    background: #fff;
+    border-radius: 0;           /* Sin bordes redondeados */
+    overflow: hidden;
+    box-shadow: 0 2px 8px 0 rgba(40,40,40,0.06);
+    border-collapse: collapse !important;
+}
+.table thead.table-dark th {
+    background: #23262f !important;
+    color: #fff !important;
+    font-size: 1.01rem;
+    font-weight: 700;
+    border: none;
+}
+.table tbody tr {
+    border-bottom: 1px solid #e5e6ea;
+    transition: background 0.07s;
+}
+.table tbody tr:hover {
+    background: #f3f4f6;
+}
+.table td, .table th {
+    vertical-align: middle !important;
+    font-size: 1rem;
+    padding: 0.73rem 0.75rem;
+    word-break: break-word;
+    border: none;
+}
+ 
+/* BADGES DE ESTADO */
+.badge {
+    font-size: 0.97rem;
+    padding: 0.35em 0.95em;
+    border-radius: 0;           /* Sin bordes redondeados */
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    display: inline-block;
+    min-width: 88px;
+    text-align: center;
+    background: #e9ecef;
+    color: #222;
+    border: 1px solid #d1d5db;
+}
+.badge.bg-success {
+    background: #23262f !important;   /* Negro */
+    color: #fff !important;
+    border: none;
+}
+.badge.bg-secondary {
+    background: #b0b2b8 !important;  /* Gris neutro */
+    color: #fff !important;
+    border: none;
+}
+.badge.bg-warning {
+    background: #fff3cd !important;   /* Amarillo pálido */
+    color: #856404 !important;
+    border: 1px solid #ffeeba;
+}
+.badge.bg-danger {
+    background: #dc3545 !important;
+    color: #fff !important;
+    border: none;
+}
+ 
+/* LISTA DE SOLICITUDES */
+.list-group-item {
+    border-radius: 0 !important;      /* Sin bordes redondeados */
+    margin-bottom: 0.18rem;
+    background: #fafbfc;
+    border: 1px solid #e4e7ea;
+    font-size: 1.02rem;
+    font-weight: 500;
+    transition: background 0.04s;
+    padding: 0.75rem 1rem;
+}
+.list-group-item .badge,
+.list-group-item .btn {
+    margin-left: 0.7rem;
+}
+.list-group-item .btn-outline-primary {
+    font-size: 0.95rem;
+    border-radius: 0;
+    padding: 0.25rem 0.9rem;
+    font-weight: 500;
+    border-width: 2px;
+    border-color: #23262f;
+    color: #23262f;
+    background: transparent;
+    transition: background 0.13s, color 0.13s, border 0.13s;
+}
+.list-group-item .btn-outline-primary:hover,
+.list-group-item .btn-outline-primary:focus {
+    background: #23262f;
+    color: #fff;
+    border-color: #23262f;
+}
+ 
+/* ESPACIADOS Y UTILIDADES */
+.py-5 {
+    padding-top: 2.1rem !important;
+    padding-bottom: 2.1rem !important;
+}
+.text-end {
+    text-align: right !important;
+}
+.mt-4, .mb-4 {
+    margin-top: 2rem !important;
+    margin-bottom: 2rem !important;
+}
+ 
+/* RESPONSIVE */
+@media (max-width: 991.98px) {
+    .row.mt-5 > div {
+        margin-bottom: 2rem;
+    }
+    .table {
+        font-size: 0.97rem;
+    }
+}
+@media (max-width: 575.98px) {
+    h2 {
+        font-size: 1.15rem;
+    }
+    h4 {
+        font-size: 1rem;
+    }
+    .table th, .table td {
+        font-size: 0.91rem;
+        padding: 0.45rem 0.3rem;
+    }
+    .btn-success {
+        font-size: 1rem;
+        padding: 0.45em 1em;
+    }
+}
+ 
+/* SCROLLBAR GLOBAL */
+::-webkit-scrollbar {
+    width: 8px;
+    background: #ececec;
+}
+::-webkit-scrollbar-thumb {
+    background: #b0b2b8;
+    border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #23262f;
+}
+html {
+    scrollbar-width: thin;
+    scrollbar-color: #b0b2b8 #ececec;
+}
+ 
+ 
+/* Tabla más compacta para el panel admin */
+.table td, .table th {
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
+    font-size: 0.96rem !important;
+}
+ 
+.table {
+    font-size: 0.97rem;
+    margin-bottom: 1rem;
+}
+ 
+@media (max-width: 767.98px) {
+    .table td, .table th {
+        font-size: 0.88rem !important;
+        padding-top: 0.32rem !important;
+        padding-bottom: 0.32rem !important;
+    }
+}
+
+
+
+/* === RESPONSIVIDAD PARA PANTALLAS PEQUEÑAS === */
+
+/* Tabla con scroll horizontal si es necesario */
+.table-responsive-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+}
+
+/* Botón de registrar responsivo */
+@media (max-width: 768px) {
+  .btn.w-md-auto {
+    width: 100% !important;
+  }
+}
+
+/* Filtro adaptado */
+@media (max-width: 576px) {
+  #filtro-estado {
+    width: 100% !important;
+  }
+
+  .form-label {
+    text-align: center;
+  }
+}

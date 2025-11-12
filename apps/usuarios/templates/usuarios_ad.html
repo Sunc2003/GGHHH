@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'usuarios/usuarios_ad.css' %}">
+<style>
+/* Paginación: estilos negro/blanco */
+.pagination .page-item .page-link {
+  color: #000 !important;
+  background-color: #fff !important;
+  border: 1px solid #000 !important;
+  transition: background 0.2s, color 0.2s;
+}
+
+.pagination .page-item.active .page-link,
+.pagination .page-item .page-link:hover,
+.pagination .page-item .page-link:focus {
+  color: #fff !important;
+  background-color: #000 !important;
+  border-color: #000 !important;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #aaa !important;
+  background-color: #fff !important;
+  border-color: #ddd !important;
+  cursor: not-allowed;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <h3 class="text-center mb-4">Listado de Usuarios AD</h3>
+
+  <!-- Filtros -->
+  <form method="get" class="row mb-4 g-3 align-items-end">
+    <div class="col-md-4">
+      <label for="q" class="form-label">Nombre o Username</label>
+      <input type="text" class="form-control" name="q" id="q" value="{{ filtro_nombre|default_if_none:'' }}" placeholder="Ej: juanperez">
+    </div>
+    <div class="col-md-4">
+      <label for="usuario_ad" class="form-label">Usuario AD</label>
+      <input type="text" class="form-control" name="usuario_ad" id="usuario_ad" value="{{ filtro_usuario_ad|default_if_none:'' }}" placeholder="Ej: jdoe">
+    </div>
+    <div class="col-md-3">
+      <label for="area" class="form-label">Área</label>
+      <select name="area" id="area" class="form-select">
+        <option value="">-- Todas las áreas --</option>
+        {% for area in areas %}
+          <option value="{{ area.id }}" {% if filtro_area == area.id|stringformat:"s" %}selected{% endif %}>{{ area.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-1">
+      <button type="submit" class="btn btn-dark w-100">Buscar</button>
+    </div>
+  </form>
+
+  <!-- Tabla -->
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover">
+      <thead class="table-dark text-center">
+        <tr>
+          <th style="width: 4%;">#</th>
+          <th style="min-width: 150px;" class="text-start">Nombre</th>
+          <th style="min-width: 150px;" class="text-start">Cargo</th>
+          <th style="min-width: 120px;" class="text-start">Usuario AD</th>
+          <th style="min-width: 100px;" class="text-start">Office</th>
+          <th style="min-width: 100px;" class="text-start">SAP</th>
+          <th style="min-width: 100px;" class="text-start">Equipo</th>
+          <th style="min-width: 100px;" class="text-start">Impresora</th>
+          <th style="min-width: 100px;" class="text-start">Móvil</th>
+          <th style="width: 6%;" class="text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for usuario in usuarios %}
+          <tr>
+            <td class="text-center">{{ forloop.counter0|add:page_obj.start_index }}</td>
+            <td class="text-start">{{ usuario.get_full_name|title }}</td>
+            <td class="text-start">{{ usuario.cargo.nombre|default:"-" }}</td>
+            <td class="text-start">{{ usuario.usuario_ad|default:"-" }}</td>
+            <td class="text-start">{{ usuario.usuario_office|default:"-" }}</td>
+            <td class="text-start">{{ usuario.usuario_sap|default:"-" }}</td>
+            <td class="text-start">{{ usuario.equipo_a_cargo|default:"-" }}</td>
+            <td class="text-start">{{ usuario.impresora_a_cargo|default:"-" }}</td>
+            <td class="text-start">{{ usuario.movil|default:"-" }}</td>
+            <td class="text-center">
+              <a href="{% url 'editar_perfil_usuario' usuario.pk %}" class="btn btn-sm btn-outline-dark">Perfil</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="10" class="text-center text-muted py-3">No se encontraron resultados.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginación -->
+  {% if is_paginated %}
+    <nav class="mt-4">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filtro_nombre %}&q={{ filtro_nombre }}{% endif %}{% if filtro_usuario_ad %}&usuario_ad={{ filtro_usuario_ad }}{% endif %}{% if filtro_area %}&area={{ filtro_area }}{% endif %}">&laquo;</a>
+          </li>
+        {% endif %}
+
+        {% for num in paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}{% if filtro_nombre %}&q={{ filtro_nombre }}{% endif %}{% if filtro_usuario_ad %}&usuario_ad={{ filtro_usuario_ad }}{% endif %}{% if filtro_area %}&area={{ filtro_area }}{% endif %}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filtro_nombre %}&q={{ filtro_nombre }}{% endif %}{% if filtro_usuario_ad %}&usuario_ad={{ filtro_usuario_ad }}{% endif %}{% if filtro_area %}&area={{ filtro_area }}{% endif %}">&raquo;</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

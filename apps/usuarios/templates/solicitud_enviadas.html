@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load permisos_tags %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4 text-center text-dark fw-bold">Solicitudes Enviadas</h2>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle text-center shadow-sm">
+      <thead class="table-light">
+        <tr class="text-uppercase small">
+          <th>ID</th>
+          <th>Empresa</th>
+          <th>Tipo</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Mensaje</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for solicitud in solicitudes_enviadas %}
+        {% with estado=solicitud.estado|lower %}
+        <tr>
+          <td>{{ solicitud.id }}</td>
+          <td>{{ solicitud.get_empresa_display }}</td>
+          <td>
+            {{ solicitud.get_tipo_solicitud_display }}
+            {% if solicitud.codigo_extra and solicitud.tipo_solicitud in "activacion,modificacion" %}
+              <br>
+              <small class="text-muted">
+                {% if solicitud.codigo_extra == "sin_sku" %}
+                  (Código: Sin SKU)
+                {% elif solicitud.codigo_extra == "sin_codigo" %}
+                  (Código: Sin Código)
+                {% else %}
+                  (Código: {{ solicitud.codigo_extra }})
+                {% endif %}
+              </small>
+            {% endif %}
+          </td>
+          <td>
+            {% if estado == 'pendiente' %}
+              <span class="badge bg-warning text-dark">Pendiente</span>
+            {% elif estado == 'creado' %}
+              <span class="badge bg-success">Respondido</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ solicitud.estado }}</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if solicitud.fecha_respuesta %}
+              {{ solicitud.fecha_respuesta|date:"d/m/Y" }}
+            {% else %}
+              {{ solicitud.fecha_creacion|date:"d/m/Y" }}
+            {% endif %}
+          </td>
+          <td>
+            {% if solicitud.fecha_respuesta %}
+              {{ solicitud.fecha_respuesta|date:"H:i" }}
+            {% else %}
+              {{ solicitud.fecha_creacion|date:"H:i" }}
+            {% endif %}
+          </td>
+
+          <td class="text-start">
+            {% if solicitud.comentario_estado %}
+              {{ solicitud.comentario_estado }}
+            {% endif %}
+          </td>
+        </tr>
+        {% endwith %}
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">No hay solicitudes enviadas.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

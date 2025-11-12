@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4 socios-view">
+  <h4 class="mb-3 fw-semibold text-dark">
+    Socios de Negocio <small class="text-muted">(Clientes)</small>
+  </h4>
+
+  <!-- Buscador -->
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-12 col-sm-6">
+      <input type="text" name="q" class="form-control border-platino"
+             placeholder="Buscar por código o nombre" value="{{ q }}">
+    </div>
+    <div class="col-12 col-sm-3 d-flex gap-2">
+      <button class="btn btn-platino flex-fill" type="submit">Buscar</button>
+      <a href="{% url 'socios_lista' %}" class="btn btn-outline-platino flex-fill">Limpiar</a>
+    </div>
+  </form>
+
+  {% if error %}
+    <div class="alert alert-platino border-platino">{{ error }}</div>
+  {% endif %}
+
+  {% if socios %}
+    <div class="table-responsive">
+      <table class="table table-hover table-bordered align-middle mb-0">
+        <thead class="table-platino sticky-top">
+          <tr>
+            <th class="fw-semibold">Código</th>
+            <th class="fw-semibold">Nombre</th>
+            <th class="text-end fw-semibold">Límite Crédito</th>
+            <th class="text-end fw-semibold">Saldo</th>
+            <th class="text-end fw-semibold">Crédito Disp.</th>
+            <th class="text-center fw-semibold">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in socios %}
+            <tr>
+              <td class="font-monospace fw-semibold">{{ s.CardCode }}</td>
+              <td class="text-truncate" style="max-width:220px;" title="{{ s.CardName }}">
+                {{ s.CardName }}
+              </td>
+              <td class="text-end">${{ s.CreditLine|floatformat:0 }}</td>
+              <td class="text-end">${{ s.Balance|floatformat:0 }}</td>
+              <td class="text-end"><strong>${{ s.CreditoDisponible|floatformat:0 }}</strong></td>
+              <td class="text-center">
+                <a class="btn btn-sm btn-outline-platino"
+                   href="{% url 'socio_detalle' s.CardCode %}?next={{ request.get_full_path }}">
+                  Ver detalle
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif q %}
+    <div class="alert alert-secondary border-platino">Sin resultados para “{{ q }}”.</div>
+  {% else %}
+    <p class="text-muted fst-italic">Ingresa un término de búsqueda para listar clientes.</p>
+  {% endif %}
+</div>
+
+<style>
+/* 🎨 Paleta platino */
+:root {
+  --platino: #e5e4e2;
+  --platino-dark: #b3b3b3;
+  --platino-hover: #d6d6d6;
+  --text-dark: #1e1e1e;
+}
+
+/* Botones */
+.btn-platino {
+  background-color: var(--platino);
+  color: var(--text-dark);
+  border: 1px solid var(--platino-dark);
+  border-radius: 4px;
+  font-weight: 600;
+  transition: all .2s ease;
+}
+.btn-platino:hover {
+  background-color: var(--platino-hover);
+  border-color: var(--text-dark);
+}
+
+.btn-outline-platino {
+  background-color: #fff;
+  color: var(--text-dark);
+  border: 1px solid var(--platino-dark);
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all .2s ease;
+}
+.btn-outline-platino:hover {
+  background-color: var(--platino-hover);
+  color: var(--text-dark);
+  border-color: var(--text-dark);
+}
+
+/* Inputs */
+.border-platino {
+  border: 1px solid var(--platino-dark)!important;
+}
+
+/* Alertas */
+.alert-platino {
+  background-color: var(--platino);
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+/* Tablas */
+.table-platino th {
+  background-color: var(--platino);
+  color: var(--text-dark);
+  border: 1px solid var(--platino-dark);
+}
+.table-bordered { border-color: var(--platino-dark); }
+.table-hover tbody tr:hover { background-color: #f9f9f9; }
+
+/* Responsividad extra */
+@media (max-width: 768px) {
+  .socios-view h4 { font-size: 1.1rem; }
+  .socios-view .table th,
+  .socios-view .table td { font-size: 0.85rem; padding: .4rem; }
+  .socios-view .btn-sm { font-size: 0.75rem; padding: .2rem .4rem; }
+}
+</style>
+{% endblock %}

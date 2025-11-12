@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<style>
+:root {
+  --platino: #e5e4e2;
+  --platino-dark: #b3b3b3;
+  --platino-hover: #d6d6d6;
+  --ink: #1c1c1c;
+  --muted: #6c757d;
+  --line: #dee2e6;
+  --fill: #ffffff;
+  --fill-soft: #f8f9fa;
+}
+
+.page-header {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 2px solid var(--platino);
+  padding-bottom: .75rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;
+}
+.page-title { margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--ink); }
+.ghost-btn {
+  padding: .45rem .9rem; border: 1px solid var(--platino-dark);
+  background: var(--fill); text-decoration: none; color: var(--ink);
+  border-radius: 6px; font-size: .9rem; font-weight: 500;
+  transition: all .2s ease;
+}
+.ghost-btn:hover { background: var(--platino-hover); color: var(--ink); }
+
+.card {
+  background: var(--fill); border: 1px solid var(--platino-dark); border-radius: 8px;
+  padding: 1rem; margin-bottom: 1.25rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.section-title {
+  margin: 0 0 .85rem 0; font-weight: 700; font-size: 1rem;
+  color: var(--ink); text-transform: uppercase; letter-spacing: .5px;
+}
+
+/* Tablas */
+.data-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.data-table thead th {
+  background: var(--platino);
+  font-weight: 600; padding: .6rem .7rem;
+  border: 1px solid var(--platino-dark); text-align: center; color: var(--ink);
+}
+.data-table tbody td {
+  border: 1px solid var(--platino-dark); padding: .55rem .7rem; text-align: center;
+}
+.data-table tbody tr:nth-child(odd) { background: #fcfcfc; }
+.data-table tbody tr:hover { background: var(--platino-hover); }
+.data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Tabs */
+.nav-tabs .nav-link {
+  border: 1px solid var(--platino-dark); border-bottom: none;
+  color: var(--muted); font-weight: 600; background: var(--platino);
+  padding: .6rem 1rem;
+}
+.nav-tabs .nav-link.active {
+  background: var(--fill); color: var(--ink);
+  border-top: 2px solid var(--platino-dark);
+  font-weight: 700;
+}
+.nav-tabs { margin-bottom: 1rem; border-bottom: 1px solid var(--platino-dark); overflow-x: auto; flex-wrap: nowrap; }
+.nav-tabs .nav-item { white-space: nowrap; }
+
+/* Guías Pendientes - Cuadro limpio */
+.guia-block {
+  border: 1px solid var(--platino-dark);
+  border-radius: 10px;
+  background: var(--fill);
+  padding: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+/* Encabezado de cada guía */
+.guia-header-box {
+  background: var(--platino);
+  border-bottom: 1px solid var(--platino-dark);
+  border-radius: 10px 10px 0 0;
+  padding: 0.8rem 1rem;
+  cursor: pointer;               /* <- permite click para abrir/cerrar */
+}
+
+/* Contenido del encabezado */
+.guia-numero {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+.guia-numero span { color: #003366; } /* Azul profesional */
+.guia-cliente {
+  font-size: .9rem;
+  color: var(--muted);
+  margin: 0;
+}
+.guia-fecha {
+  font-size: .9rem;
+  color: var(--ink);
+  font-weight: 500;
+  background: var(--fill-soft);
+  border: 1px solid var(--platino-dark);
+  border-radius: 6px;
+  padding: 0.3rem 0.75rem;
+}
+
+/* Toggle chevron */
+.guia-toggle {
+  display: inline-flex; align-items: center; gap: .5rem;
+}
+.guia-toggle .chev {
+  display: inline-block;
+  transition: transform .2s ease;
+}
+.guia-block.is-open .guia-toggle .chev {
+  transform: rotate(90deg);
+}
+
+/* Cuerpo colapsable con transición suave */
+.guia-body {
+  border-top: 1px solid var(--platino-dark);
+  padding: 0 1rem;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height .25s ease, opacity .2s ease;
+}
+.guia-block.is-open .guia-body {
+  padding: 1rem;
+  max-height: 1000px;  /* suficiente para tablas medianas */
+  opacity: 1;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .page-header { flex-direction: column; align-items: flex-start; }
+  .page-title { font-size: 1.25rem; }
+  .nav-tabs { font-size: 0.9rem; }
+  .table-responsive { overflow-x: auto; }
+}
+</style>
+
+<div class="container py-4">
+  <div class="page-header">
+    <h4 class="page-title">Detalle del Cliente</h4>
+    <a href="{{ request.GET.next|default:request.META.HTTP_REFERER|default:'#' }}" class="ghost-btn">
+      <i class="fas fa-arrow-left"></i> Volver a la lista
+    </a>
+  </div>
+
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% else %}
+    <!-- Información general -->
+    <div class="card">
+      <h5 class="section-title">Información General</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered table-sm mb-0">
+          <tr><th>Código</th><td>{{ detalle.socio.CardCode }}</td></tr>
+          <tr><th>Nombre</th><td>{{ detalle.socio.CardName }}</td></tr>
+          <tr><th>Límite de Crédito</th><td>$ {{ detalle.socio.CreditLine|puntos_miles }}</td></tr>
+          <tr><th>Saldo</th><td>$ {{ detalle.socio.Balance|puntos_miles }}</td></tr>
+          <tr><th>Crédito Disponible</th><td>$ {{ detalle.socio.CreditoDisponible|puntos_miles }}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="detalleTabs">
+      <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#direcciones">Direcciones</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#ov">OV Abiertas</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#guias">Guías Pendientes</a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#facturas">Facturas Vencidas</a></li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Direcciones -->
+      <div class="tab-pane fade show active" id="direcciones">
+        <div class="card">
+          <h5 class="section-title">Direcciones</h5>
+          {% if detalle.direcciones %}
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Nombre</th><th>Tipo</th><th>Calle</th><th>Ciudad</th><th>Comuna</th><th>Región</th><th>País</th><th>Zip</th></tr>
+                </thead>
+                <tbody>
+                  {% for d in detalle.direcciones %}
+                  <tr>
+                    <td>{{ d.NombreDireccion }}</td>
+                    <td>{% if d.Tipo == 'B' %}Facturación{% elif d.Tipo == 'S' %}Despacho{% else %}{{ d.Tipo }}{% endif %}</td>
+                    <td>{{ d.Calle }}</td><td>{{ d.Ciudad }}</td><td>{{ d.Comuna }}</td>
+                    <td>{{ d.Region }}</td><td>{{ d.Pais }}</td><td>{{ d.ZipCode }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}<p class="text-muted">Sin direcciones registradas.</p>{% endif %}
+        </div>
+      </div>
+
+      <!-- OV Abiertas -->
+      <div class="tab-pane fade" id="ov">
+        <div class="card">
+          <h5 class="section-title">Órdenes de Venta Abiertas</h5>
+          {% if ov_abiertas %}
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead><tr><th>N° Doc</th><th>Fecha</th><th>Vencimiento</th><th>Total Neto</th><th>Moneda</th><th>Vendedor</th><th></th></tr></thead>
+                <tbody>
+                  {% for ov in ov_abiertas %}
+                  <tr>
+                    <td>{{ ov.DocNum }}</td><td>{{ ov.DocDate }}</td><td>{{ ov.DocDueDate }}</td>
+                    <td class="num">$ {{ ov.TotalNeto|puntos_miles }}</td>
+                    <td>{{ ov.DocCur }}</td><td>{{ ov.Vendedor }}</td>
+                    <td>
+                      <a href="{% url 'ov_detalle' cardcode=cardcode docnum=ov.DocNum %}?next={{ request.get_full_path }}"
+                         class="btn btn-sm btn-outline-dark">Ver detalle</a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}<p class="text-muted">No hay órdenes de venta abiertas.</p>{% endif %}
+        </div>
+      </div>
+
+      <!-- Guías Pendientes Clientes (con abrir/cerrar por guía) -->
+      <div class="tab-pane fade" id="guias">
+        <div class="card">
+          <h5 class="section-title">Guías Pendientes de Facturar</h5>
+
+          {% if guias_pendientes %}
+            {% regroup guias_pendientes by DocNum as grouped_guias %}
+            {% for grupo in grouped_guias %}
+              <div class="guia-block js-guia">
+                <!-- Encabezado de guía (click para abrir/cerrar) -->
+                <div class="guia-header-box js-toggle">
+                  <div class="row align-items-center">
+                    <div class="col-md-8 col-sm-12 guia-toggle">
+                      <span class="chev">➤</span>
+                      <div>
+                        <h6 class="guia-numero mb-1">
+                          <i class="fa-regular fa-file-lines me-1 text-primary"></i>
+                          Guía <span>#{{ grupo.grouper }}</span>
+                        </h6>
+                        <p class="guia-cliente mb-0">
+                          <i class="fa-regular fa-user me-1"></i>
+                          {{ grupo.list.0.CardName|default:"Sin nombre" }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-4 col-sm-12 text-md-end mt-2 mt-md-0">
+                      <span class="guia-fecha">
+                        <i class="fa-regular fa-calendar me-1"></i>
+                        {{ grupo.list.0.DocDate }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cuerpo colapsable -->
+                <div class="guia-body">
+                  <div class="table-responsive">
+                    <table class="data-table mb-0">
+                      <thead>
+                      <tr>
+                        <th style="width:15%;">Código</th>
+                        <th>Descripción</th>
+                        <th style="width:10%;">Cantidad</th>
+                        <th style="width:10%;">Pendiente</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for item in grupo.list %}
+                      <tr>
+                        <td class="fw-semibold">{{ item.ItemCode }}</td>
+                        <td class="text-start">{{ item.Dscription }}</td>
+                        <td class="num">{{ item.Quantity|puntos_miles }}</td>
+                        <td class="num">{{ item.OpenQty|puntos_miles }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+
+                    </table>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted">No hay guías pendientes de facturar.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Facturas Vencidas -->
+      <div class="tab-pane fade" id="facturas">
+        <div class="card">
+          <h5 class="section-title">Facturas Vencidas</h5>
+          {% if facturas_vencidas %}
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead><tr><th>N° Factura</th><th>Fecha</th><th>Vencimiento</th><th>Saldo</th><th>Moneda</th></tr></thead>
+                <tbody>
+                  {% for fac in facturas_vencidas %}
+                  <tr>
+                    <td>{{ fac.DocNum }}</td><td>{{ fac.DocDate }}</td><td>{{ fac.DocDueDate }}</td>
+                    <td class="num">$ {{ fac.Saldo|puntos_miles }}</td><td>{{ fac.DocCur }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}<p class="text-muted">No hay facturas vencidas.</p>{% endif %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.js-guia').forEach(function(card){
+    var header = card.querySelector('.js-toggle');
+    header.addEventListener('click', function(){
+
+      card.classList.toggle('is-open');
+    });
+  });
+});
+</script>
+{% endblock %}

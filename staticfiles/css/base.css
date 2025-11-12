@@ -1,0 +1,219 @@
+html, body {
+    font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    background: #f6f7fa;
+    color: #212529;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+ 
+/* ======= NAVBAR STYLES ======= */
+.navbar {
+    background: url('../img/fondoo.png') !important;
+    box-shadow: 0 2px 6px rgb(255, 254, 254);
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+ 
+.navbar-brand {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: #fff !important;
+    margin-right: 2rem;
+    transition: color 0.2s;
+}
+ 
+.navbar-brand:hover {
+    color: #20c6f9 !important;
+}
+ 
+.navbar-dark .navbar-nav .nav-link {
+    color: #e5e7eb !important;
+    font-size: 1.12rem;
+    font-weight: 500;
+    margin-left: 1.7rem;
+    margin-right: 0.2rem;
+    transition: color 0.17s, border-bottom 0.15s;
+    padding-bottom: 2px;
+    position: relative;
+}
+ 
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link:focus {
+    color: #20c6f9 !important;
+    text-decoration: none;
+    border-bottom: 2px solid #20c6f9;
+}
+ 
+.navbar-dark .navbar-nav .nav-link.active,
+.navbar-dark .navbar-nav .nav-link[aria-current="page"] {
+    color: #fff !important;
+    font-weight: 600;
+    border-bottom: 2px solid #00bcd4;
+}
+ 
+.navbar-nav {
+    align-items: center;
+}
+ 
+form[action*="logout"] .btn-link.nav-link {
+    color: #e5e7eb !important;
+    font-weight: 500;
+    border: none;
+    background: none;
+    padding: 0;
+    margin-left: 1.7rem;
+    transition: color 0.2s, border-bottom 0.15s;
+}
+ 
+form[action*="logout"] .btn-link.nav-link:hover {
+    color: #f36f6f !important;
+    border-bottom: 2px solid #f36f6f;
+}
+ 
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+    .navbar-brand {
+        margin-bottom: 1rem;
+    }
+    .navbar-nav {
+        margin-top: 1rem;
+        margin-left: 0 !important;
+    }
+    .navbar-dark .navbar-nav .nav-link,
+    form[action*="logout"] .btn-link.nav-link {
+        margin-left: 0;
+        margin-bottom: 0.7rem;
+        font-size: 1.04rem;
+    }
+}
+ 
+@media (max-width: 575.98px) {
+    .navbar {
+        border-radius: 0;
+    }
+    .navbar-brand {
+        font-size: 1.4rem;
+    }
+}
+ 
+/* ======= MAIN CONTENT ======= */
+main {
+    flex: 1;
+    padding: 2.2rem 0 1rem 0;
+}
+ 
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+ 
+/* ======= FOOTER ======= */
+.site-footer {
+    background: url('../img/fondoo.png');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    border-top: 3px solid #fff;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    min-height: 180px;
+    box-shadow: 0 2px 18px 0 rgba(65,0,0,0.09) inset;
+}
+
+.site-footer .footer-contact {
+    font-family: inherit;
+    color: #fff;
+}
+
+.site-footer .footer-link {
+    color: #fff;
+    text-decoration: underline dotted;
+    transition: color 0.18s;
+    word-break: break-all;
+}
+.site-footer .footer-link:hover {
+    color: #ffd700;
+    text-decoration: underline;
+}
+
+.site-footer p.fw-bold {
+    font-family: inherit;
+    letter-spacing: 0.2px;
+    color: #fff;
+    margin-bottom: 0.45rem;
+    font-size: 1.3rem;
+}
+
+@media (max-width: 767px) {
+    .site-footer .container {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    .site-footer .footer-logo {
+        margin-bottom: 1rem;
+    }
+    .site-footer .footer-contact {
+        margin-left: 0;
+    }
+}
+/* ======= SCROLLBAR ======= */
+::-webkit-scrollbar {
+    width: 9px;
+}
+::-webkit-scrollbar-track {
+    background: #f3f3f3;
+    border-radius: 5px;
+}
+::-webkit-scrollbar-thumb {
+    background: #b1b1b1;
+    border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #747474;
+}
+ 
+/* ======= FORMS ======= */
+.form-control {
+    border-radius: 0.25rem;
+    border: 1px solid #ced4da;
+    padding: 0.44rem 0.75rem;
+}
+.form-control:focus {
+    border-color: #20c6f9;
+    box-shadow: 0 0 0 0.17rem rgba(32, 198, 249, 0.19);
+}
+ 
+.mt-5 {
+    margin-top: 3rem !important;
+}
+.py-4 {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+}
+ 
+/* Animación toggler */
+.navbar-toggler {
+    transition: all 0.22s;
+}
+.navbar-toggler:hover {
+    opacity: 0.8;
+}
+ 
+/* ======= UTILS ======= */
+.text-secondary {
+    color: #7a828a !important;
+}
+.text-info {
+    color: #20c6f9 !important;
+}
+

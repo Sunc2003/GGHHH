@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/buscador_productos.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <div class="search-card">
+    <form method="get" class="row g-2 align-items-center">
+      <div class="col-md-4 col-12">
+        <input type="text" name="q" placeholder="Buscar producto..."
+               value="{% firstof termino request.GET.q '' %}" class="form-control">
+      </div>
+      <div class="col-auto form-check ms-2">
+        <input type="checkbox" name="con_stock" id="con_stock" class="form-check-input"
+               {% if filtrar_stock or request.GET.con_stock %}checked{% endif %}>
+        <label for="con_stock" class="form-check-label">Solo con stock</label>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary">
+          <i class="fa fa-search"></i> Buscar
+        </button>
+      </div>
+      <div class="col-auto">
+        <a href="{% url 'buscar_productos_ui' %}" class="btn btn-secondary">
+          <i class="fa fa-times"></i> Limpiar
+        </a>
+      </div>
+    </form>
+  </div>
+
+  {% if request.GET %}
+    {% if resultados %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th class="num">Stock Total</th>
+          <th class="num">PMV</th>
+          <th>Detalles</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for producto in resultados %}
+          <tr>
+            <td data-label="Código">{{ producto.Codigo }}</td>
+            <td data-label="Descripción">{{ producto.Descripcion }}</td>
+            <td class="num" data-label="Stock Total">{{ producto.StockTotal|puntos_miles }}</td>
+            <td class="num" data-label="PMV">$ {{ producto.PrecioMinVta|puntos_miles }}</td>
+            <td class="text-center" data-label="Detalles">
+              <a href="{% url 'obtener_detalle_producto' producto.Codigo %}?{{ request.GET.urlencode }}"
+                 class="btn btn-primary btn-sm" style="min-width:88px">
+                Ver detalles
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p class="alert alert-warning" style="border:1px solid var(--line); border-radius:0;">
+    No hay resultados para tu búsqueda.
+  </p>
+{% endif %}
+  {% endif %}
+</div>
+{% endblock %}

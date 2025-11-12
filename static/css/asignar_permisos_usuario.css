@@ -1,0 +1,201 @@
+#asignar-permisos-panel {
+    max-width: 850px;
+    margin: 40px auto 48px auto;
+    padding: 0;
+}
+#asignar-permisos-panel .card {
+    border: 1px solid #222 !important;
+    background: #fff !important;
+    border-radius: 4px !important;
+    margin-bottom: 2rem !important;
+}
+#asignar-permisos-panel .card-title {
+    font-size: 1.35rem !important;
+    font-weight: 700 !important;
+    color: #111 !important;
+    margin-bottom: 1.1rem !important;
+    text-align: left;
+}
+
+/* CUSTOM CHECKBOX */
+#asignar-permisos-panel .custom-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: .7rem;
+    cursor: pointer;
+    user-select: none;
+}
+#asignar-permisos-panel .custom-checkbox input[type="checkbox"] {
+    opacity: 0;
+    position: absolute;
+    width: 0; height: 0;
+}
+#asignar-permisos-panel .checkmark {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #111;
+    border-radius: 4px;
+    background: #fff;
+    margin-right: 9px;
+    display: inline-block;
+    position: relative;
+    transition: background 0.14s;
+}
+#asignar-permisos-panel .custom-checkbox input[type="checkbox"]:checked + .checkmark {
+    background: #111;
+    border-color: #111;
+}
+#asignar-permisos-panel .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+#asignar-permisos-panel .custom-checkbox input[type="checkbox"]:checked + .checkmark:after {
+    display: block;
+}
+#asignar-permisos-panel .custom-checkbox .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 12px;
+    border: solid #fff;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+    content: "";
+    position: absolute;
+}
+
+#asignar-permisos-panel .form-check-label {
+    font-weight: 400 !important;
+    color: #111 !important;
+    font-size: .98rem !important;
+    margin-left: 0;
+    cursor: pointer;
+}
+
+#asignar-permisos-panel .btn-black {
+    display: inline-block;
+    background: #111 !important;
+    color: #fff !important;
+    border: none !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    border-radius: 4px !important;
+    padding: 0.8rem 1.6rem !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+}
+#asignar-permisos-panel .btn-black:hover,
+#asignar-permisos-panel .btn-black:focus {
+    background: #000 !important;
+    color: #fff !important;
+}
+
+#asignar-permisos-panel .text-danger.small {
+    font-size: 92% !important;
+    margin-top: 7px !important;
+    font-weight: 600 !important;
+    color: #b8001f !important;
+}
+
+/* RESPONSIVE: Tablets y celulares */
+@media (max-width: 991px) {
+  #asignar-permisos-panel {
+    max-width: 98vw;
+    margin: 24px 1vw 32px 1vw;
+    padding: 0 0.5rem;
+  }
+  #asignar-permisos-panel .card {
+    margin-bottom: 1.2rem !important;
+    padding: 0.7rem !important;
+  }
+  #asignar-permisos-panel .card-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 0.7rem !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  #asignar-permisos-panel {
+    max-width: 100vw;
+    margin: 12px 0 18px 0;
+    padding: 0 0.2rem;
+  }
+  #asignar-permisos-panel .card {
+    padding: 0.4rem !important;
+  }
+  #asignar-permisos-panel .card-title {
+    font-size: 1rem !important;
+  }
+  #asignar-permisos-panel .btn-black {
+    width: 100%;
+    padding: 0.7rem 0 !important;
+    font-size: 0.98rem !important;
+  }
+  #asignar-permisos-panel .custom-checkbox {
+    font-size: 0.97rem;
+  }
+}
+
+
+
+@media (max-width: 767.98px) {
+  .perm-box {
+    overflow-x: auto;
+  }
+  .perm-table {
+    min-width: 600px;
+    font-size: 0.97rem;
+  }
+  .perm-table thead th,
+  .perm-table tbody td {
+    padding: 8px 8px;
+    font-size: 0.97rem;
+  }
+}
+
+/* Alternativa: tabla tipo tarjeta para móviles pequeños */
+@media (max-width: 575.98px) {
+  .perm-table thead {
+    display: none;
+  }
+  .perm-table, .perm-table tbody, .perm-table tr, .perm-table td {
+    display: block;
+    width: 100%;
+  }
+  .perm-table tr {
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--line);
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  }
+  .perm-table td {
+    text-align: left;
+    padding-left: 48%;
+    position: relative;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    overflow: visible;
+    white-space: normal;
+  }
+  .perm-table td:before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0.7rem;
+    top: 0.6rem;
+    width: 44%;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+    text-align: left;
+  }
+  .perm-table td:last-child {
+    border-bottom: none;
+  }
+}

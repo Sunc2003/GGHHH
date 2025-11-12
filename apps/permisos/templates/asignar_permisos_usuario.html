@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% load static %}
+ 
+{% block extra_css %}
+<style>
+  :root{
+    --bg:#ffffff; --card:#ffffff; --text:#212529; --muted:#6c757d;
+    --line:#dee2e6; --accent:#198754; --radius:6px;
+  }
+  body{ background:var(--bg); color:var(--text); }
+  .container-wide{ max-width:1320px; }
+  @media(min-width:1400px){ .container-wide{ max-width:1440px; } }
+ 
+  .page-title{ display:flex; align-items:center; gap:10px; font-weight:600; margin:8px 0 16px; }
+ 
+  .card-clean{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); }
+  .card-clean .card-body{ padding:20px; }
+ 
+  /* Campos perfil */
+  .fields-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width: 767.98px){ .fields-grid{ grid-template-columns:1fr; } }
+  .form-label{ font-weight:500; margin-bottom:6px; }
+  input, select, textarea{
+    background:#fff !important; border:1px solid var(--line) !important; color:var(--text) !important;
+    border-radius:var(--radius) !important; padding:8px 10px !important; height:38px; box-shadow:none !important; width:100%;
+  }
+  textarea{ height:auto; min-height:84px; }
+  .text-danger.small{ color:#dc3545 !important; border-left:3px solid #dc3545; padding:4px 8px; font-size:.875rem; }
+ 
+  /* Permisos */
+  .perm-wrap{ margin-top:24px; }
+  .perm-head{
+    display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;
+    padding:12px; border:1px solid var(--line); border-bottom:none; border-radius:var(--radius) var(--radius) 0 0; background:#f8f9fa;
+  }
+  .perm-title{ margin:0; font-weight:600; }
+  .perm-tools{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .perm-tools .form-control{ min-width:220px; }
+  .perm-tools button{ flex-shrink:0; }
+ 
+  .perm-box{ border:1px solid var(--line); border-radius:0 0 var(--radius) var(--radius); overflow:auto; background:#fff; }
+  .perm-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+  .perm-table thead th{
+    background:#f1f3f5; font-weight:600; text-align:left;
+    border-bottom:1px solid var(--line); padding:10px 12px; font-size:.95rem; white-space:nowrap;
+  }
+  .perm-table tbody td{
+    border-bottom:1px solid var(--line); padding:10px 12px; vertical-align:middle;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .perm-col-check{ width:68px; text-align:center; }
+  .perm-col-code{ width:180px; }
+  .perm-col-name{ width:320px; }
+ 
+  /* Checkbox visible */
+  .form-check-input{
+    width:18px; height:18px; margin:0; cursor:pointer;
+    accent-color: var(--accent);
+    border:1px solid #cfd4da !important;
+    border-radius:3px; box-shadow:none;
+  }
+  .form-check-input:checked{
+    background-color: var(--accent) !important;
+    border-color: var(--accent) !important;
+  }
+ 
+  .badge-muted{
+    background:#eef2f4; border:1px solid var(--line); color:#495057;
+    padding:.35rem .55rem; font-weight:500; border-radius:999px;
+  }
+ 
+  .sticky-actions{ position:sticky; bottom:0; background:#fff; border-top:1px solid var(--line); padding:12px; display:flex; justify-content:flex-end; gap:8px; }
+  .btn-primary{ background:#2f3235; border-color:#2f3235; font-weight:600; border-radius:var(--radius); }
+  .btn-primary:hover{ background:#232527; border-color:#232527; }
+ 
+  /* Achicar solo el campo "Equipo a cargo" */
+  textarea#id_equipo_a_cargo {
+      min-height: 38px !important;
+      height: 38px !important;
+      max-height: 60px;
+      resize: none;
+      overflow-y: hidden;
+  }
+
+  /* Responsividad */
+  @media(max-width: 575.98px){
+    .perm-tools{ flex-direction:column; align-items:stretch; }
+    .perm-tools .form-control{ width:100%; min-width:unset; }
+    .perm-tools button{ width:100%; }
+  }
+</style>
+{% endblock %}
+ 
+{% block content %}
+<div class="container container-wide py-3">
+  <h4 class="page-title"><i class="fa-solid fa-user-pen"></i> Editar perfil y asignar permisos</h4>
+ 
+  <form method="post" novalidate>
+    {% csrf_token %}
+ 
+    <!-- Datos del usuario -->
+    <div class="card card-clean mb-4">
+      <div class="card-body">
+        <h6 class="mb-3">Datos del usuario</h6>
+        <div class="fields-grid">
+          {% for field in form.visible_fields %}
+            {% if field.name != 'permisos_directos' %}
+              <div class="mb-2">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                  <div class="text-danger small">{{ field.errors.0 }}</div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+ 
+    <!-- Permisos -->
+    <div class="perm-wrap">
+      <div class="perm-head">
+        <div class="d-flex align-items-center gap-2">
+          <h6 class="perm-title mb-0">Permisos directos</h6>
+          <span class="badge-muted"><span id="perm-count">0</span> seleccionados</span>
+        </div>
+        <div class="perm-tools">
+          <input id="perm-search" type="search" class="form-control form-control-sm" placeholder="Buscar por código o nombre…">
+          <button type="button" id="btn-clear" class="btn btn-outline-secondary btn-sm">Limpiar selección</button>
+        </div>
+      </div>
+ 
+      <div class="perm-box">
+        <table class="perm-table">
+          <thead>
+            <tr>
+              <th class="perm-col-check">Sel.</th>
+              <th class="perm-col-code">Código</th>
+              <th class="perm-col-name">Nombre</th>
+              <th>Descripción</th>
+            </tr>
+          </thead>
+          <tbody id="perm-body">
+            {% with qs=form.fields.permisos_directos.queryset selected_ids=form.permisos_directos.value %}
+              {% for p in qs %}
+              <tr data-search="{{ p.codigo|lower }} {{ p.nombre|lower }} {{ p.descripcion|default:''|lower }}">
+                <td class="perm-col-check text-center">
+                  <input class="form-check-input perm-check"
+                         type="checkbox"
+                         name="permisos_directos"
+                         value="{{ p.pk }}"
+                         {% if selected_ids and p.pk|stringformat:"s" in selected_ids|stringformat:"s" %}checked{% endif %}>
+                </td>
+                <td class="perm-col-code"><code>{{ p.codigo }}</code></td>
+                <td class="perm-col-name">{{ p.nombre }}</td>
+                <td>{{ p.descripcion|default:"—" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-muted text-center py-3">No hay permisos disponibles.</td></tr>
+              {% endfor %}
+            {% endwith %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+ 
+    <!-- Acciones -->
+    <div class="sticky-actions mt-3">
+      <a href="{% url 'usuarios_ad' %}" class="btn btn-outline-secondary">Cancelar</a>
+      <!-- Abrir modal -->
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmModal">
+        Guardar cambios
+      </button>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-md" style="max-width: 600px;">
+        <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden">
+          <div class="row g-0">
+            
+            <!-- Columna imagen -->
+            <div class="col-5 d-none d-md-flex align-items-center justify-content-center bg-light">
+              <img src="{% static 'img/ggh.png' %}" alt="Confirmación" class="img-fluid p-3" style="max-height:180px; object-fit:contain;">
+            </div>
+            
+            <!-- Columna texto -->
+            <div class="col-12 col-md-7 d-flex flex-column">
+              <div class="modal-header border-0 pb-2">
+                <h6 class="modal-title fw-bold text-dark" id="confirmModalLabel">
+                  <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> Confirmar cambios
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+              </div>
+
+              <div class="modal-body flex-grow-1 d-flex align-items-center">
+                <p class="mb-0 text-muted small">
+                  ¿Está seguro que desea <span class="fw-semibold text-dark">guardar los cambios</span> en el perfil y los permisos?
+                </p>
+              </div>
+
+              <div class="modal-footer border-0 pt-0 justify-content-end">
+                <button type="button" class="btn btn-outline-secondary btn-sm px-4" data-bs-dismiss="modal" style="border-radius:6px;">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn btn-success btn-sm px-4" style="border-radius:6px;">
+                  Sí, guardar
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</div>
+ 
+<script>
+  (function(){
+    const body = document.getElementById('perm-body');
+    const search = document.getElementById('perm-search');
+    const clearBtn = document.getElementById('btn-clear');
+    const count = document.getElementById('perm-count');
+ 
+    const updateCount = () => count.textContent = body.querySelectorAll('.perm-check:checked').length;
+    const filterRows = (term) => {
+      const t = term.trim().toLowerCase();
+      for (const tr of body.querySelectorAll('tr')) {
+        const hay = tr.getAttribute('data-search') || '';
+        tr.style.display = hay.includes(t) ? '' : 'none';
+      }
+    };
+ 
+    updateCount();
+    body.addEventListener('change', (e) => { if (e.target.classList.contains('perm-check')) updateCount(); });
+    search.addEventListener('input', (e) => filterRows(e.target.value));
+    clearBtn.addEventListener('click', () => { for (const cb of body.querySelectorAll('.perm-check')) cb.checked = false; updateCount(); });
+  })();
+</script>
+
+<!-- Bootstrap JS necesario para el modal -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

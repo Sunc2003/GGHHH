@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.tickets-ui {
+  --bg: #f6f7f9; --card: #ffffff; --text: #0f172a;
+  --muted: #6b7280; --border: #e5e7eb; --border-strong: #cbd5e1;
+  --primary: #0d6efd; --radius: 8px;
+  --shadow: 0 4px 12px rgba(2,6,23,.06);
+}
+.tickets-ui * { box-sizing: border-box; }
+.tickets-ui h4 { margin: 0; font-weight: 700; color: var(--text); }
+
+.tickets-header { 
+  display: flex; flex-wrap: wrap; align-items: center; 
+  justify-content: space-between; gap: 12px; margin-bottom: 14px; 
+}
+.tickets-header .badge-count {
+  font-weight: 600; color: #334155; background: #eef2f7; 
+  border: 1px solid #d7dce3; border-radius: 999px; 
+  padding: .25rem .6rem; font-size: .75rem; 
+}
+
+.filter-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 12px; margin-bottom: 16px;
+}
+.filter-row { 
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center; 
+}
+.filter-row .input-group-text { background: #f8fafc; border-color: var(--border-strong); }
+.filter-row .form-control, .filter-row .form-select { 
+  border: 1px solid var(--border-strong); 
+  border-radius: var(--radius); font-size: .9rem; padding: .35rem .5rem;
+  height: 36px; /* más compacto */
+}
+.filter-row .btn { border-radius: 6px; font-size: .85rem; padding: .35rem .75rem; }
+
+.table-frame { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.table thead th { background: #f8fafc; color: #334155; font-weight: 700; border-bottom: 1px solid var(--border); white-space: nowrap; font-size: .85rem; }
+.table tbody td { border-top: 1px solid var(--border); vertical-align: middle; font-size: .85rem; }
+
+.empty { padding: 24px 12px; color: var(--muted); }
+.empty .emoji { font-size: 2rem; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .filter-row { flex-direction: column; align-items: stretch; }
+  .filter-row .form-control, .filter-row .form-select, .filter-row .btn { width: 100%; }
+}
+</style>
+
+<div class="container py-4 tickets-ui">
+  <div class="tickets-header">
+    <div class="d-flex align-items-center gap-2">
+      <h4 class="mb-0">Bandeja de tickets</h4>
+      {% if tickets %}<span class="badge-count">{{ tickets|length }} en total</span>{% endif %}
+    </div>
+  </div>
+
+  <!-- Filtros compactos -->
+  <div class="filter-card">
+    <form class="filter-row" method="get">
+      <!-- buscador reducido -->
+      <div class="input-group" style="max-width: 220px;">
+        <span class="input-group-text">🔍</span>
+        <input name="q" value="{{ q }}" class="form-control" placeholder="Buscar...">
+      </div>
+      <select name="estado" class="form-select" style="max-width: 160px;">
+        <option value="">Todos</option>
+        <option value="abierto" {% if f_estado == 'abierto' %}selected{% endif %}>Abierto</option>
+        <option value="en_progreso" {% if f_estado == 'en_progreso' or f_estado == 'en-progreso' %}selected{% endif %}>En progreso</option>
+        <option value="cerrado" {% if f_estado == 'cerrado' or f_estado == 'resuelto' %}selected{% endif %}>Cerrado</option>
+      </select>
+      <div class="form-check ms-2">
+        <input class="form-check-input" type="checkbox" value="1" id="chkAbiertos" name="abiertos" {% if solo_abiertos == '1' %}checked{% endif %}>
+        <label class="form-check-label" for="chkAbiertos">Solo abiertos</label>
+      </div>
+      <button class="btn btn-primary">Filtrar</button>
+      <a class="btn btn-light border" href="{% url 'tickets_bandeja' %}">Limpiar</a>
+    </form>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-frame">
+    {% if tickets %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr><th>#</th><th>Título</th><th>Solicitante</th><th>Estado</th><th>Actualizado</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for t in tickets %}
+          <tr>
+            <td>#{{ t.id }}</td>
+            <td>{{ t.titulo }}</td>
+            <td>{{ t.solicitante.get_full_name|default:t.solicitante.username }}</td>
+            <td>{{ t.estado }}</td>
+            <td>{{ t.fecha_actualizacion|date:"Y-m-d H:i" }}</td>
+            <td class="text-end"><a href="{% url 'tickets_detalle' t.id %}" class="btn btn-sm btn-outline-primary">Ver</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="empty text-center"><div class="emoji mb-2">📭</div>No hay tickets.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* ======== FORMULARIO ESTILO PLATINO RESPONSIVO ======== */
+body {
+  background-color: #f5f6f8;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  color: #2c2c2c;
+}
+
+/* ======== TÍTULO ======== */
+.container h3 {
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.35rem;
+}
+
+.container h3 i {
+  color: #777;
+  font-size: 1.3rem;
+}
+
+/* ======== FORMULARIO ======== */
+.form-section {
+  background: #ffffff;
+  border: 1px solid #d9d9d9;
+  border-radius: 0.6rem;
+  padding: 2rem;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+  transition: all 0.3s ease;
+}
+
+.form-section:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+/* ======== ENCABEZADOS DE SECCIÓN ======== */
+.form-section h5 {
+  font-weight: 600;
+  color: #4e5052;
+  margin-bottom: 1rem;
+  border-left: 4px solid #b5b9bd;
+  padding-left: 0.7rem;
+}
+
+/* ======== CAMPOS ======== */
+label.form-label {
+  font-weight: 500;
+  color: #3c3c3c;
+  font-size: 0.93rem;
+}
+
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  border-radius: 0.4rem !important;
+  border: 1px solid #cfd2d6 !important;
+  background-color: #fafafa;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  padding: 0.45rem 0.6rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  background-color: #fff;
+  border-color: #b5b9bd !important;
+  box-shadow: 0 0 0 0.15rem rgba(181,185,189,0.25);
+  outline: none;
+}
+
+/* ======== CHECKBOX ======== */
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.form-check-input {
+  accent-color: #7d858c;
+  transform: scale(1.05);
+}
+
+.form-check-label {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+/* ======== BOTONES ======== */
+.btn {
+  border-radius: 0.4rem;
+  font-size: 0.9rem;
+  padding: 0.45rem 1rem;
+  transition: all 0.2s ease;
+}
+
+/* Botón Volver */
+.btn-volver {
+  background: #f0f0f0;
+  border: 1px solid #cccccc;
+  color: #333;
+}
+.btn-volver:hover {
+  background: #e6e6e6;
+}
+
+/* Botón Enviar */
+.btn-enviar {
+  background: linear-gradient(90deg, #b5b9bd, #9fa4a9);
+  border: none;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+.btn-enviar:hover {
+  background: linear-gradient(90deg, #9fa4a9, #8d9297);
+  transform: translateY(-1px);
+}
+
+/* ======== DIVISOR ======== */
+hr {
+  margin: 1.8rem 0;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* ======== RESPONSIVIDAD ======== */
+
+/* Tablets */
+@media (max-width: 992px) {
+  .form-section {
+    padding: 1.5rem;
+  }
+  .container h3 {
+    font-size: 1.2rem;
+  }
+}
+
+/* Celulares */
+@media (max-width: 576px) {
+  .container {
+    padding: 0 0.8rem;
+  }
+
+  .form-section {
+    padding: 1rem;
+  }
+
+  .container h3 {
+    font-size: 1.1rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .row > [class*="col-"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .form-check {
+    margin-top: 0.8rem;
+  }
+
+  .d-flex {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.6rem;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h3 class="mb-4"><i class="fa-solid fa-gears"></i>Solicitud de Código — Producción</h3>
+
+  <div class="form-section">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <!-- Cabecera -->
+      <h5>Información General</h5>
+      <div class="row g-3 mb-3">
+        <div class="col-md-6 col-sm-12">
+          <label class="form-label">Enviar a</label>
+          {{ header_form.receptor }}
+        </div>
+        <div class="col-md-6 col-sm-12">
+          <label class="form-label">Empresa</label>
+          {{ header_form.empresa }}
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- Detalle -->
+      <h5>Detalle del Producto</h5>
+      <div class="row g-3">
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <label class="form-label">¿Padre o Hijo?</label>
+          {{ form.tipo_padre_hijo }}
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <label class="form-label">Origen</label>
+          {{ form.origen }}
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <label class="form-label">Marca</label>
+          {{ form.marca }}
+        </div>
+
+        <div class="col-md-6 col-sm-12">
+          <label class="form-label">Nombre Proveedor</label>
+          {{ form.proveedor }}
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+          <div class="form-check mt-4">
+            {{ form.sin_sku }}
+            <label class="form-check-label">Sin SKU</label>
+          </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+          <div class="form-check mt-4">
+            {{ form.sin_codigo }}
+            <label class="form-check-label">Sin Código</label>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Descripción</label>
+          {{ form.descripcion }}
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+          <label class="form-label">Largo (cm)</label>
+          {{ form.largo }}
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <label class="form-label">Ancho (cm)</label>
+          {{ form.ancho }}
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <label class="form-label">Alto (cm)</label>
+          {{ form.alto }}
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <label class="form-label">Peso (kg)</label>
+          {{ form.peso }}
+        </div>
+
+        <div class="col-md-4 col-sm-12">
+          <label class="form-label">Costo ($)</label>
+          {{ form.costo }}
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="d-flex justify-content-center align-items-center mt-4 gap-3 flex-wrap">
+        <a href="{% url 'panel_admin_usuarios' %}" class="btn btn-volver">
+          <i class="fa-solid fa-arrow-left me-2"></i>Volver
+        </a>
+        <button type="submit" class="btn btn-enviar">
+          <i class="fa-solid fa-paper-plane me-1"></i>Enviar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+

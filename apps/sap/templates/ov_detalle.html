@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<style>
+:root {
+  --ink: #333333;         /* gris oscuro para texto */
+  --title: #111111;       /* casi negro, solo para títulos */
+  --muted: #555555;       /* gris medio */
+  --line: #d0d0d0;        /* bordes suaves */
+  --fill: #ffffff;        /* fondo */
+  --fill-soft: #f8f9fa;   /* fondo alterno */
+  --platinum: #E5E4E2;    /* platino */
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: #f7f9fb;
+}
+
+.page-header {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: .75rem; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem;
+}
+.page-title {
+  margin: 0; font-size: 1.3rem; font-weight: 600; color: var(--title);
+}
+.ghost-btn {
+  padding: .45rem .9rem; border: 1px solid var(--line);
+  background: var(--platinum); text-decoration: none; color: var(--ink);
+  border-radius: 4px; font-size: .85rem; font-weight: 600;
+  transition: all .2s ease;
+}
+.ghost-btn:hover { background: var(--title); color: #fff; border-color: var(--title); }
+
+.card {
+  background: var(--fill); border: 1px solid var(--line); border-radius: 6px;
+  padding: 1rem; margin-bottom: 1rem;
+}
+.section-title {
+  margin: 0 0 .85rem 0; font-weight: 600; font-size: .95rem;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .3px;
+  border-bottom: 2px solid var(--platinum);
+  padding-bottom: .3rem;
+}
+
+/* Datos Generales */
+.table-general {
+  width: 100%; border-collapse: collapse; font-size: .9rem;
+}
+.table-general th {
+  width: 35%; text-align: left; padding: .5rem .7rem;
+  background: var(--platinum); color: var(--muted);
+  border: 1px solid var(--line); font-weight: 600;
+}
+.table-general td {
+  padding: .5rem .7rem; border: 1px solid var(--line);
+  text-align: left; color: var(--ink);
+}
+
+/* Responsive en móvil */
+@media (max-width: 768px) {
+  .table-general, .table-general tbody, .table-general tr, .table-general td, .table-general th {
+    display: block; width: 100%;
+  }
+  .table-general tr { margin-bottom: .7rem; }
+  .table-general th {
+    background: none; border: none; padding: 0; font-weight: 600; color: var(--muted);
+  }
+  .table-general td {
+    border: none; padding: 0 0 .5rem 0;
+  }
+}
+
+/* Detalle de líneas */
+.table-responsive {
+  width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.data-table {
+  width: 100%; border-collapse: collapse; font-size: .85rem; min-width: 650px;
+}
+.data-table thead th {
+  background: var(--platinum); font-weight: 600;
+  padding: .6rem; border: 1px solid var(--line);
+  text-align: center; color: var(--muted);
+}
+.data-table tbody td {
+  border: 1px solid var(--line); padding: .55rem;
+  text-align: center; vertical-align: middle; color: var(--ink);
+}
+.data-table tbody tr:nth-child(even) { background: var(--fill-soft); }
+.data-table tbody tr:hover { background: #ededed; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+</style>
+
+
+<div class="container py-3">
+  <div class="page-header">
+    <h4 class="page-title">Detalle de Orden de Venta</h4>
+    <a href="{{ request.GET.next|default:request.META.HTTP_REFERER|default:'#' }}" class="ghost-btn">
+      <i class="fas fa-arrow-left"></i> Volver
+    </a>
+  </div>
+
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% else %}
+    <!-- Datos generales -->
+    <div class="card">
+      <h5 class="section-title">Datos Generales</h5>
+      <table class="table-general">
+        <tr><th>N° Documento</th><td>{{ ov.DocNum }}</td></tr>
+        <tr><th>Fecha</th><td>{{ ov.DocDate }}</td></tr>
+        <tr><th>Vencimiento</th><td>{{ ov.DocDueDate }}</td></tr>
+        <tr><th>Cliente</th><td>{{ ov.CardCode }} — {{ ov.CardName }}</td></tr>
+        <tr><th>Vendedor</th><td>{{ ov.Vendedor }}</td></tr>
+        <tr><th>Total Neto</th><td>$ {{ ov.TotalNeto|puntos_miles }}</td></tr>
+        <tr><th>Moneda</th><td>{{ ov.DocCur }}</td></tr>
+      </table>
+    </div>
+
+    <!-- Detalle de líneas -->
+    <div class="card">
+      <h5 class="section-title">Detalle de Líneas</h5>
+      {% if detalle_items %}
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Línea</th>
+                <th>Item</th>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>Pendiente</th>
+                <th>Moneda</th>
+                <th>Precio Venta Unit.</th>
+                <th>Total Línea Neto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in detalle_items %}
+              <tr>
+                <td>{{ item.LineNum }}</td>
+                <td>{{ item.ItemCode }}</td>
+                <td style="text-align:left">{{ item.Dscription }}</td>
+                <td class="num">{{ item.Quantity|puntos_miles }}</td>
+                <td class="num">{{ item.OpenQty|puntos_miles }}</td>
+                <td>{{ item.Moneda }}</td>
+                <td class="num">{{ item.PrecioVentaUnit|floatformat:0|puntos_miles }}</td>
+                <td class="num">{{ item.TotalLineaNeto|floatformat:0|puntos_miles }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted">No hay detalle disponible para esta orden de venta.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

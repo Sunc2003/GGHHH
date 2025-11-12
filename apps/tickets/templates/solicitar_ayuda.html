@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/solicitar_ayuda.css' %}">
+{% endblock %}
+
+<style>
+.help-ui{
+  --bg:#f6f7f9;
+  --card:#ffffff;
+  --text:#1e293b;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --border-strong:#cbd5e1;
+
+  /* 🎨 Paleta Platino */
+  --primary:#b3b3b3;         /* gris platino */
+  --primary-hover:#9e9e9e;   /* gris más oscuro */
+  --primary-dark:#7a7a7a;    /* contraste fuerte */
+  
+  --radius:0;
+  --radius-sm:0;
+  --shadow:0 4px 12px rgba(0,0,0,.06);
+}
+.help-ui *{ box-sizing:border-box; font-family: 'Inter', sans-serif; }
+
+/* ---------- Encabezado ---------- */
+.page-head{ margin-bottom:20px; }
+.page-head h4 { font-weight:600; color:var(--text); }
+
+.segmented{
+  display:inline-flex; border:1px solid var(--border-strong); border-radius:0;
+  overflow:hidden; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.segmented a{
+  padding:.5rem 1rem; text-decoration:none; font-weight:600; font-size:.9rem;
+  color:#334155; display:inline-block; transition:.2s;
+}
+.segmented a + a{ border-left:1px solid var(--border); }
+.segmented .is-active{ background:var(--primary); color:#fff; }
+
+/* ---------- Tarjetas ---------- */
+.card{ background:var(--card); border:1px solid var(--border); border-radius:0; box-shadow:var(--shadow); }
+.card .card-header{ border-bottom:1px solid var(--border); background:#f8fafc; font-weight:600; color:var(--text); }
+.card .card-body{ padding:1.25rem; }
+
+/* ---------- Formularios ---------- */
+.form-control, .form-select, textarea, input[type="file"]{
+  border:1px solid var(--border-strong)!important; border-radius:0!important; box-shadow:none!important;
+}
+.form-control:focus, .form-select:focus, textarea:focus{
+  border-color:var(--primary)!important; box-shadow:0 0 0 2px rgba(179,179,179,.3)!important;
+}
+.form-text{ color:var(--muted); font-size:.85rem; }
+
+/* ---------- Tablas ---------- */
+.table-frame{ border:1px solid var(--border); border-radius:0; overflow:hidden; box-shadow:var(--shadow); }
+.table thead th{ background:#f9fafb; color:#334155; font-weight:600; border-bottom:1px solid var(--border); font-size:.85rem; }
+.table tbody td{ border-top:1px solid var(--border); font-size:.9rem; vertical-align:middle; }
+.cell-title a{ font-weight:600; color:var(--text); text-decoration:none; }
+.cell-title a:hover{ color:var(--primary-dark); text-decoration:underline; }
+
+/* ---------- Estados ---------- */
+.status{ display:inline-flex; align-items:center; gap:.4rem; padding:.3rem .7rem; border-radius:0;
+  font-size:.75rem; font-weight:600; letter-spacing:.2px; border:1px solid transparent; }
+.status .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+.status-open{ color:#7a0000; background:#fdf2f2; border-color:#f2b8b5; } .status-open .dot{ background:#c53030; }
+.status-progress{ color:#7a5a00; background:#fffbea; border-color:#f2e1a3; } .status-progress .dot{ background:#d97706; }
+.status-done{ color:#004d33; background:#f0fdf4; border-color:#a7f3d0; } .status-done .dot{ background:#059669; }
+.status-closed{ color:#333; background:#f5f5f5; border-color:#d4d4d4; } .status-closed .dot{ background:#737373; }
+
+/* ---------- Botones Platino ---------- */
+.btn-primary {
+  background: var(--primary);
+  border: none;
+  border-radius: 0;
+  font-weight: 600;
+  padding: 0.55rem 1.2rem;
+  color: #fff;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(128,128,128,0.4);
+}
+.btn-primary:active { transform: scale(0.98); box-shadow: none; }
+
+.btn-outline-secondary {
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  color: var(--text);
+  border-radius: 0;
+  font-weight: 500;
+  padding: 0.5rem 1.1rem;
+  transition: all 0.2s ease;
+}
+.btn-outline-secondary:hover {
+  background: #f1f1f1;
+  border-color: var(--primary-dark);
+  color: var(--primary-dark);
+  box-shadow: 0 2px 6px rgba(128,128,128,0.3);
+}
+
+.btn-light {
+  background: #f9fafb;
+  border: 1px solid var(--border-strong);
+  border-radius: 0;
+  font-weight: 500;
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+.btn-light:hover {
+  background: #efefef;
+  color: var(--text);
+}
+
+.btn-link {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 0;
+  transition: color .2s ease;
+}
+.btn-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px){
+  .page-head { flex-direction:column; align-items:flex-start; gap:12px; }
+  .page-head h4 { font-size:1.25rem; }
+  .segmented{ width:100%; }
+  .segmented a{ flex:1; text-align:center; font-size:.85rem; padding:.45rem .6rem; }
+  .form-control, .form-select, textarea, input[type="file"]{ font-size:.9rem; }
+  
+  /* Tabla → tarjetas */
+  .table-frame{ border:none; box-shadow:none; }
+  .table thead{ display:none; }
+  .table tbody tr{
+    display:block; margin-bottom:1rem;
+    border:1px solid var(--border); border-radius:0;
+    box-shadow:var(--shadow); background:#fff; overflow:hidden;
+  }
+  .table tbody td{
+    display:block; width:100%; text-align:left!important;
+    border:none; border-bottom:1px solid var(--border);
+    padding:.65rem .9rem; font-size:.9rem;
+  }
+  .table tbody td::before{
+    content:attr(data-label);
+    display:block; font-weight:600; color:var(--muted);
+    margin-bottom:2px; font-size:.8rem;
+  }
+  .status{ font-size:.7rem; padding:.25rem .5rem; }
+}
+</style>
+
+<div class="container-xxl py-4 help-ui" style="max-width:1200px;">
+  <div class="d-flex flex-wrap justify-content-between align-items-center page-head">
+    <h4 class="mb-2">Solicitar ayuda</h4>
+    <div class="segmented" role="tablist">
+      <a href="?tab=crear&new=1" class="{% if tab != 'lista' %}is-active{% endif %}">Nuevo ticket</a>
+      <a href="?tab=lista{% if base_qs %}&{{ base_qs }}{% endif %}" class="{% if tab == 'lista' %}is-active{% endif %}">Mis solicitudes</a>
+    </div>
+  </div>
+
+  {# ========== CREAR ========== #}
+  {% if tab != 'lista' %}
+    {% if form.errors or request.GET.new %}
+    <div class="row g-4">
+      <div class="col-12 col-lg-6 col-xl-5">
+        <div id="ticket-form-card" class="card">
+          <div class="card-header">Nuevo ticket</div>
+          <div class="card-body">
+            <form id="form-ayuda" method="post" enctype="multipart/form-data" novalidate>
+              {% csrf_token %}
+              <div class="mb-3">
+                <label class="form-label">{{ form.titulo.label }}</label>
+                {{ form.titulo }}
+              </div>
+              <div class="mb-3">
+                <label class="form-label">{{ form.descripcion.label }}</label>
+                {{ form.descripcion }}
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Archivos</label>
+                <input type="file" name="archivos" class="form-control" multiple>
+                <div class="form-text">Puedes adjuntar archivos (imágenes, PDFs, etc.).</div>
+              </div>
+              <div class="d-grid d-sm-flex gap-2">
+                <button class="btn btn-primary">Enviar ticket</button>
+                <button type="button" id="btn-cancel-form-2" class="btn btn-light">Cancelar</button>
+              </div>
+            </form>
+            <div class="d-flex justify-content-end mt-2">
+              <button id="btn-cancel-form" class="btn btn-link btn-sm" type="button">Cerrar formulario</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  {% endif %}
+
+  {# ========== LISTA ========== #}
+  {% if tab == 'lista' %}
+  <div class="card">
+    <div class="card-body">
+      {% if page_obj.object_list %}
+        <div class="table-frame">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Título</th><th>Actualizado</th>
+                  <th>Último mensaje</th><th class="text-end">Estado</th><th class="text-end">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in page_obj.object_list %}
+                <tr>
+                  <td data-label="ID" class="text-muted">#{{ t.id }}</td>
+                  <td data-label="Título" class="cell-title"><a href="{% url 'mi_ticket_detalle' t.id %}">{{ t.titulo }}</a></td>
+                  <td data-label="Actualizado">{{ t.fecha_actualizacion|date:"Y-m-d H:i" }}</td>
+                  <td data-label="Último mensaje">
+                    {% if t.ultimo_mensaje %}
+                      <div class="small text-muted"><strong>{{ t.ultimo_mensaje.autor }}</strong>: {{ t.ultimo_mensaje.mensaje|truncatechars:200 }}</div>
+                    {% else %}<span class="text-muted small">Sin respuestas.</span>{% endif %}
+                  </td>
+                  <td data-label="Estado" class="text-end">
+                    {% if t.estado == 'abierto' %}
+                      <span class="status status-open"><span class="dot"></span> Abierto</span>
+                    {% elif t.estado == 'en_progreso' %}
+                      <span class="status status-progress"><span class="dot"></span> En progreso</span>
+                    {% elif t.estado == 'resuelto' %}
+                      <span class="status status-done"><span class="dot"></span> Resuelto</span>
+                    {% elif t.estado == 'cerrado' %}
+                      <span class="status status-closed"><span class="dot"></span> Cerrado</span>
+                    {% endif %}
+                  </td>
+                  <td data-label="Acción" class="text-end">
+                    <a href="{% url 'mi_ticket_detalle' t.id %}" class="btn btn-sm btn-outline-secondary">Ver</a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% else %}
+        <div class="empty text-center"><div class="emoji">📭</div>No hay resultados con esos filtros.</div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

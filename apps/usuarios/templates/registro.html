@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static %}
+ 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/registro.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+{% endblock %}
+ 
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="icono-registro">
+        <i class="fa-solid fa-user-tie"></i>
+      </div>
+ 
+      <form method="post" id="registroForm">
+        {% csrf_token %}
+        <div class="row g-3">
+          <!-- Campo Área -->
+          <div class="col-md-6">
+            <label for="{{ form.area.id_for_label }}" class="form-label">{{ form.area.label }}</label>
+            {{ form.area }}
+            {% for error in form.area.errors %}
+              <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <!-- Campo Cargo -->
+          <div class="col-md-6">
+            <label for="{{ form.cargo.id_for_label }}" class="form-label">{{ form.cargo.label }}</label>
+            {{ form.cargo }}
+            {% for error in form.cargo.errors %}
+              <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <!-- Los demás campos -->
+          {% for field in form %}
+            {% if field.name != 'area' and field.name != 'cargo' %}
+              <div class="col-md-6">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                  <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+          <!-- Botón que abre el modal -->
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmModal">
+            Registrar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+ 
+<!-- Modal de confirmación -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content border-0 shadow-lg rounded-3">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold text-dark" id="confirmModalLabel">
+          <i class="fa-solid fa-triangle-exclamation text-warning me-2"></i> Confirmar registro
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p class="text-muted mb-0">
+          ¿Está seguro que desea <span class="fw-semibold text-dark">registrar un nuevo usuario</span>?
+        </p>
+      </div>
+      <div class="modal-footer border-0 justify-content-end">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <!-- Este botón envía el formulario -->
+        <button type="button" class="btn btn-success" id="confirmSubmit">Sí, registrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const areaSelect  = document.getElementById('id_area');
+    const cargoSelect = document.getElementById('id_cargo');
+    const form        = document.getElementById('registroForm');
+    const confirmBtn  = document.getElementById('confirmSubmit');
+
+    // Acción del botón confirmar dentro del modal
+    confirmBtn.addEventListener('click', () => {
+      form.submit();
+    });
+
+    function cargarCargos(areaId) {
+      fetch(`/usuarios/api/cargos_por_area/${areaId}/`)
+        .then(res => res.json())
+        .then(data => {
+          cargoSelect.innerHTML = '<option value="">Seleccione un cargo</option>';
+          data.forEach(c => {
+            const o = document.createElement('option');
+            o.value = c.id;
+            o.textContent = c.nombre;
+            cargoSelect.appendChild(o);
+          });
+        });
+    }
+    if (areaSelect && cargoSelect) {
+      if (areaSelect.value) {
+        cargarCargos(areaSelect.value);
+      }
+      areaSelect.addEventListener('change', () => {
+        if (areaSelect.value) {
+          cargarCargos(areaSelect.value);
+        } else {
+          cargoSelect.innerHTML = '<option value="">Seleccione un área primero</option>';
+        }
+      });
+    }
+  });
+</script> 
+
+<!-- Bootstrap JS necesario para modales -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

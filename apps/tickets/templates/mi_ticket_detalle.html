@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<style>
+:root {
+  --bg-light:#f8fafc;
+  --card-light:#ffffff;
+  --text-light:#0f172a;
+  --muted-light:#64748b;
+  --border-light:#e2e8f0;
+}
+
+.ticket-detail .card {
+  border:1px solid var(--border-light);
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  background:var(--card-light);
+}
+
+/* Chat */
+.chat-body {
+  background:#ece5dd url("{% static 'img/chat-bg.png' %}") repeat;
+  border-radius:8px;
+  padding:1rem;
+  min-height:400px;
+}
+
+.chat-container { display:flex; flex-direction:column; gap:.8rem; }
+.chat-message {
+  max-width:70%;
+  padding:.6rem .9rem;
+  border-radius:14px;
+  font-size:.9rem;
+  line-height:1.4;
+  word-break:break-word;
+  position:relative;
+}
+.chat-user {
+  margin-left:auto;
+  background:#dbeafe;
+  color:#1e3a8a;
+  border:1px solid #c7d2fe;
+  border-bottom-right-radius:4px;
+}
+.chat-user::after {
+  content:""; position:absolute; right:-10px; bottom:0;
+  border-top:10px solid #dbeafe; border-left:10px solid transparent;
+}
+.chat-respuesta {
+  margin-right:auto;
+  background:#d4f8e8;
+  color:#065f46;
+  border:1px solid #a7f3d0;
+  border-bottom-left-radius:4px;
+}
+.chat-respuesta::after {
+  content:""; position:absolute; left:-10px; bottom:0;
+  border-top:10px solid #d4f8e8; border-right:10px solid transparent;
+}
+.chat-meta {
+  font-size:.75rem;
+  color:var(--muted-light);
+  margin-top:.25rem;
+  text-align:right;
+}
+
+/* Emoji picker */
+.emoji-picker {
+  position: absolute;
+  bottom: 120%;
+  right: 0;
+  width: 260px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+.emoji-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.emoji-grid span:hover {
+  transform: scale(1.2);
+}
+</style>
+
+<div class="container py-4 ticket-detail" style="max-width:920px;">
+
+  <!-- Encabezado -->
+  <div class="card shadow-sm mb-3 border-0">
+    <div class="card-body pb-2 d-flex justify-content-between align-items-start flex-wrap">
+      <div>
+        <h4 class="fw-bold mb-1">Ticket #{{ ticket.id }} — {{ ticket.titulo }}</h4>
+        <div class="text-muted small">
+          <i class="bi bi-calendar-event"></i> Creado: {{ ticket.fecha_creacion|date:"Y-m-d H:i" }} ·
+          <i class="bi bi-clock-history"></i> Última actualización: {{ ticket.fecha_actualizacion|date:"Y-m-d H:i" }}
+        </div>
+      </div>
+      <div class="d-flex gap-2 mt-2 mt-sm-0">
+        <span class="badge rounded-pill 
+          {% if ticket.estado == 'abierto' %} bg-success-subtle text-success border border-success 
+          {% elif ticket.estado == 'cerrado' or ticket.estado == 'resuelto' %} bg-secondary-subtle text-secondary border border-secondary 
+          {% else %} bg-light text-dark border {% endif %}">
+          {% if ticket.estado == 'resuelto' %} Cerrado {% else %} {{ ticket.get_estado_display }} {% endif %}
+        </span>
+      </div>
+    </div>
+    <hr class="my-2">
+    {% if ticket.descripcion %}
+    <div class="card-body pt-0">
+      <h6 class="fw-semibold text-secondary mb-2"><i class="bi bi-info-circle"></i> Descripción</h6>
+      <p class="mb-0">{{ ticket.descripcion|linebreaksbr }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="row g-3 mt-3">
+    <!-- Conversación -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">Conversación</div>
+        <div class="chat-body">
+          {% if mensajes %}
+            <div class="chat-container mb-3">
+              {% for m in mensajes %}
+              <div class="chat-message {% if m.autor.id == ticket.solicitante.id %}chat-user{% else %}chat-respuesta{% endif %}">
+                <div>{{ m.mensaje|linebreaksbr }}</div>
+                <div class="chat-meta">
+                  {{ m.autor.get_full_name|default:m.autor.username }} · {{ m.fecha|date:"Y-m-d H:i" }}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted">Sin mensajes aún.</p>
+          {% endif %}
+
+          <!-- Responder -->
+          {% if puede_responder %}
+          <form method="post" enctype="multipart/form-data" class="mt-3 position-relative">
+            {% csrf_token %}
+            <div class="mb-2 position-relative">
+              {{ form_msg.mensaje }}
+              <!-- Botón emoji -->
+              <button type="button" class="btn btn-light btn-sm position-absolute top-0 end-0 me-2 mt-2" id="btnEmoji">😀</button>
+              <!-- Panel emojis -->
+              <div id="emojiPicker" class="emoji-picker shadow-sm border bg-white p-2 rounded d-none">
+                <div class="emoji-grid">
+                  <!-- Caritas -->
+                  <span>😀</span><span>😃</span><span>😄</span><span>😁</span><span>😆</span>
+                  <span>😂</span><span>🤣</span><span>😊</span><span>😉</span><span>😍</span>
+                  <span>😘</span><span>😎</span><span>🤩</span><span>😢</span><span>😭</span>
+                  <span>😡</span><span>😱</span><span>😴</span><span>🤔</span><span>🙄</span>
+                  <!-- Gestos -->
+                  <span>👍</span><span>👎</span><span>🙌</span><span>👏</span><span>🙏</span>
+                  <span>👌</span><span>✌️</span><span>🤝</span><span>👊</span><span>🤟</span>
+                  <!-- Corazones -->
+                  <span>❤️</span><span>🧡</span><span>💛</span><span>💚</span><span>💙</span>
+                  <span>💜</span><span>🖤</span><span>🤍</span><span>💔</span><span>❣️</span>
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <input type="file" name="archivos" multiple class="form-control form-control-sm">
+              <div class="form-text">Puedes adjuntar archivos.</div>
+            </div>
+            <button class="btn btn-primary btn-sm">Enviar</button>
+          </form>
+          {% else %}
+          <div class="alert alert-warning mb-0">
+            Este ticket está <strong>cerrado</strong>. No se pueden agregar más mensajes ni adjuntos.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Adjuntos -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">Adjuntos</div>
+        <div class="card-body">
+          {% if adjuntos %}
+          <ul class="list-group list-group-flush">
+            {% for a in adjuntos %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div class="me-2">
+                <div class="small">{{ a.nombre }}</div>
+                <div class="text-muted small">
+                  Subido por {{ a.subido_por.get_full_name|default:a.subido_por.username }}
+                  {% if a.fecha_subida %} · {{ a.fecha_subida|date:"Y-m-d H:i" }}{% endif %}
+                </div>
+              </div>
+              <a class="btn btn-sm btn-outline-secondary" href="{{ a.url|default:'#' }}" target="_blank" rel="noopener">Ver</a>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="text-muted mb-0">No hay adjuntos.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <a href="{% url 'tickets_solicitar_ayuda' %}?tab=lista{% if base_qs %}&{{ base_qs }}{% endif %}"
+       class="btn btn-secondary btn-sm">Volver a mis solicitudes</a>
+  </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  const btn = document.getElementById("btnEmoji");
+  const picker = document.getElementById("emojiPicker");
+  const textarea = document.getElementById("id_mensaje"); // campo Django
+
+  // Abrir/cerrar picker
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    picker.classList.toggle("d-none");
+  });
+
+  // Insertar emoji y cerrar
+  picker.addEventListener("click", function(e){
+    if(e.target.tagName === "SPAN"){
+      textarea.value += e.target.textContent;
+      textarea.focus();
+      picker.classList.add("d-none"); // cierra automáticamente
+    }
+  });
+
+  // Cerrar si se hace click fuera
+  document.addEventListener("click", function(e){
+    if(!picker.contains(e.target) && e.target !== btn){
+      picker.classList.add("d-none");
+    }
+  });
+});
+</script>
+{% endblock %}

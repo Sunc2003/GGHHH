@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  /* ======== DISEÑO GENERAL ======== */
+  body {
+    background-color: #f5f7fa;
+    color: #212529;
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  h3 {
+    font-weight: 600;
+    color: #1e2d3b;
+  }
+
+  /* ======== BLOQUE DE FILTRO ======== */
+  .form-section {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 1.5rem;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .form-section:hover {
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+  }
+
+  label.form-label {
+    font-weight: 600;
+    color: #34495e;
+  }
+
+  .form-select, .form-control {
+    border-radius: 0.5rem;
+    border: 1px solid #cfd8dc;
+  }
+
+  .btn-primary {
+    background-color: #005a9c;
+    border-color: #005a9c;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.2rem;
+    font-weight: 500;
+  }
+
+  .btn-primary:hover {
+    background-color: #004b84;
+    border-color: #004b84;
+  }
+
+  /* ======== TABLA ======== */
+  .table {
+    background-color: #fff;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+
+  .table thead th {
+    white-space: nowrap;
+    background-color: #1b3b6f;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border: none;
+  }
+
+  .table tbody tr {
+    transition: background-color 0.2s ease-in-out;
+  }
+
+  .table tbody tr:hover {
+    background-color: #f0f4f8;
+  }
+
+  .table tbody td {
+    vertical-align: middle;
+    font-size: 0.92rem;
+    color: #2f3b45;
+  }
+
+  /* ======== BADGES ======== */
+  .badge {
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.4em 0.7em;
+  }
+
+  .badge.bg-success {
+    background-color: #27ae60 !important;
+  }
+
+  .badge.bg-danger {
+    background-color: #c0392b !important;
+  }
+
+  .badge.bg-warning {
+    background-color: #f1c40f !important;
+    color: #2d3436 !important;
+  }
+
+  /* ======== MENSAJE VACÍO ======== */
+  .text-muted {
+    font-size: 1rem;
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  /* ======== RESPONSIVE ======== */
+  @media (max-width: 768px) {
+    h3 {
+      font-size: 1.25rem;
+    }
+    .form-section {
+      padding: 1rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h3 class="mb-4"><i class="fa-solid fa-truck me-2 text-primary"></i>Guías Pendientes</h3>
+
+  <!-- 🔍 Filtros -->
+  <form method="get" class="row g-3 form-section align-items-end">
+    <div class="col-md-6">
+      <label class="form-label fw-bold">Vendedor</label>
+      <select name="vendedor" class="form-select">
+        <option value="">-- Seleccione un vendedor --</option>
+        {% for v in vendedores %}
+          <option value="{{ v }}" {% if vendedor == v %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <div class="form-check mt-2">
+        <input class="form-check-input" type="checkbox" name="solo_no_recepcionadas" value="true"
+               id="checkNoRecep" {% if solo_no_recepcionadas == 'true' %}checked{% endif %}>
+        <label class="form-check-label" for="checkNoRecep">Solo no recepcionadas</label>
+      </div>
+    </div>
+    <div class="col-md-3 text-end">
+      <button type="submit" class="btn btn-primary">
+        <i class="fa-solid fa-search me-2"></i>Buscar
+      </button>
+    </div>
+  </form>
+
+  <!-- 🔴 Errores -->
+  {% if error %}
+    <div class="alert alert-danger shadow-sm">{{ error }}</div>
+  {% endif %}
+
+  <!-- ✅ Resultados -->
+  {% if data %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>N° Documento</th>
+          <th>N° Guía</th>
+          <th>Fecha</th>
+          <th>Cliente</th>
+          <th>Total Neto</th>
+          <th>Total</th>
+          <th>Recepción</th>
+          <th>Vendedor</th>
+          <th>Orden Compra</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for guia in data %}
+        <tr>
+          <td>{{ guia.Numero_Documento }}</td>
+          <td>{{ guia.Numero_Guia }}</td>
+          <td>{{ guia.Fecha|date:"d/m/Y" }}</td>
+          <td>{{ guia.Nombre_Cliente }}</td>
+          <td>${{ guia.Total_Neto|floatformat:0 }}</td>
+          <td>${{ guia.Total|floatformat:0 }}</td>
+          <td>
+            {% if guia.Recepcion == "NO" %}
+              <span class="badge bg-danger">NO</span>
+            {% else %}
+              <span class="badge bg-success">Sí</span>
+            {% endif %}
+          </td>
+          <td>{{ guia.Nombre_Vendedor }}</td>
+          <td>{{ guia.Orden_de_compra }}</td>
+          <td>
+            {% if guia.Estado_Documento == "Packing" %}
+              <span class="badge bg-warning text-dark">Packing</span>
+            {% else %}
+              {{ guia.Estado_Documento }}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="text-muted">No se encontraron resultados.</p>
+  {% endif %}
+</div>
+{% endblock %}

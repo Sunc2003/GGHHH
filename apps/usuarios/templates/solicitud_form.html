@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+{% load permisos_tags %}
+{% load static %}
+ 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/solicitud_form.css' %}">
+<style>
+  .menu-botones{display:flex;justify-content:center;flex-wrap:wrap;gap:1.5rem;margin-bottom:2rem;}
+  .btn-cuadrado{display:flex;flex-direction:column;align-items:center;justify-content:center;width:180px;height:140px;background:#f1f3f5;color:#212529;border:none;border-radius:1rem;font-weight:600;font-size:.95rem;text-align:center;box-shadow:0 4px 8px rgba(0,0,0,.1);transition:all .2s;text-decoration:none;cursor:pointer;}
+  .btn-cuadrado:hover{background:#e2e6ea;transform:scale(1.05);}
+  .btn-cuadrado img{width:80px;height:80px;margin-bottom:10px;}
+  .error-msg{color:#d9534f;font-size:.85rem;margin-top:.25rem;}
+  @media (max-width:576px){
+    .btn-cuadrado{width:120px;height:110px;font-size:.75rem;}
+    .btn-cuadrado img{width:32px;height:32px;}
+  }
+  .is-invalid{border-color:#dc3545 !important;}
+</style>
+{% endblock %}
+ 
+{% block content %}
+<div class="container py-5">
+ 
+  <!-- Menú principal -->
+  <div class="menu-botones" id="menu-botones">
+    {% if request.user.is_authenticated and request.user|tiene_permiso:"ENVIAR_SOLICITUD" %}
+    <button id="btn-mostrar-submenu" class="btn-cuadrado">
+      <img src="{% static 'img/ggh.png' %}" alt="Nuevo">Solicitar Código
+    </button>
+    {% endif %}
+    {% if request.user.is_authenticated and request.user|tiene_permiso:"VER_SOLICITUDES" %}
+    <a href="{% url 'solicitudes_enviadas' %}" class="btn-cuadrado">
+      <img src="{% static 'img/ggh.png' %}" alt="Enviadas">Enviadas
+    </a>
+    {% endif %}
+    {% if request.user.is_authenticated and request.user|tiene_permiso:"VER_SOLICITUDES_RECIBIDAS" %}
+    <a href="{% url 'solicitudes_recibidas' %}" class="btn-cuadrado">
+      <img src="{% static 'img/ggh.png' %}" alt="Recibidas">Recibidas
+    </a>
+    {% endif %}
+  </div>
+ 
+  <!-- Submenú (mostrar/ocultar) -->
+  <div id="submenu-opciones" class="menu-botones" style="display:none; margin-top:2rem;">
+    <button class="btn-cuadrado opcion-solicitud" data-tipo="nuevo_articulo">
+      <img src="{% static 'img/ggh.png' %}" alt="">Nuevo artículo
+    </button>
+ 
+    <button class="btn-cuadrado opcion-solicitud" data-tipo="activacion">
+      <img src="{% static 'img/ggh.png' %}" alt="">Activación
+    </button>
+    <button class="btn-cuadrado opcion-solicitud" data-tipo="modificacion">
+      <img src="{% static 'img/ggh.png' %}" alt="">Modificación
+    </button>
+
+        <!-- Producción → a su propia vista -->
+    <a href="{% url 'solicitud_produccion_nueva' %}" class="btn-cuadrado text-decoration-none">
+      <img src="{% static 'img/ggh.png' %}" alt="">Producción
+    </a>
+    
+  </div>
+ 
+  <!-- Formulario NUEVO ARTÍCULO -->
+  <div id="formulario-nuevo" style="display:none;">
+    <div class="card shadow-sm mx-auto" style="max-width: 1200px;">
+      <div class="card-body">
+        <h2 class="mb-4"><i class="fas fa-barcode"></i> Nueva Solicitud de Código SAP — Nuevo Artículo</h2>
+        <form method="post" enctype="multipart/form-data" id="form-nuevo">
+          {% csrf_token %}
+          <input type="hidden" name="tipo_opcion" value="nuevo_articulo">
+ 
+          <!-- Información General -->
+          <fieldset class="border rounded p-3 mb-4">
+            <legend class="w-auto px-2">Información General</legend>
+            <div class="row g-3">
+              <div class="col-md-4">{{ form.receptor.label_tag }}{{ form.receptor }}{% for error in form.receptor.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}</div>
+              <div class="col-md-4">{{ form.empresa.label_tag }}{{ form.empresa }}{% for error in form.empresa.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}</div>
+              <div class="col-md-4">{{ form.tipo_solicitud.label_tag }}{{ form.tipo_solicitud }}{% for error in form.tipo_solicitud.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}</div>
+              <div class="col-md-4">{{ form.cotizacion.label_tag }}{{ form.cotizacion }}{% for error in form.cotizacion.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}</div>
+ 
+              <div class="col-md-4" id="campo_archivo" style="display:none;">
+                {{ form.archivos.label_tag }}{{ form.archivos }}
+                <small class="text-muted">Puedes seleccionar varios archivos</small>
+              </div>
+              <div class="col-md-4" id="campo_imagen" style="display:none;">
+                {{ form.imagenes.label_tag }}{{ form.imagenes }}
+                <small class="text-muted">Puedes seleccionar varias imágenes</small>
+              </div>
+            </div>
+          </fieldset>
+ 
+          <!-- Agregar producto (UI) -->
+          <fieldset class="border rounded p-3 mb-4">
+            <legend class="w-auto px-2">Agregar Producto</legend>
+            <div class="row g-3" id="formset-actual">
+              {% for field in formset.empty_form.visible_fields %}
+                <div class="col-md-3">
+                  {{ field.label_tag }}{{ field }}
+                  {% for error in field.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+                </div>
+              {% endfor %}
+            </div>
+            {{ formset.management_form }}
+            <div id="formset-hidden" class="d-none"></div>
+            <button type="button" class="btn btn-outline-primary mt-2" id="add-product-btn">+ Agregar Producto</button>
+          </fieldset>
+ 
+          <!-- Productos agregados -->
+          <fieldset class="border rounded p-3 mb-4">
+            <legend class="w-auto px-2">Productos Agregados</legend>
+            <div class="table-responsive">
+              <table class="table table-striped" id="tabla-detalles">
+                <thead>
+                  <tr>
+                    <th>#</th><th>Descripción</th><th>Marca</th><th>UDM</th><th>Origen</th>
+                    <th>Proveedor</th><th>Dimensiones</th><th>Peso</th><th>Costo</th>
+                    <th>SKU Prov.</th><th>SKU Fab.</th><th></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </fieldset>
+ 
+          <!-- Mensaje -->
+          <fieldset class="border rounded p-3 mb-4">
+            <legend class="w-auto px-2">Mensaje</legend>
+            <div class="mb-3">
+              {{ form.mensaje.label_tag }}{{ form.mensaje }}
+              {% for error in form.mensaje.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+            </div>
+          </fieldset>
+ 
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'panel_admin_usuarios' %}" class="btn btn-outline-secondary">Volver</a>
+            <button type="submit" class="btn btn-success px-4 py-2">
+              <i class="fas fa-paper-plane"></i> Enviar Solicitud
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- Formulario ACTIVACIÓN / MODIFICACIÓN -->
+  <div id="form-activacion" style="display:none;">
+    <div class="card shadow-sm mx-auto" style="max-width:600px;">
+      <div class="card-header bg-dark text-white d-flex align-items-center">
+        <i class="fas fa-edit me-2"></i>
+        <h5 class="mb-0" id="titulo-activacion">Solicitud</h5>
+      </div>
+      <div class="card-body">
+        <form method="post" id="form-activacion-real">
+          {% csrf_token %}
+          <input type="hidden" name="tipo_opcion" id="tipo-opcion-activacion">
+ 
+          <!-- Información General -->
+          <div class="mb-4">
+            <h6 class="border-bottom pb-2">Información General</h6>
+            <div class="row g-3">
+              <div class="col-md-6 col-12">{{ form.receptor.label_tag }}{{ form.receptor }}</div>
+              <div class="col-md-6 col-12">{{ form.empresa.label_tag }}{{ form.empresa }}</div>
+            </div>
+          </div>
+ 
+          <!-- Código -->
+          <div class="mb-4">
+            <div class="mb-3">
+              <label for="codigo_extra" class="form-label">Código</label>
+              <input type="text" name="codigo_extra" id="codigo_extra" class="form-control"
+                     placeholder="Ingrese el código SAP" required>
+            </div>
+          </div>
+ 
+          <!-- Detalle -->
+          <div class="mb-4">
+            <label for="mensaje_activacion" class="form-label">Detalle</label>
+            <textarea name="mensaje" id="mensaje_activacion" class="form-control" rows="3"
+                      placeholder="Agregue un detalle" required></textarea>
+          </div>
+ 
+          <!-- Botones -->
+          <div class="text-end">
+            <a href="{% url 'panel_admin_usuarios' %}" class="btn btn-outline-secondary btn-sm">Cancelar</a>
+            <button type="submit" class="btn btn-success btn-sm">
+              <i class="fas fa-paper-plane me-1"></i> Enviar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+ 
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ======= MENÚ / SUBMENÚ =======
+  const menu = document.getElementById('menu-botones');
+  const submenu = document.getElementById('submenu-opciones');
+  const btnMostrarSubmenu = document.getElementById('btn-mostrar-submenu');
+
+  const boxNuevo = document.getElementById('formulario-nuevo');
+  const boxAct  = document.getElementById('form-activacion');
+
+  const formNuevo = document.getElementById('form-nuevo');
+  const formAct   = document.getElementById('form-activacion-real');
+  const tituloAct = document.getElementById('titulo-activacion');
+  const tipoAct   = document.getElementById('tipo-opcion-activacion');
+
+  if (btnMostrarSubmenu) {
+    btnMostrarSubmenu.onclick = () => { 
+      menu.style.display = 'none'; 
+      submenu.style.display = 'flex'; 
+    };
+  }
+
+  document.querySelectorAll('.opcion-solicitud').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tipo = btn.dataset.tipo;
+      submenu.style.display = 'none';
+
+      if (tipo === 'nuevo_articulo') {
+        // Abrir NUEVO ARTÍCULO
+        boxNuevo.style.display = 'block';
+        initNuevoArticuloUI(); // inicializa lógica del formset y cotización
+      } else {
+        // ACTIVACIÓN o MODIFICACIÓN
+        boxAct.style.display = 'block';
+        tipoAct.value = tipo;
+        tituloAct.innerHTML = (tipo === 'activacion')
+          ? '<i class="fas fa-bolt me-1"></i> Solicitud de Activación'
+          : '<i class="fas fa-edit me-1"></i> Solicitud de Modificación';
+      }
+    });
+  });
+
+  // ======= NUEVO ARTÍCULO (Formset + adjuntos) =======
+  function initNuevoArticuloUI() {
+    if (initNuevoArticuloUI._inited) return;
+    initNuevoArticuloUI._inited = true;
+
+    const cotSelect = document.getElementById('id_cotizacion');
+    const campoArchivo = document.getElementById('campo_archivo');
+    const campoImagen  = document.getElementById('campo_imagen');
+    const inputArchivos = campoArchivo ? campoArchivo.querySelector('input[type="file"]') : null;
+    const inputImagenes = campoImagen  ? campoImagen.querySelector('input[type="file"]')  : null;
+
+    const formsetUI = document.getElementById('formset-actual');
+    const hiddenBox = document.getElementById('formset-hidden');
+    const tablaBody = document.querySelector('#tabla-detalles tbody');
+    const addBtn    = document.getElementById('add-product-btn');
+
+    const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+    const initialForms = document.getElementById('id_form-INITIAL_FORMS');
+
+    let index = parseInt(totalForms?.value || '0', 10);
+    if (Number.isNaN(index)) index = 0;
+
+    const REQUIRED_KEYS = [
+      'descripcion','marca','udm','origen','proveedor',
+      'largo','ancho','alto','peso','costo','sku_proveedor','sku_fabricante'
+    ];
+
+    // === Mostrar campos de adjuntos según tipo de cotización ===
+    if (cotSelect) {
+      const toggleAdjuntos = () => {
+        const v = cotSelect.value;
+        const doc = v === 'documento';
+        const img = v === 'whatsapp';
+        if (campoArchivo) campoArchivo.style.display = doc ? 'block' : 'none';
+        if (inputArchivos) inputArchivos.required = doc;
+        if (campoImagen) campoImagen.style.display = img ? 'block' : 'none';
+        if (inputImagenes) inputImagenes.required = img;
+      };
+      cotSelect.addEventListener('change', toggleAdjuntos);
+      toggleAdjuntos();
+    }
+
+    // === Campos numéricos ===
+    ['largo','ancho','alto','peso','costo'].forEach(k => {
+      const el = formsetUI.querySelector(`[name$="-${k}"]`);
+      if (el) { el.type='number'; el.step='0.01'; }
+    });
+
+    // === Helpers ===
+    const trimVal = (v) => (typeof v === 'string' ? v.trim() : v);
+    const showError = (el, msg='Campo obligatorio') => {
+      el.classList.add('is-invalid');
+      let help = el.parentElement.querySelector('.error-msg');
+      if (!help) { 
+        help = document.createElement('div'); 
+        help.className = 'error-msg'; 
+        el.parentElement.appendChild(help); 
+      }
+      help.textContent = msg;
+    };
+    const clearError = (el) => {
+      el.classList.remove('is-invalid');
+      const help = el.parentElement.querySelector('.error-msg'); 
+      if (help) help.remove();
+    };
+    const selectText = (sel) => {
+      if (!sel || sel.tagName !== 'SELECT') return '';
+      const opt = sel.options[sel.selectedIndex];
+      return opt ? (opt.text || '') : '';
+    };
+    function escapeHtml(str){
+      return (str || '').toString()
+        .replaceAll('&','&amp;').replaceAll('<','&lt;')
+        .replaceAll('>','&gt;').replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+    }
+
+    function readCurrentValues() {
+      const get = (key) => formsetUI.querySelector(`[name$="-${key}"]`);
+      const values = {};
+      REQUIRED_KEYS.forEach(key => {
+        const el = get(key);
+        if (!el) return;
+        if (el.tagName === 'SELECT') {
+          values[key] = trimVal(el.value);
+          values[`${key}__text`] = selectText(el);
+        } else {
+          const raw = trimVal(el.value);
+          values[key] = (['text','textarea','search','tel','url','email'].includes((el.type||'').toLowerCase()))
+                        ? raw.toUpperCase()
+                        : raw;
+        }
+      });
+      return values;
+    }
+
+    function validateCurrent() {
+      const get = (key) => formsetUI.querySelector(`[name$="-${key}"]`);
+      let ok = true, first = null;
+      REQUIRED_KEYS.forEach(key => {
+        const el = get(key); if (!el) return;
+        const raw = trimVal(el.value);
+        const empty = (el.tagName === 'SELECT') ? (raw === '' || raw === null) : (raw === '');
+        if (empty) { showError(el); if (!first) first = el; ok = false; }
+        else { clearError(el); }
+        el.addEventListener('input', () => clearError(el), { once:true });
+        el.addEventListener('change', () => clearError(el), { once:true });
+      });
+      return { ok, first };
+    }
+
+    function createHiddenFor(values, idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'hidden-item';
+      wrapper.dataset.index = String(idx);
+
+      REQUIRED_KEYS.forEach(key => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = `form-${idx}-${key}`;
+        input.value = values[key] ?? '';
+        wrapper.appendChild(input);
+      });
+
+      // ✅ Asegurar que los inputs se inserten dentro del <form>, no fuera
+      formNuevo.appendChild(wrapper);
+      return wrapper;
+    }
+
+    function addRow(values, idx) {
+      const tr = document.createElement('tr');
+      tr.dataset.index = String(idx);
+      const dims = [values.largo, values.ancho, values.alto].filter(Boolean).join('x');
+      const pesoTxt = values.peso ? `${parseFloat(values.peso).toFixed(2)}kg` : '';
+      const costoTxt = values.costo ? `$${values.costo}` : '';
+
+      tr.innerHTML = `
+        <td>${idx + 1}</td>
+        <td>${escapeHtml(values.descripcion || '')}</td>
+        <td>${escapeHtml(values.marca__text || '')}</td>
+        <td>${escapeHtml(values.udm__text || '')}</td>
+        <td>${escapeHtml(values.origen__text || '')}</td>
+        <td>${escapeHtml(values.proveedor__text || '')}</td>
+        <td>${escapeHtml(dims)}</td>
+        <td>${escapeHtml(pesoTxt)}</td>
+        <td>${escapeHtml(costoTxt)}</td>
+        <td>${escapeHtml(values.sku_proveedor || '')}</td>
+        <td>${escapeHtml(values.sku_fabricante || '')}</td>
+        <td><button type="button" class="btn btn-sm btn-danger btn-del">✕</button></td>
+      `;
+      tablaBody.appendChild(tr);
+      tr.querySelector('.btn-del').addEventListener('click', () => removeItem(idx));
+    }
+
+    function resetUI() {
+      formsetUI.querySelectorAll('input, select, textarea').forEach(el => {
+        if (el.tagName === 'SELECT') el.selectedIndex = 0;
+        else el.value = '';
+        clearError(el);
+      });
+    }
+
+    function removeItem(idxToRemove) {
+      const hidden = formNuevo.querySelector(`.hidden-item[data-index="${idxToRemove}"]`);
+      if (hidden) hidden.remove();
+
+      const row = tablaBody.querySelector(`tr[data-index="${idxToRemove}"]`);
+      if (row) row.remove();
+
+      const wrappers = Array.from(formNuevo.querySelectorAll('.hidden-item'));
+      wrappers.forEach((w, newIdx) => {
+        w.querySelectorAll('input').forEach(inp => {
+          inp.name = inp.name.replace(/form-\d+-/, `form-${newIdx}-`);
+        });
+        w.dataset.index = String(newIdx);
+      });
+
+      const rows = Array.from(tablaBody.querySelectorAll('tr'));
+      rows.forEach((tr, newIdx) => {
+        tr.dataset.index = String(newIdx);
+        tr.children[0].textContent = String(newIdx + 1);
+        const btn = tr.querySelector('.btn-del');
+        btn.onclick = () => removeItem(newIdx);
+      });
+
+      totalForms.value = String(wrappers.length);
+      index = wrappers.length;
+    }
+
+    // === Añadir producto ===
+    addBtn.addEventListener('click', () => {
+      const { ok, first } = validateCurrent();
+      if (!ok) { if (first) first.focus(); return; }
+
+      const v = readCurrentValues();
+      v.marca__text     = selectText(formsetUI.querySelector('select[name$="-marca"]')).toUpperCase();
+      v.udm__text       = selectText(formsetUI.querySelector('select[name$="-udm"]')).toUpperCase();
+      v.origen__text    = selectText(formsetUI.querySelector('select[name$="-origen"]')).toUpperCase();
+      v.proveedor__text = selectText(formsetUI.querySelector('select[name$="-proveedor"]')).toUpperCase();
+
+      createHiddenFor(v, index);
+      addRow(v, index);
+
+      index += 1;
+      totalForms.value = String(index);
+
+      resetUI();
+      document.querySelector('#tabla-detalles').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // === Envío del formulario ===
+    formNuevo.addEventListener('submit', (e) => {
+      const total = parseInt(totalForms.value || '0', 10);
+
+      // ✅ Si ya hay productos agregados, permitir envío directo
+      if (total > 0) return;
+
+      // Si UI tiene datos sin agregar, los agrega antes de enviar
+      const anyFilled = Array.from(formsetUI.querySelectorAll('input,select,textarea'))
+        .some(el => (el.tagName === 'SELECT') ? el.value : (trimVal(el.value) !== ''));
+      if (anyFilled) {
+        const res = validateCurrent();
+        if (!res.ok) { e.preventDefault(); if (res.first) res.first.focus(); return; }
+
+        const v = readCurrentValues();
+        v.marca__text     = selectText(formsetUI.querySelector('select[name$="-marca"]')).toUpperCase();
+        v.udm__text       = selectText(formsetUI.querySelector('select[name$="-udm"]')).toUpperCase();
+        v.origen__text    = selectText(formsetUI.querySelector('select[name$="-origen"]')).toUpperCase();
+        v.proveedor__text = selectText(formsetUI.querySelector('select[name$="-proveedor"]')).toUpperCase();
+
+        createHiddenFor(v, total);
+        addRow(v, total);
+        totalForms.value = String(total + 1);
+        resetUI();
+      }
+
+      // Si no hay nada agregado ni completado, bloquea envío
+      if (parseInt(totalForms.value || '0', 10) === 0) {
+        e.preventDefault();
+        alert('Debes agregar al menos un producto a la solicitud.');
+        return;
+      }
+    });
+  }
+});
+</script>
+
+{% endblock %}
+ 
