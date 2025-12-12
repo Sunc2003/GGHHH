@@ -2,10 +2,10 @@
 {% load static %}
 
 {% block content %}
-<div class="cotizacion-wrapper py-4 px-2 px-md-4">
+<div class="cotizacion-wrapper py-2 px-2 px-md-4">
   <div class="cotizacion-card shadow-sm p-4 bg-white rounded-2 border-0">
     <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
       <div class="d-flex align-items-center gap-3">
         <img src="{% static 'img/ggh.png' %}" alt="Ferretería Marsella" class="logo-header">
         <h3 class="fw-semibold titulo-seccion mb-0">Nueva Cotización</h3>
@@ -17,12 +17,27 @@
     <div class="row g-3">
       <div class="col-12 col-md-4">
         <label class="form-label">CardCode (Cliente)</label>
-        <input id="cardCode" class="form-control" placeholder="Ej: C77260520-K" />
+        <input
+          id="cardCode"
+          class="form-control"
+          placeholder="Selecciona un cliente…"
+          readonly
+          aria-readonly="true"
+          title="Se completa al elegir un cliente en el buscador"
+        />
       </div>
-      <div class="col-12 col-md-4">
-        <label class="form-label">SalesPersonCode</label>
-        <input id="slp" type="number" class="form-control" placeholder="Ej: 74" />
+
+      <!-- Nombre Cliente con lupa -->
+      <div class="col-12 col-md-8">
+        <label class="form-label">Nombre Cliente</label>
+        <div class="position-relative">
+          <input id="cardName" class="desc-buscar" placeholder="Buscar por nombre de cliente..." />
+          <button type="button" id="btnBuscarSocio" class="btn btn-link btn-buscar" aria-label="Buscar socio">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </div>
       </div>
+
       <div class="col-12 col-md-4">
         <label class="form-label">DocDate</label>
         <input id="docDate" type="date" class="form-control" readonly />
@@ -31,30 +46,20 @@
         <label class="form-label">DocDueDate</label>
         <input id="dueDate" type="date" class="form-control" readonly />
       </div>
-      <div class="col-12 col-md-4">
-        <label class="form-label">ShipToCode</label>
-        <input id="shipTo" class="form-control" placeholder="Ej: DESPACHO LAMPA" />
-      </div>
-      <div class="col-12 col-md-4">
-        <label class="form-label">PayToCode</label>
-        <input id="payTo" class="form-control" placeholder="Ej: OFICINA CENTRAL" />
-      </div>
     </div>
 
     <!-- LÍNEAS DE PRODUCTOS -->
-    <div class="section-title mt-5 mb-3">Líneas de Productos</div>
+    <div class="section-title mt-4 mb-2">Líneas de Productos</div>
     <div class="table-responsive border border-light rounded-2">
       <table id="linesTbl" class="table table-sm align-middle text-center mb-0">
         <thead class="table-header">
           <tr>
-            <th>ItemCode</th>
-            <th>Descripción</th>
-            <th>Cant.</th>
-            <th>Precio</th>
-            <th>Bodega</th>
-            <th>Entrega</th>
-            <th>Impuesto</th>
-            <th></th>
+            <th class="th-itemcode">ItemCode</th>
+            <th class="th-desc">Descripción</th>
+            <th class="th-qty">Cant.</th>
+            <th class="th-price">Precio</th>
+            <th class="th-entrega">Entrega</th>
+            <th class="th-actions"></th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -76,7 +81,6 @@
       <button id="submitBtn" data-endpoint="{% url 'cotizacion_crear' %}" class="btn btn-fiori">
         <i class="fa-solid fa-paper-plane me-1"></i>Crear Cotización
       </button>
-      
       <button id="pdfBtn" class="btn btn-outline-fiori d-none">
         <i class="fa-solid fa-file-pdf me-1"></i> Generar PDF
       </button>
@@ -87,7 +91,7 @@
   </div>
 </div>
 
-<!-- ================== MODAL BUSCADOR ================== -->
+<!-- ================== MODAL BUSCADOR PRODUCTOS ================== -->
 <div class="modal fade" id="buscadorModal" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content border-0 shadow-sm rounded-2">
@@ -100,7 +104,7 @@
 
       <div class="modal-body bg-white">
         <input id="buscadorInput" type="text" class="form-control mb-3"
-          placeholder="🔍 Buscar por descripción o código...">
+               placeholder="🔍 Buscar por descripción o código...">
         <div class="table-responsive border rounded-2">
           <table class="table table-hover align-middle text-center mb-0" id="tablaResultados">
             <thead class="table-header">
@@ -133,6 +137,42 @@
   </div>
 </div>
 
+<!-- ================== MODAL BUSCADOR SOCIOS ================== -->
+<div class="modal fade" id="sociosModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow-sm rounded-2">
+      <div class="modal-header modal-fiori-header">
+        <h5 class="modal-title fw-semibold">
+          <i class="fa-solid fa-user-group me-2"></i>Buscar Cliente por Nombre
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body bg-white">
+        <input id="sociosInput" type="text" class="form-control mb-3"
+               placeholder="🔍 Escribe parte del nombre…">
+        <div class="table-responsive border rounded-2">
+          <table class="table table-hover align-middle text-center mb-0" id="tablaSocios">
+            <thead class="table-header">
+              <tr>
+                <th>RUT (CardCode)</th>
+                <th>Nombre</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer modal-fiori-footer">
+        <small class="text-muted">
+          <i class="fa-regular fa-circle-info me-1"></i>Haz clic en una fila para seleccionar.
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ================== MODAL VISTA PREVIA ================== -->
 <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -150,13 +190,11 @@
           <table class="table table-hover align-middle text-center mb-0" id="previewTable">
             <thead class="table-header">
               <tr>
-                <th>ItemCode</th>
-                <th>Descripción</th>
-                <th>Cantidad</th>
-                <th>Precio Unitario</th>
-                <th>Bodega</th>
-                <th>Entrega</th>
-                <th>Impuesto</th>
+                <th class="th-itemcode">ItemCode</th>
+                <th class="th-desc">Descripción</th>
+                <th class="th-qty">Cantidad</th>
+                <th class="th-price">Precio Unitario</th>
+                <th class="th-entrega">Entrega (días)</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -164,15 +202,13 @@
         </div>
 
         <!-- Versión móvil -->
-        <div class="mobile-preview d-md-none" id="mobilePreviewContainer"></div>
+        <div class="d-md-none" id="mobilePreviewContainer"></div>
 
         <!-- Totales -->
         <div class="mt-3 text-end fw-semibold" id="previewTotal">
           Neto: <b>$0</b> | IVA (19%): <b>$0</b> | Total: <b>$0</b>
         </div>
       </div>
-
-      
 
       <div class="modal-footer modal-fiori-footer">
         <button type="button" class="btn btn-outline-fiori" data-bs-dismiss="modal">
@@ -186,241 +222,265 @@
   </div>
 </div>
 
-
-
 <!-- ================== ESTILOS ================== -->
-
-
+<!-- ================== ESTILOS ================== -->
 <style>
 :root {
-  --color-bg: #f8fafc;
+  --color-bg: #f5f6f8;
   --color-card: #ffffff;
   --color-border: #c8c8c8;
   --color-border-light: #e0e0e0;
-  --color-text: #000;
-  --color-primary: #0078d7;
-  --color-primary-dark: #005a9e;
+  --color-text: #0f172a;
+  --color-primary: #0f172a;
+  --color-primary-dark: #111827;
   --color-danger: #dc3545;
-  --radius: 8px;
+  --radius: 0px;      /* antes 8px */
   --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
-  --transition: 0.25s ease-in-out;
+  --transition: 0.15s ease-in-out;
 }
 
-/* ===== GENERAL ===== */
-body {
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  font-family: "Inter", "Segoe UI", Roboto, sans-serif;
-  font-size: 0.93rem;
+/* General */
+body{
+  background:var(--color-bg);
+  color:var(--color-text);
+  font-family:"Inter","Segoe UI",Roboto,sans-serif;
+  font-size:.93rem
 }
 
-/* ===== HEADER ===== */
-.logo-header {
-  width: 110px;
-  object-fit: contain;
+/* Compactar espacio bajo navbar */
+.cotizacion-wrapper{margin-top:0!important;padding-top:25px!important}
+main,.app-main,.content,.container,.container-fluid{padding-top:0!important;margin-top:0!important}
+.navbar,.site-header,.header,.hero,.banner{margin-bottom:0!important;padding-bottom:0!important}
+
+/* Header */
+.logo-header{width:110px;object-fit:contain}
+.titulo-seccion{font-size:1.45rem;font-weight:600;color:var(--color-text)}
+
+/* Formularios */
+.form-label{
+  font-size:.83rem;
+  color:var(--color-text);
+  font-weight:500
 }
-.titulo-seccion {
-  font-size: 1.45rem;
-  font-weight: 600;
-  color: var(--color-text);
+.form-control{
+  border:1px solid var(--color-border);
+  border-radius:0 !important; /* cuadrado */
+  font-size:.9rem;
+  padding:.45rem .6rem;
+  color:var(--color-text)
+}
+.form-control:focus{
+  border-color:#475569;
+  box-shadow:none;
+  outline:none
 }
 
-/* ===== FORMULARIOS ===== */
-.form-label {
-  font-size: 0.83rem;
-  color: var(--color-text);
-  font-weight: 500;
+/* Tablas */
+.table{
+  font-size:.86rem;
+  border-collapse:collapse;
+  color:var(--color-text)
 }
-.form-control {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  font-size: 0.9rem;
-  padding: 0.45rem 0.6rem;
-  color: var(--color-text);
+.table-header{
+  background:#eef1f4;
+  font-weight:600;
+  text-transform:uppercase;
+  border-bottom:1px solid var(--color-border)
 }
-.form-control:focus {
-  border-color: var(--color-primary);
-  box-shadow: none;
-  outline: none;
-}
-
-/* ===== TABLAS ===== */
-.table {
-  font-size: 0.86rem;
-  border-collapse: collapse;
-  color: var(--color-text);
-}
-.table-header {
-  background: #efefef;
-  font-weight: 600;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--color-border);
-}
-.table td,
-.table th {
-  padding: 0.55rem;
-  border: 1px solid var(--color-border);
-  vertical-align: middle;
+.table td,.table th{
+  padding:.55rem;
+  border:1px solid var(--color-border);
+  vertical-align:middle;
+  border-radius:0 !important; /* cuadrado */
 }
 
-/* ===== BOTONES ===== */
-.btn {
-  font-size: 0.87rem;
-  border-radius: var(--radius) !important;
-  font-weight: 500;
-  transition: var(--transition);
-}
-.btn-fiori {
-  background-color: var(--color-primary);
-  color: #fff;
-  border: none;
-}
-.btn-fiori:hover {
-  background-color: var(--color-primary-dark);
-}
-.btn-outline-fiori {
-  background: #fff;
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-}
-.btn-outline-fiori:hover {
-  background-color: #f1f5f9;
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+/* Column widths */
+.th-itemcode{width:120px}
+.th-qty{width:90px}
+.th-price{width:130px}
+.th-entrega{width:180px}
+.th-actions{width:60px}
+
+/* Inputs tabla */
+#linesTbl td input,
+#previewTable td input{
+  width:100%;
+  border:1px solid var(--color-border);
+  border-radius:0 !important;  /* cuadrado */
+  padding:.3rem .4rem;
+  font-size:.88rem
 }
 
-/* ===== MODAL ===== */
-.modal-content {
-  border-radius: var(--radius);
-  border: 1px solid var(--color-border);
+#linesTbl td.col-itemcode input,
+#previewTable td.col-itemcode input{max-width:110px}
+
+#linesTbl td.col-qty input,
+#previewTable td.col-qty input{max-width:80px;text-align:right}
+
+#linesTbl td.col-price input,
+#previewTable td.col-price input{max-width:120px;text-align:right}
+
+/* Botones */
+.btn{
+  border-radius:0 !important; /* cuadrado */
+  padding:8px 12px!important;
+  font-weight:500!important;
+  letter-spacing:.1px;
+  box-shadow:none!important;
+  transition:background .15s,border-color .15s,color .15s
 }
-.modal-header {
-  background-color: #f1f3f4;
-  border-bottom: 1px solid var(--color-border);
+.btn-fiori{
+  background:var(--color-primary)!important;
+  border:1px solid var(--color-primary)!important;
+  color:#fff!important
 }
-.modal-title {
-  font-size: 1rem;
-  font-weight: 600;
+.btn-fiori:hover{
+  background:var(--color-primary-dark)!important;
+  border-color:var(--color-primary-dark)!important
+}
+.btn-outline-fiori{
+  background:#fff;
+  color:var(--color-text);
+  border:1px solid var(--color-border)
+}
+.btn-outline-fiori:hover{
+  background:#f1f5f9;
+  border-color:#475569;
+  color:#111827
 }
 
-/* ===== BOTÓN DE BÚSQUEDA (LUPA) ===== */
-.position-relative {
-  position: relative;
+/* Modal */
+.modal-content{
+  border-radius:0 !important; /* cuadrado */
+  border:1px solid var(--color-border)
 }
-.desc-buscar {
-  width: 100%;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  height: 36px;
-  font-size: 0.9rem;
-  padding: 0.4rem 2.2rem 0.4rem 0.6rem;
-  background-color: #fff;
-  color: var(--color-text);
-  transition: border-color 0.2s ease-in-out;
+.modal-header{
+  background-color:#f3f4f6;
+  border-bottom:1px solid var(--color-border)
 }
-.desc-buscar:focus {
-  border-color: var(--color-primary);
-  outline: none;
-}
-.btn-buscar {
-  position: absolute;
-  top: 50%;
-  right: 8px;
-  transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid var(--color-border-light);
-  background-color: #f5f7f9;
-  color: #444;
-  font-size: 0.8rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-}
-.btn-buscar:hover {
-  background-color: #e4e8ec;
-  color: var(--color-primary-dark);
-  border-color: var(--color-primary);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+.modal-title{
+  font-size:1rem;
+  font-weight:600
 }
 
-/* ===== EFECTO HOVER ===== */
-#tablaResultados tr:hover td {
-  background-color: #d8f5d0 !important;
-  transition: background-color 0.25s ease-in-out;
+/* Input con lupa */
+.position-relative{position:relative}
+.desc-buscar{
+  width:100%;
+  border:1px solid var(--color-border);
+  border-radius:0 !important;  /* cuadrado */
+  height:36px;
+  font-size:.9rem;
+  padding:.4rem 2.2rem .4rem .6rem;
+  background:#fff;
+  color:var(--color-text);
+  transition:border-color .2s ease-in-out
 }
-#tablaResultados tr.selected td {
-  background-color: #b7e6b1 !important;
-  font-weight: 600;
+.desc-buscar:focus{
+  border-color:#475569;
+  outline:none
 }
-
-/* ===== ALERTAS ===== */
-.alert {
-  font-size: 0.85rem;
-  border-radius: var(--radius);
-  border: 1px solid var(--color-border);
+.btn-buscar{
+  position:absolute;
+  top:50%;
+  right:8px;
+  transform:translateY(-50%);
+  width:28px;
+  height:28px;
+  border-radius:0 !important; /* cuadrado */
+  border:1px solid var(--color-border-light);
+  background:#f5f7f9;
+  color:#444;
+  font-size:.8rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .15s ease-in-out;
+  cursor:pointer
 }
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .btn { width: 100%; }
-}
-
-/* ===== MODAL VISTA PREVIA ===== */
-#previewModal .modal-body {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-#previewModal table td input {
-  width: 100%;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  font-size: 0.88rem;
-  padding: 0.3rem 0.5rem;
-}
-
-#previewModal table td input:focus {
-  border-color: var(--color-primary);
-  outline: none;
-}
-
-#previewModal .modal-title {
-  font-size: 1.05rem;
+.btn-buscar:hover{
+  background:#e4e8ec;
+  color:#111827;
+  border-color:#475569
 }
 
-#previewModal .table th {
-  background-color: #f1f3f4;
-  font-size: 0.85rem;
-  text-transform: uppercase;
+/* Hover/selección tabla modal */
+#tablaResultados tr:hover td,
+#tablaSocios tr:hover td{
+  background:#d8f5d0!important;
+  transition:background-color .2s ease-in-out
+}
+#tablaResultados tr.selected td,
+#tablaSocios tr.selected td{
+  background:#b7e6b1!important;
+  font-weight:600
+}
+#tablaSocios tr{cursor:pointer}
+
+/* Alertas */
+.alert{
+  font-size:.85rem;
+  border-radius:0 !important; /* cuadrado */
+  border:1px solid var(--color-border)
 }
 
-#previewTotal {
-  font-size: 0.9rem;
-  color: var(--color-text);
+/* Responsive */
+@media (max-width:768px){
+  .btn{width:100%}
+}
+
+/* Vista previa */
+#previewModal .modal-body{
+  max-height:70vh;
+  overflow-y:auto
+}
+#previewModal table td input{
+  border:1px solid var(--color-border);
+  border-radius:0 !important; /* cuadrado */
+  font-size:.88rem;
+  padding:.3rem .5rem
+}
+#previewModal table td input:focus{
+  border-color:#475569;
+  outline:none
+}
+#previewModal .modal-title{
+  font-size:1.05rem
+}
+#previewModal .table th{
+  background:#f1f3f4;
+  font-size:.85rem;
+  text-transform:uppercase
+}
+#previewTotal{
+  font-size:.9rem;
+  color:var(--color-text)
 }
 
 </style>
 
-
 <script>
-/* ===================== UTILIDAD CSRF ===================== */
+/* ===================== CSRF ===================== */
 function getCookie(name){
   const m=document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
   return m?m.pop():'';
 }
 
-/* ===================== FECHAS AUTOMÁTICAS ===================== */
+/* ===================== FECHAS AUTO ===================== */
 document.addEventListener("DOMContentLoaded",()=>{
   const today=new Date();
   const yyyy=today.getFullYear(),mm=String(today.getMonth()+1).padStart(2,"0"),dd=String(today.getDate()).padStart(2,"0");
   const currentDate=`${yyyy}-${mm}-${dd}`;
   document.querySelectorAll("#docDate,#dueDate").forEach(el=>el.value=currentDate);
 });
+
+/* ===================== BLOQUEA TIPIAR EN CardCode ===================== */
+(() => {
+  const cc = document.getElementById('cardCode');
+  if (!cc) return;
+  cc.addEventListener('keydown', e => e.preventDefault());
+  cc.addEventListener('paste',   e => e.preventDefault());
+})();
 
 /* ===================== TABLA PRINCIPAL ===================== */
 const tbody=document.querySelector('#linesTbl tbody');
@@ -430,96 +490,136 @@ document.querySelector('#clearBtn').addEventListener('click',()=>{tbody.innerHTM
 function addLineRow(prefill = {}) {
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><input placeholder="ItemCode" value="${prefill.Codigo || ''}" readonly /></td>
-    <td class="position-relative">
+    <td class="col-itemcode"><input class="cell-input" placeholder="ItemCode" value="${prefill.Codigo || ''}" readonly /></td>
+    <td class="col-desc position-relative">
       <input class="desc-buscar" placeholder="Buscar producto..." value="${prefill.ItemName || ''}" />
       <button type="button" class="btn btn-link btn-buscar" aria-label="Buscar producto"><i class="fa-solid fa-magnifying-glass"></i></button>
     </td>
-    <td><input type="number" min="1" step="1" placeholder="Qty" value="${prefill.Quantity ?? ''}" /></td>
-    <td><input type="number" min="0" step="0.01" placeholder="UnitPrice" value="${prefill.UnitPrice ?? ''}" /></td>
-    <td><input placeholder="Warehouse" value="${prefill.WarehouseCode || 'A01'}" /></td>
-    <td><input type="text" placeholder="Ej: 2 días" value="${prefill.U_GGH_TIM || ''}" /></td>
-    <td><input placeholder="TaxCode" value="${prefill.TaxCode || 'IVA'}" /></td>
-    <td><button type="button" class="btn btn-sm btn-outline-danger rm" aria-label="Eliminar línea"><i class="fa-solid fa-trash"></i></button></td>
+    <td class="col-qty"><input class="cell-input" type="number" min="1" step="1" placeholder="Qty" value="${prefill.Quantity ?? ''}" /></td>
+    <td class="col-price"><input class="cell-input" type="number" min="0" step="0.01" placeholder="UnitPrice" value="${prefill.UnitPrice ?? ''}" /></td>
+    <td class="col-entrega"><input class="cell-input" type="text" placeholder="Ej: 2 días" value="${prefill.U_GGH_TIM || ''}" /></td>
+    <td class="col-actions"><button type="button" class="btn btn-sm btn-outline-fiori rm" aria-label="Eliminar línea"><i class="fa-solid fa-trash"></i></button></td>
   `;
   tr.querySelector('.rm').addEventListener('click', () => tr.remove());
-  tr.querySelector('.btn-buscar').addEventListener('click', () => abrirModalBusqueda(tr));
+  tr.querySelector('.btn-buscar').addEventListener('click', () => abrirModalBusquedaProductos(tr));
   tbody.appendChild(tr);
 }
 addLineRow();
 
-/* ===================== MODAL DE BÚSQUEDA (simple y estable) ===================== */
-function abrirModalBusqueda(tr){
+/* ===================== MODAL PRODUCTOS ===================== */
+function abrirModalBusquedaProductos(tr){
   const modalEl = document.getElementById('buscadorModal');
-  if (!modalEl) { console.error('No existe #buscadorModal'); return; }
   const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-
   const input = document.getElementById('buscadorInput');
   const tableBody = document.querySelector('#tablaResultados tbody');
-  if (!input || !tableBody) { console.error('Falta #buscadorInput o #tablaResultados tbody'); return; }
+  input.value = ''; tableBody.innerHTML = ''; modal.show();
 
-  // Reset y abrir
-  input.value = '';
-  tableBody.innerHTML = '';
-  modal.show();
-
-  // Un único handler (se reemplaza cada vez que se abre)
   input.oninput = async () => {
     const q = input.value.trim();
     if (q.length < 2) { tableBody.innerHTML = ''; return; }
-
     const url = `/buscar_items_inventario/?q=${encodeURIComponent(q)}`;
-    try {
+    try{
       const res = await fetch(url);
       const data = await res.json();
-
-      if (!Array.isArray(data) || data.length === 0) {
+      if (!Array.isArray(data) || data.length===0){
         tableBody.innerHTML = '<tr><td colspan="12" class="text-muted text-center">Sin resultados</td></tr>';
         return;
       }
-
-      tableBody.innerHTML = data.map(it => `
-        <tr data-code="${it.Codigo}" data-name="${it.ItemName}" data-price="${it.PMV || 0}">
+      tableBody.innerHTML = data.map(it=>`
+        <tr data-code="${it.Codigo}" data-name="${it.ItemName}" data-price="${it.PMV||0}">
           <td>${it.Codigo}</td>
           <td>${it.ItemName}</td>
-          <td>${it.FirmName || ''}</td>
-          <td>${it.ProveedorName || ''}</td>
-          <td>${it.ProveedorCode || ''}</td>
-          <td>${it.Stock_A01 || 0}</td>
-          <td>${it.Stock_A02 || 0}</td>
-          <td>${it.Stock_A08 || 0}</td>
-          <td>${it.PMV || ''}</td>
-          <td>${it.UltimoPrecioCompra || ''}</td>
+          <td>${it.FirmName||''}</td>
+          <td>${it.ProveedorName||''}</td>
+          <td>${it.ProveedorCode||''}</td>
+          <td>${it.Stock_A01||0}</td>
+          <td>${it.Stock_A02||0}</td>
+          <td>${it.Stock_A08||0}</td>
+          <td>${it.PMV||''}</td>
+          <td>${it.UltimoPrecioCompra||''}</td>
           <td>${it.UltimaFechaCompra ? it.UltimaFechaCompra.split('T')[0] : ''}</td>
-          <td>${it.Origen || ''}</td>
+          <td>${it.Origen||''}</td>
         </tr>
       `).join('');
 
-      tableBody.querySelectorAll('tr').forEach(row => {
-        row.addEventListener('click', () => {
-          tableBody.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+      tableBody.querySelectorAll('tr').forEach(row=>{
+        row.addEventListener('click', ()=>{
+          tableBody.querySelectorAll('tr').forEach(r=>r.classList.remove('selected'));
           row.classList.add('selected');
           tr.querySelector('input.desc-buscar').value = row.dataset.name;
           tr.querySelector('input[placeholder="ItemCode"]').value  = row.dataset.code;
           tr.querySelector('input[placeholder="UnitPrice"]').value = row.dataset.price;
-          setTimeout(() => modal.hide(), 120);
+          setTimeout(()=>modal.hide(), 120);
         });
       });
-    } catch (e) {
+    }catch(e){
       console.error(e);
       tableBody.innerHTML = '<tr><td colspan="12" class="text-danger text-center">⚠️ Error al buscar productos</td></tr>';
     }
   };
 }
 
-/* ===================== CREAR COTIZACIÓN (POST) ===================== */
+/* ===================== MODAL SOCIOS ===================== */
+document.getElementById('btnBuscarSocio').addEventListener('click', abrirModalSocios);
+
+function abrirModalSocios(){
+  const modalEl   = document.getElementById('sociosModal');
+  const modal     = bootstrap.Modal.getOrCreateInstance(modalEl);
+  const input     = document.getElementById('sociosInput');
+  const tableBody = document.querySelector('#tablaSocios tbody');
+
+  input.value=''; tableBody.innerHTML=''; modal.show();
+
+  input.oninput = async ()=>{
+    const q = input.value.trim();
+    if (q.length < 2){ tableBody.innerHTML = ''; return; }
+
+    const url = `/buscar_socios_por_nombre/?q=${encodeURIComponent(q)}`;
+
+    try{
+      const res = await fetch(url, {headers: {"X-Requested-With":"fetch"}});
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length===0){
+        tableBody.innerHTML = '<tr><td colspan="2" class="text-muted">Sin resultados</td></tr>';
+        return;
+      }
+      tableBody.innerHTML = data.map(s=>`
+        <tr data-code="${s.CardCode}" data-name="${s.Nombre}">
+          <td>${s.CardCode}</td>
+          <td class="text-start">${s.Nombre}</td>
+        </tr>
+      `).join('');
+
+      tableBody.querySelectorAll('tr').forEach(row=>{
+        row.addEventListener('click', ()=>{
+          tableBody.querySelectorAll('tr').forEach(r=>r.classList.remove('selected'));
+          row.classList.add('selected');
+
+          // Rellena CardCode y Nombre
+          document.getElementById('cardCode').value = row.dataset.code || '';
+          const nameInput = document.getElementById('cardName');
+          if (nameInput) nameInput.value = row.dataset.name || '';
+
+          setTimeout(()=>modal.hide(), 120);
+        });
+      });
+    }catch(e){
+      console.error(e);
+      tableBody.innerHTML = '<tr><td colspan="2" class="text-danger">⚠️ Error al buscar socios</td></tr>';
+    }
+  };
+}
+
+/* ===================== CREAR COTIZACIÓN ===================== */
 document.querySelector('#submitBtn').addEventListener('click',async()=>{
   const msgOk=document.querySelector('#msgOk'),msgErr=document.querySelector('#msgErr');
   msgOk.classList.add('d-none');msgErr.classList.add('d-none');
+
   const endpoint=document.querySelector('#submitBtn').dataset.endpoint;
-  const cardCode=document.querySelector('#cardCode').value.trim();
-  const docDate=document.querySelector('#docDate').value;
-  const dueDate=document.querySelector('#dueDate').value;
+  const cardCode=document.getElementById('cardCode').value.trim();
+  const docDate=document.getElementById('docDate').value;
+  const dueDate=document.getElementById('dueDate').value;
+
   if(!cardCode||!docDate||!dueDate){
     msgErr.textContent="Faltan campos obligatorios";
     msgErr.classList.remove('d-none'); return;
@@ -528,14 +628,17 @@ document.querySelector('#submitBtn').addEventListener('click',async()=>{
   const lines=[];
   tbody.querySelectorAll('tr').forEach(tr=>{
     const tds=tr.querySelectorAll('input');
+
+    // Normaliza precio con coma -> punto si no hay punto decimal
+    let unitRaw = (tds[3].value || '').trim();
+    if (unitRaw.includes(',') && !unitRaw.includes('.')) unitRaw = unitRaw.replace(',', '.');
+
     const line={
       ItemCode:tds[0].value.trim(),
       ItemDescription:tds[1].value.trim(),
       Quantity:Number(tds[2].value),
-      UnitPrice:Number(tds[3].value),
-      WarehouseCode:tds[4].value.trim(),
-      U_GGH_TIM:tds[5].value.trim(),
-      TaxCode:tds[6].value.trim()
+      UnitPrice:Number(unitRaw || 0),
+      U_GGH_TIM:tds[4].value.trim()
     };
     if(line.ItemCode && line.Quantity>0) lines.push(line);
   });
@@ -545,7 +648,14 @@ document.querySelector('#submitBtn').addEventListener('click',async()=>{
     msgErr.classList.remove('d-none'); return;
   }
 
-  const payload={DocDate:docDate,DocDueDate:dueDate,CardCode:cardCode,DocumentLines:lines};
+  const payload={
+    DocDate:docDate,
+    DocDueDate:dueDate,
+    CardCode:cardCode,
+    // CardName: document.getElementById('cardName').value.trim(),
+    DocumentLines:lines
+  };
+
   try{
     const resp=await fetch(endpoint,{
       method:"POST",
@@ -563,7 +673,7 @@ document.querySelector('#submitBtn').addEventListener('click',async()=>{
   }
 });
 
-
+/* ===================== PDF ===================== */
 document.addEventListener("DOMContentLoaded", () => {
   const pdfBtn = document.getElementById("pdfBtn");
   const okEl = document.getElementById("msgOk");
@@ -585,7 +695,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-
+/* ===================== VISTA PREVIA ===================== */
 const previewBtn       = document.getElementById('previewBtn');
 const savePreviewBtn   = document.getElementById('savePreviewBtn');
 const previewTableBody = document.querySelector('#previewTable tbody');
@@ -597,30 +707,26 @@ function getLinesFromMain() {
   const rows = [];
   tbody.querySelectorAll('tr').forEach(tr => {
     const ins = tr.querySelectorAll('input');
+    let unitRaw = (ins[3].value || '').trim();
+    if (unitRaw.includes(',') && !unitRaw.includes('.')) unitRaw = unitRaw.replace(',', '.');
+
     const line = {
       ItemCode:        ins[0].value.trim(),
       ItemDescription: ins[1].value.trim(),
-      Quantity:        Number(ins[2].value || 0),
-      UnitPrice:       Number(ins[3].value || 0),
-      WarehouseCode:   ins[4].value.trim(),
-      U_GGH_TIM:       ins[5].value.trim(),
-      TaxCode:         ins[6].value.trim()
+      Quantity:        Number(ins[2].value || 1),
+      UnitPrice:       Number(unitRaw || 0),
+      U_GGH_TIM:       ins[4].value.trim()
     };
     if (line.ItemCode) rows.push(line);
   });
   return rows;
 }
 
-function clp(n){
-  return Number(n||0).toLocaleString('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0});
-}
+function clp(n){ return Number(n||0).toLocaleString('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}); }
 
 function calcTotals(lines){
-  const neto = lines.reduce((a,l)=> a + (Number(l.Quantity)*Number(l.UnitPrice||0)), 0);
-  const iva  = lines.reduce((a,l)=> {
-    const ln = Number(l.Quantity)*Number(l.UnitPrice||0);
-    return a + (/(^|\s)IVA/i.test(l.TaxCode) ? ln*0.19 : 0);
-  }, 0);
+  const neto  = lines.reduce((a,l)=> a + (Number(l.Quantity)*Number(l.UnitPrice||0)), 0);
+  const iva   = neto * 0.19; // IVA fijo 19%
   const total = neto + iva;
   previewTotal.innerHTML = `Neto: <b>${clp(neto)}</b> | IVA (19%): <b>${clp(iva)}</b> | Total: <b>${clp(total)}</b>`;
 }
@@ -637,13 +743,11 @@ function bindRecalc(container){
 function renderPreviewDesktop(lines){
   previewTableBody.innerHTML = lines.map(l=>`
     <tr>
-      <td><input value="${l.ItemCode}" readonly></td>
-      <td><input value="${l.ItemDescription}"></td>
-      <td><input type="number" min="1" step="1" value="${l.Quantity||1}"></td>
-      <td><input type="number" min="0" step="0.01" value="${l.UnitPrice||0}"></td>
-      <td><input value="${l.WarehouseCode||''}"></td>
-      <td><input value="${l.U_GGH_TIM||''}"></td>
-      <td><input value="${l.TaxCode||'IVA'}"></td>
+      <td class="col-itemcode"><input value="${l.ItemCode}" readonly></td>
+      <td class="col-desc"><input value="${l.ItemDescription}"></td>
+      <td class="col-qty"><input type="number" min="1" step="1" value="${l.Quantity||1}"></td>
+      <td class="col-price"><input type="number" min="0" step="0.01" value="${l.UnitPrice||0}"></td>
+      <td class="col-entrega"><input value="${l.U_GGH_TIM||''}"></td>
     </tr>
   `).join('');
   bindRecalc(document.getElementById('previewTable'));
@@ -657,9 +761,7 @@ function renderPreviewMobile(lines){
         <div class="mb-2"><small class="text-muted">Descripción</small><input class="form-control" value="${l.ItemDescription}"></div>
         <div class="mb-2"><small class="text-muted">Cantidad</small><input class="form-control" type="number" min="1" step="1" value="${l.Quantity||1}"></div>
         <div class="mb-2"><small class="text-muted">Precio Unitario</small><input class="form-control" type="number" min="0" step="0.01" value="${l.UnitPrice||0}"></div>
-        <div class="mb-2"><small class="text-muted">Bodega</small><input class="form-control" value="${l.WarehouseCode||''}"></div>
-        <div class="mb-2"><small class="text-muted">Entrega</small><input class="form-control" value="${l.U_GGH_TIM||''}"></div>
-        <div><small class="text-muted">Impuesto</small><input class="form-control" value="${l.TaxCode||'IVA'}"></div>
+        <div><small class="text-muted">Entrega</small><input class="form-control" value="${l.U_GGH_TIM||''}"></div>
       </div>
     </div>
   `).join('');
@@ -677,9 +779,7 @@ function collectLinesFromPreview(){
         ItemDescription: ins[1].value.trim(),
         Quantity:        Number(ins[2].value||0),
         UnitPrice:       Number(ins[3].value||0),
-        WarehouseCode:   ins[4].value.trim(),
-        U_GGH_TIM:       ins[5].value.trim(),
-        TaxCode:         ins[6].value.trim(),
+        U_GGH_TIM:       ins[4].value.trim()
       });
     });
   } else {
@@ -690,9 +790,7 @@ function collectLinesFromPreview(){
         ItemDescription: ins[1].value.trim(),
         Quantity:        Number(ins[2].value||0),
         UnitPrice:       Number(ins[3].value||0),
-        WarehouseCode:   ins[4].value.trim(),
-        U_GGH_TIM:       ins[5].value.trim(),
-        TaxCode:         ins[6].value.trim(),
+        U_GGH_TIM:       ins[4].value.trim()
       });
     });
   }
@@ -709,7 +807,7 @@ previewBtn.addEventListener('click', ()=>{
   }
   renderPreviewDesktop(lines);
   renderPreviewMobile(lines);
-  calcTotals(lines);
+  calcTotals(collectLinesFromPreview());
   const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('previewModal'));
   modal.show();
 });
@@ -723,18 +821,11 @@ savePreviewBtn.addEventListener('click', ()=>{
       ItemName:      l.ItemDescription,
       Quantity:      l.Quantity,
       UnitPrice:     l.UnitPrice,
-      WarehouseCode: l.WarehouseCode,
-      U_GGH_TIM:     l.U_GGH_TIM,
-      TaxCode:       l.TaxCode
+      U_GGH_TIM:     l.U_GGH_TIM
     });
   });
   const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('previewModal'));
   modal.hide();
 });
 </script>
-
-
-
-
 {% endblock %}
-

@@ -38,6 +38,7 @@ urlpatterns = [
 
     # tus otras apps...
     path('tickets/', include('apps.tickets.urls')),  # 👈 aquí montamos tickets
+    
 ]
 
 

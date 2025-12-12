@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+ 
+{% block extra_css %}
+<style>
+  .board h5 { letter-spacing:.4px; }
+  .action-card {
+    display:block; text-decoration:none; color:inherit;
+    border:1px solid rgba(0,0,0,.08); border-radius:14px;
+    padding:35px 25px; text-align:center;
+    transition:transform .12s ease, box-shadow .12s ease;
+    background:#fff; height:100%;
+  }
+  .action-card:hover {
+    transform:translateY(-3px);
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+  }
+  .action-card .icon {
+    width:68px; height:68px; border-radius:16px;
+    margin:0 auto 14px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,.05);
+    font-size:1.7rem;
+  }
+  .action-card h4 {
+    font-size:1.1rem;
+    margin:0;
+    font-weight:600;
+  }
+</style>
+{% endblock %}
+ 
+{% block content %}
+<div class="container board py-5">
+  <div class="row g-4">
+ 
+    <!-- IZQUIERDA: Cotizaciones -->
+    <div class="col-12 col-md-6 d-flex flex-column gap-4">
+      <!-- Cotización -->
+      <a href="{% url 'cotizacion_form' %}" class="action-card" aria-label="Crear cotización">
+        <div class="icon"><i class="fas fa-file-invoice-dollar"></i></div>
+        <h4>Cotización</h4>
+      </a>
+ 
+      <!-- Buscar Cotización -->
+      <a href="{% url 'buscar_cotizacion' %}" class="action-card" aria-label="Buscar cotizaciones">
+        <div class="icon"><i class="fas fa-search"></i></div>
+        <h4>Buscar Cotización</h4>
+      </a>
+    </div>
+ 
+    <!-- DERECHA: Notas de Venta -->
+    <div class="col-12 col-md-6 d-flex flex-column gap-4">
+      <!-- Nota de Venta -->
+      <a href="{% url 'ov_nueva' %}" class="action-card" aria-label="Crear nota de venta">
+        <div class="icon"><i class="fas fa-file-signature"></i></div>
+        <h4>Nota de Venta</h4>
+      </a>
+ 
+      <!-- Buscar Nota de Venta -->
+      <a href="{% url 'cotizacion_form' %}" class="action-card" aria-label="Buscar notas de venta">
+        <div class="icon"><i class="fas fa-search-dollar"></i></div>
+        <h4>Buscar Nota de Venta</h4>
+      </a>
+    </div>
+ 
+  </div>
+</div>
+{% endblock %}

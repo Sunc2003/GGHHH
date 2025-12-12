@@ -2,6 +2,7 @@
 from django.urls import path
 from . import views
 from .views import cotizacion_pdf
+from apps.sap import views as sap_views
 from .views import (
     buscar_productos_remoto,
     buscador_productos_view,
@@ -12,6 +13,13 @@ from .views import (
     guias_pendientes_view,
     Cotizacion,
     crear_cotizacion,
+    MenuVentasView,
+    BuscarCotizacionesView,
+    api_cotizaciones,
+    api_cotizacion_action,
+    OrdenVenta, 
+    crear_orden_venta
+    
     
 )
 
@@ -39,5 +47,11 @@ urlpatterns = [
     path("buscar_items_inventario/", views.buscar_items_inventario, name="buscar_items_inventario"),
     path("cotizaciones/detalle/<int:doc_entry>/", views.cotizacion_detalle, name="cotizacion_detalle"),
     path("cotizacion/<int:doc_entry>/pdf/", views.cotizacion_pdf, name="cotizacion_pdf"),
-
+    path('menu/', MenuVentasView.as_view(), name='menu_ventas'),
+    path("api/cotizaciones/", api_cotizaciones, name="api_cotizaciones"),
+    path("cotizaciones/buscar/", BuscarCotizacionesView.as_view(), name="buscar_cotizacion"),
+    path("buscar_socios_por_nombre/", sap_views.buscar_socios_por_nombre, name="buscar_socios_por_nombre"),
+    path("api/cotizaciones/<int:doc_entry>/action/", api_cotizacion_action, name="api_cotizacion_action"),
+    path("ventas/ov/nueva/", OrdenVenta.as_view(), name="ov_nueva"),
+    path("api/ventas/ov/crear/", crear_orden_venta, name="ov_crear"),
 ]

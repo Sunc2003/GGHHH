@@ -1,0 +1,1558 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="alert alert-info">
+  Debug usuario: {{ debug_user|default:"-" }} <br>
+  Esquema seleccionado: <b>{{ commission_scheme_name }}</b>
+</div>
+
+<div class="nv-wrapper py-4 px-2 px-md-4">
+  <div class="nv-card">
+
+    <!-- ===================== HEADER ===================== -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+      <div class="d-flex align-items-center gap-3">
+        <img src="{% static 'img/ggh.png' %}" alt="Ferretería Marsella" class="logo-header">
+        <h3 class="fw-semibold titulo-seccion mb-0">Nueva Nota de Venta</h3>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <small class="text-muted">Usuario:</small>
+        <span class="fw-semibold me-3">{{ user_username|default:"-" }}</span>
+
+        <small class="text-muted">Escala comisión:</small>
+        <select id="commissionSchemeSelect" class="form-select form-select-sm" style="width:220px;">
+        </select>
+      </div>
+    </div>
+
+    <!-- ===================== TABS ===================== -->
+    <ul class="nav nav-tabs sap-tabs mb-4" id="nvTabs" role="tablist">
+      <li class="nav-item"><button class="nav-link active" id="tab-cliente" data-bs-toggle="tab" data-bs-target="#pane-cliente" type="button" role="tab">Cliente & Documento</button></li>
+      <li class="nav-item"><button class="nav-link" id="tab-comercial" data-bs-toggle="tab" data-bs-target="#pane-comercial" type="button" role="tab">Comerciales</button></li>
+      <li class="nav-item"><button class="nav-link" id="tab-logistica" data-bs-toggle="tab" data-bs-target="#pane-logistica" type="button" role="tab">Logística</button></li>
+    </ul>
+
+    <div class="tab-content" id="nvTabsContent">
+
+      <!-- ========================================================= -->
+      <!-- TAB 1: CLIENTE Y DOCUMENTO -->
+      <!-- ========================================================= -->
+      <div class="tab-pane fade show active" id="pane-cliente" role="tabpanel">
+
+        <div class="section-title">Cliente y Documento</div>
+
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <label class="form-label">CardCode (Cliente)</label>
+            <input id="cardCode" class="form-control" placeholder="Selecciona un cliente…" readonly />
+          </div>
+
+          <div class="col-12 col-md-8">
+            <label class="form-label">Nombre Cliente</label>
+            <div class="position-relative">
+              <input id="cardName" class="form-control" placeholder="Buscar por nombre de cliente..." />
+              <button type="button" id="btnBuscarSocio" class="btn-buscar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label class="form-label">Fecha Documento</label>
+            <input id="docDate" type="date" class="form-control" readonly />
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label class="form-label">Fecha Entrega (DocDueDate)</label>
+            <input id="dueDate" type="date" class="form-control" />
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label class="form-label">Fecha Compromiso (U_NX_FechaEntrega)</label>
+            <input id="uFechaEntrega" type="date" class="form-control" />
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label class="form-label">Fecha OC (U_INX_FechaRef_1)</label>
+            <input id="uFechaOC" type="date" class="form-control" />
+          </div>
+        </div>
+
+        <div class="section-title mt-4">Líneas de Productos</div>
+
+        <div class="table-responsive">
+          <table id="linesTbl" class="nv-table table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>ItemCode</th>
+                <th>Descripción</th>
+                <th>Cant.</th>
+                <th>Precio</th>
+                <th>PMV</th>
+                <th>S.Compra</th>
+                <th>Proveedor</th>
+                <th>Cant.Compra</th>
+                <th>P.Compra</th>
+                <th>Margen %</th>
+                <th>Comisión</th>
+                <th>P/T</th>
+                <th>Total línea</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+<!-- BOTÓN INDIVIDUAL -->
+<button id="addLineBtn" type="button" class="btn btn-outline-fiori btn-sm mt-2">
+  <i class="fa-solid fa-plus me-1"></i>Agregar línea
+</button>
+
+
+<!-- CAMPO + BOTÓN PARA AGREGAR N LÍNEAS DIRECTO -->
+<div class="d-flex align-items-center gap-2 mt-2">
+  <input id="multiLineInput"
+         type="number"
+         class="form-control form-control-sm"
+         style="width:120px;"
+         placeholder="Ej: 5"
+         min="1">
+
+  <button id="addMultipleLinesDirect" type="button" class="btn btn-outline-fiori btn-sm">
+    <i class="fa-solid fa-layer-group me-1"></i>Agregar líneas
+  </button>
+</div>
+
+<button id="btnPreviewLines" type="button" class="btn btn-outline-primary btn-sm mt-3">
+  <i class="fa-solid fa-eye me-1"></i>Vista previa de líneas
+</button>
+
+
+
+
+
+
+        <div class="mt-3 text-end fw-semibold" id="totalesResumen">
+          Neto: <b>$0</b> | IVA (19%): <b>$0</b> | Total: <b>$0</b>
+        </div>
+
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- TAB 2: COMERCIALES -->
+      <!-- ========================================================= -->
+      <div class="tab-pane fade" id="pane-comercial" role="tabpanel">
+
+        <div class="section-title">Datos Comerciales</div>
+
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <label class="form-label">Forma de pago (U_GGH_FPG)</label>
+            <select id="uFormaPago" class="form-control">
+              <option value="">-- Selecciona forma de pago --</option>
+              <option value="Cheque contra entrega">Cheque contra entrega</option>
+              <option value="Transferencia">Transferencia</option>
+              <option value="Crédito">Crédito</option>
+              <option value="Pago Sucursal">Pago Sucursal</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label">Tipo Orden (U_NX_TipoOrden)</label>
+            <select id="uTipoOrden" class="form-control">
+              <option value="">-- Seleccionar --</option>
+              <option value="Almacenaje">Almacenaje</option>
+              <option value="Reserva">Reserva</option>
+              <option value="Entrega">Entrega</option>
+              <option value="Solo Traslado">Solo Traslado</option>
+              <option value="Solo Traslado con Ajuste de Stock">Solo Traslado con Ajuste de Stock</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label">Orden de Compra Cliente</label>
+            <input id="uOCFolio" class="form-control" placeholder="N° OC cliente" />
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">Adjuntar OC cliente (PDF)</label>
+            <input id="ocPdf" name="oc_pdf" type="file" class="form-control" accept="application/pdf" />
+            <small class="text-muted">Este PDF se subirá a Supabase.</small>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Comentario (Comments)</label>
+            <textarea id="comments" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- TAB 3: LOGÍSTICA -->
+      <!-- ========================================================= -->
+      <div class="tab-pane fade" id="pane-logistica" role="tabpanel">
+
+        <div class="section-title">Datos Logísticos</div>
+
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <label class="form-label">Destino (ShipToCode)</label>
+            <select id="shipToCode" class="form-select">
+              <option value="">-- Seleccione Cliente Primero --</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-4 d-flex align-items-center">
+            <input class="form-check-input me-2" type="checkbox" id="partSupplyChk">
+            <label class="form-check-label" for="partSupplyChk">Entrega Parcial</label>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label">Transporte</label>
+            <select id="transporte_id" class="form-control">
+              <option value="">-- Seleccionar --</option>
+              <option value="1">GGH</option>
+              <option value="2">PDQ</option>
+              <option value="3">FEDEX</option>
+              <option value="4">CHILEXPRESS</option>
+              <option value="5">STARKEN</option>
+              <option value="7">ENVIAME</option>
+              <option value="9">RETIRO EN TIENDA</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label">Tipo despacho</label>
+            <select id="u_ggh_tds" class="form-control">
+              <option value="">-- Seleccionar --</option>
+              <option value="GGH">GGH</option>
+              <option value="Retira cliente">Retira cliente</option>
+              <option value="Agenda">Agenda</option>
+              <option value="Transporte Externo">Transporte Externo</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label">Documento despacho</label>
+            <select id="uDocDespacho" class="form-control">
+              <option value="">-- Seleccionar --</option>
+              <option value="Factura">Factura</option>
+              <option value="Guía despacho">Guía despacho</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label">Costo de flete</label>
+            <input id="uFlete" type="number" step="0.01" min="0" class="form-control" value="0" />
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- BOTONES -->
+    <div class="acciones d-flex flex-wrap justify-content-end gap-2 mt-4">
+      <button id="clearBtn" type="button" class="btn btn-outline-fiori">
+        <i class="fa-solid fa-eraser me-1"></i>Limpiar
+      </button>
+      <button id="submitBtn" type="button" data-endpoint="{% url 'ov_crear' %}" class="btn btn-fiori">
+        <i class="fa-solid fa-paper-plane me-1"></i>Crear Nota de Venta
+      </button>
+    </div>
+
+    <div id="msgOk" class="alert alert-success mt-3 d-none"></div>
+    <div id="msgErr" class="alert alert-danger mt-3 d-none"></div>
+
+  </div>
+
+  <!-- ========================================================= -->
+<!-- MODAL BUSCADOR DE PRODUCTOS -->
+<!-- ========================================================= -->
+<div class="modal fade" id="buscadorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Buscar Productos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <input id="buscadorInput" class="form-control mb-3" placeholder="Ingrese nombre o código…">
+
+        <div class="table-responsive">
+          <table class="table table-hover" id="tablaResultados">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>Marca</th>
+                <th>Proveedor</th>
+                <th>Cod.Proveedor</th>
+                <th>A01</th>
+                <th>A02</th>
+                <th>A08</th>
+                <th>PMV</th>
+                <th>Últ. Costo</th>
+                <th>Últ. Compra</th>
+                <th>Origen</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ========================================================= -->
+<!-- MODAL BUSCADOR DE SOCIOS -->
+<!-- ========================================================= -->
+<div class="modal fade" id="sociosModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Buscar Cliente</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <input id="sociosInput" class="form-control mb-3" placeholder="Escribe el nombre del cliente…">
+
+        <div class="table-responsive">
+          <table class="table table-hover" id="tablaSocios">
+            <thead>
+              <tr>
+                <th>CardCode</th>
+                <th>Nombre Cliente</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================= -->
+<!-- MODAL VISTA PREVIA DE LÍNEAS -->
+<!-- ========================================================= -->
+<div class="modal fade" id="previewLinesModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Vista previa de líneas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div id="previewContainer"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="savePreviewChanges" class="btn btn-fiori">
+          <i class="fa-solid fa-floppy-disk me-1"></i>Guardar cambios
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  
+</div>
+
+
+
+</div>
+
+<!-- =========================================================
+     🔵 STYLE PROFESIONAL SAP/FIORI COMPLETO — VERSION FINAL
+========================================================= -->
+<style>
+/* =========================================================
+   🔵 VISTA PREVIA – TARJETAS ESTILO SAP/FIORI
+========================================================= */
+
+.preview-line-card {
+    background: #f9fafb;
+    border: 1px solid #d5d9de;
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+
+.preview-line-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    color: #0a6ed1;
+    margin-bottom: .8rem;
+}
+
+.btn-remove-line {
+    background: #fee2e2;
+    border: 1px solid #ef4444;
+    color: #b91c1c;
+    font-size: .8rem;
+    padding: .25rem .55rem;
+    border-radius: 6px;
+}
+
+.btn-remove-line:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.preview-line-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.preview-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 140px;
+}
+
+.preview-field label {
+    font-size: .75rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 3px;
+}
+
+.preview-input {
+    border: 1px solid #cdd3da;
+    background: white;
+    border-radius: 6px;
+    padding: .45rem .6rem;
+    font-size: .82rem;
+}
+
+.preview-input:focus {
+    border-color: #0a6ed1;
+    outline: none;
+    box-shadow: 0 0 0 1px #0a6ed1;
+}
+
+/* Permite que descripción se estire */
+.preview-field.flex-grow {
+    flex: 1;
+}
+
+
+/* =========================================================
+   🌐 PALETA CORPORATIVA SAP FIORI – PREMIUM
+========================================================= */
+:root {
+  --fiori-bg: #f5f6f8;
+  --fiori-card: #ffffff;
+  --fiori-border: #d0d4d9;
+  --fiori-border-light: #e5e7eb;
+
+  --fiori-text: #1f2937;
+  --fiori-text-light: #6b7280;
+
+  --fiori-primary: #0a6ed1;
+  --fiori-primary-hover: #0857a1;
+
+  --radius: 10px;
+  --shadow-soft: 0 2px 8px rgba(0,0,0,.05);
+}
+
+/* =========================================================
+   BODY
+========================================================= */
+body {
+  background: var(--fiori-bg);
+  color: var(--fiori-text);
+  font-family: "Inter","Segoe UI",Roboto,Arial,sans-serif;
+}
+
+/* =========================================================
+   LABELS (Fix alineación)
+========================================================= */
+.form-label {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--fiori-text-light);
+  margin-bottom: 4px;
+  line-height: 1.1;
+  min-height: 26px;
+  display: block;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+.nv-card {
+  background: var(--fiori-card);
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--fiori-border-light);
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+.logo-header { width: 110px; }
+
+.titulo-seccion {
+  font-size: 1.55rem;
+  font-weight: 600;
+  color: var(--fiori-text);
+}
+
+/* =========================================================
+   SECTION TITLE
+========================================================= */
+.section-title {
+  font-size: .93rem;
+  font-weight: 700;
+  letter-spacing: .3px;
+  padding-bottom: .45rem;
+  margin-top: 1.8rem;
+  margin-bottom: 1rem;
+  color: var(--fiori-text);
+  border-bottom: 2px solid var(--fiori-border);
+}
+
+/* =========================================================
+   FORM FIELDS
+========================================================= */
+.form-control,
+.form-select {
+  font-size: .86rem;
+  border-radius: 8px;
+  border: 1px solid var(--fiori-border);
+  padding: .5rem .75rem;
+  color: var(--fiori-text);
+  background: #fafafa;
+  transition: all .2s;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--fiori-primary);
+  box-shadow: 0 0 0 1px var(--fiori-primary);
+}
+
+/* =========================================================
+   BOTÓN BUSCADOR
+========================================================= */
+.btn-buscar {
+  position: absolute;
+  top: 50%;
+  right: 9px;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--fiori-border);
+  background: white;
+  color: var(--fiori-text-light);
+  font-size: .75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-buscar:hover {
+  background: var(--fiori-primary);
+  border-color: var(--fiori-primary);
+  color: white;
+}
+
+/* =========================================================
+   TABS SAP FIORI
+========================================================= */
+.sap-tabs .nav-link {
+  font-size: .9rem;
+  font-weight: 600;
+  padding: .65rem 1.4rem;
+  border: 1px solid var(--fiori-border-light);
+  background: #f1f3f5;
+  color: var(--fiori-text-light);
+  border-radius: 8px 8px 0 0;
+  margin-right: 4px;
+}
+.sap-tabs .nav-link.active {
+  color: var(--fiori-primary);
+  background: white;
+  border-bottom: 3px solid var(--fiori-primary);
+}
+
+/* =========================================================
+   📌 TABLA DE LÍNEAS
+========================================================= */
+
+.table-responsive {
+  padding: 0.7rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.nv-table {
+  min-width: 1450px;
+  border: 1px solid var(--fiori-border-light);
+  border-radius: 8px;
+  font-size: .74rem;
+  width: 100%;
+  background: white;
+}
+
+.nv-table th {
+  background: #eef1f5;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  padding: .55rem .5rem;
+  white-space: nowrap;
+}
+
+.nv-table td {
+  padding: .45rem .55rem;
+  vertical-align: middle;
+}
+
+/* Inputs compactos */
+.nv-table input,
+.nv-table select {
+  height: 30px !important;
+  font-size: .72rem !important;
+  padding: .25rem .35rem !important;
+  border-radius: 6px;
+  border: 1px solid var(--fiori-border);
+}
+
+/* Botón lupa en tabla */
+.nv-table .btn-buscar.btn-buscar-prod {
+  width: 22px !important;
+  height: 22px !important;
+  right: 8px !important;
+  font-size: .65rem;
+}
+
+/* Columnas más equilibradas */
+.nv-table .item-code { width: 80px; }
+.nv-table .item-name { width: 220px; }
+.nv-table .qty-input { width: 55px; }
+.nv-table .price-input { width: 80px; }
+.nv-table .pmv-input { width: 80px; }
+.nv-table .prov-input { width: 140px; }
+
+/* Hover */
+.nv-table tbody tr:hover td {
+  background: #f5faff;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 768px) {
+  .nv-table {
+    min-width: 1100px;
+    font-size: .7rem;
+  }
+
+  .nv-table input,
+  .nv-table select {
+    height: 32px !important;
+    font-size: .7rem !important;
+  }
+}
+
+/* =========================================================
+   BOTONES
+========================================================= */
+.btn-fiori {
+  background: var(--fiori-primary);
+  color: white;
+  font-weight: 600;
+  padding: .5rem 1.3rem;
+  border-radius: 7px;
+  border: none;
+}
+.btn-fiori:hover {
+  background: var(--fiori-primary-hover);
+}
+
+.btn-outline-fiori {
+  background: white;
+  color: var(--fiori-text);
+  font-weight: 600;
+  border: 1px solid var(--fiori-border);
+  padding: .5rem 1.2rem;
+  border-radius: 7px;
+}
+.btn-outline-fiori:hover {
+  border-color: var(--fiori-primary);
+  color: var(--fiori-primary);
+  background: #eef4ff;
+}
+
+/* =========================================================
+   ALERTAS
+========================================================= */
+.alert {
+  border-radius: 8px;
+  font-size: .85rem;
+  border: 1px solid var(--fiori-border);
+}
+
+/* =========================================================
+   FIX PARA OPERA GX – SELECTS INVISIBLES EN TABLAS
+========================================================= */
+.scp-select {
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  -moz-appearance: auto !important;
+
+  background-color: white !important;
+  min-width: 80px !important;
+  width: 80px !important;
+}
+
+</style>
+
+
+<script>
+// ===================== CSRF =====================
+function getCookie(name){
+  const m = document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
+  return m ? m.pop() : '';
+}
+
+// ===================== INYECCIÓN SEGURA DE ESCALAS DE COMISIÓN =====================
+// Estas variables pueden ser inyectadas por la view Django:
+// - commission_schemes_json : lista [{name, brackets:[{desde,hasta,valor}]}]
+// - commission_brackets_json : objeto { "Comisión 1": [...], "Comisión 2": [...] }  OR single array
+// - commission_scheme_name : nombre del esquema asignado al usuario
+// - user_username : username del usuario
+
+let SCHEMES_BY_NAME = {};
+let SCHEMES_LIST = [];
+let ACTIVE_SCHEME_NAME = null;
+
+try {
+  // intento parsear lo que inyecte Django; si falla, uso fallback hardcodeado
+  const raw_schemes = JSON.parse('{{ commission_schemes_json|default:"null"|escapejs }}');
+  const raw_brackets = JSON.parse('{{ commission_brackets_json|default:"null"|escapejs }}');
+  const raw_active = '{{ commission_scheme_name|default:"" |escapejs }}';
+
+  if (Array.isArray(raw_schemes) && raw_schemes.length){
+    // formato: [{name:"Comisión 1", brackets:[{desde:..,hasta:..,valor:..}]}, ...]
+    SCHEMES_LIST = raw_schemes;
+    for (const s of SCHEMES_LIST){
+      SCHEMES_BY_NAME[s.name] = s.brackets || [];
+    }
+  } else if (raw_brackets && typeof raw_brackets === 'object'){
+    // raw_brackets puede venir { "Comisión 1": [...], "Comisión 2": [...] } o directamente array de brackets
+    if (Array.isArray(raw_brackets)){
+      SCHEMES_BY_NAME['Default'] = raw_brackets;
+      SCHEMES_LIST = [{name:'Default', brackets: raw_brackets}];
+    } else {
+      SCHEMES_LIST = Object.keys(raw_brackets).map(k => ({name:k, brackets: raw_brackets[k]}));
+      for (const k of Object.keys(raw_brackets)) SCHEMES_BY_NAME[k] = raw_brackets[k];
+    }
+  }
+  ACTIVE_SCHEME_NAME = raw_active || (SCHEMES_LIST[0] && SCHEMES_LIST[0].name) || 'Default';
+} catch(e){
+  console.warn("No se pudieron parsear esquemas de comisión inyectados por Django:", e);
+  // fallback: escalas ejemplo
+  SCHEMES_LIST = [
+    { name: "Comisión 1", brackets: [
+      { desde:7.00, hasta:7.99, valor:0.20 },
+      { desde:8.00, hasta:9.99, valor:0.40 },
+      { desde:10.00, hasta:11.99, valor:0.80 },
+      { desde:12.00, hasta:13.99, valor:1.50 },
+      { desde:14.00, hasta:15.99, valor:2.00 },
+      { desde:16.00, hasta:99999, valor:3.00 },
+    ]},
+    { name: "Comisión 2", brackets: [
+      { desde:0.00, hasta:9.99, valor:0.10 },
+      { desde:10.00, hasta:19.99, valor:0.50 },
+      { desde:20.00, hasta:99999, valor:1.00 },
+    ]},
+  ];
+  SCHEMES_LIST.forEach(s => SCHEMES_BY_NAME[s.name] = s.brackets);
+  ACTIVE_SCHEME_NAME = '{{ commission_scheme_name|default:"Comisión 1"|escapejs }}' || SCHEMES_LIST[0].name;
+}
+
+// populate select
+function initCommissionSelect(){
+  const sel = document.getElementById('commissionSchemeSelect');
+  if (!sel) return;
+  sel.innerHTML = SCHEMES_LIST.map(s => `<option value="${s.name}" ${s.name===ACTIVE_SCHEME_NAME?'selected':''}>${s.name}</option>`).join('');
+  sel.addEventListener('change', (e) => {
+    ACTIVE_SCHEME_NAME = e.target.value;
+    // recalcula todas las comisiones en UI
+    document.querySelectorAll('tr.linea-item').forEach(tr => calcularMargenYComision(tr));
+    recalcularTotales();
+  });
+}
+
+// helper: obtiene brackets activos (array)
+function getActiveBrackets(){
+  return SCHEMES_BY_NAME[ACTIVE_SCHEME_NAME] || [];
+}
+
+function getComisionPorMargenConEscala(pct){
+  const brackets = getActiveBrackets();
+  for (const b of brackets){
+    const desde = Number(b.desde);
+    const hasta = Number(b.hasta);
+    if (pct >= desde && pct <= hasta) return Number(b.valor);
+  }
+  return 0;
+}
+
+// ===================== FECHAS AUTO =====================
+document.addEventListener("DOMContentLoaded", () => {
+  const today=new Date();
+  const yyyy=today.getFullYear();
+  const mm=String(today.getMonth()+1).padStart(2,"0");
+  const dd=String(today.getDate()).padStart(2,"0");
+  const currentDate=`${yyyy}-${mm}-${dd}`;
+  const docEl = document.getElementById("docDate");
+  const dueEl = document.getElementById("dueDate");
+  if (docEl && !docEl.value) docEl.value = currentDate;
+  if (dueEl && !dueEl.value) dueEl.value = currentDate;
+
+  initCommissionSelect();
+});
+
+// ===================== TABLA PRINCIPAL =====================
+const tbody = document.querySelector('#linesTbl tbody');
+const totalesResumen = document.getElementById('totalesResumen');
+
+document.getElementById('addLineBtn').addEventListener('click', () => addLineRow());
+document.getElementById('clearBtn').addEventListener('click', () => {
+  tbody.innerHTML = '';
+  addLineRow();
+  recalcularTotales();
+});
+
+function addLineRow(prefill = {}) {
+  const tr = document.createElement('tr');
+  tr.classList.add('linea-item');
+  tr.innerHTML = `
+    <td><input class="form-control form-control-sm item-code" placeholder="ItemCode" value="${prefill.Codigo || ''}" readonly /></td>
+    <td class="position-relative">
+      <input class="form-control form-control-sm desc-buscar item-name" placeholder="Buscar producto..." value="${prefill.ItemName || ''}" />
+      <button type="button" class="btn btn-link btn-buscar btn-buscar-prod" aria-label="Buscar producto">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+    </td>
+    <td><input type="number" min="1" step="1" class="form-control form-control-sm qty-input" placeholder="Qty" value="${prefill.Quantity ?? ''}" /></td>
+    <td><input type="number" min="0" step="0.01" class="form-control form-control-sm price-input" placeholder="Precio" value="${prefill.UnitPrice ?? ''}" /></td>
+    <td><input type="number" min="0" step="0.01" class="form-control form-control-sm pmv-input" placeholder="PMV" value="${prefill.U_NX_PrecioMinVta ?? ''}" /></td>
+    <td>
+<select class="form-select form-select-sm scp-select">
+  <option value="NO" ${prefill.U_GGH_SCP == 'SI' ? '' : 'selected'}>NO</option>
+  <option value="SI" ${prefill.U_GGH_SCP == 'SI' ? 'selected' : ''}>SI</option>
+</select>
+
+    </td>
+    <td><input class="form-control form-control-sm prov-input" placeholder="Proveedor" value="${prefill.U_GGH_PROV || ''}" /></td>
+    <td><input type="number" min="0" step="1" class="form-control form-control-sm cant-compra-input" placeholder="Cant. comprar" value="${prefill.U_GGH_CTC ?? ''}" /></td>
+    <td><input type="number" min="0" step="0.01" class="form-control form-control-sm precio-compra-input" placeholder="Precio compra" value="${prefill.U_GGH_PCS ?? ''}" /></td>
+    <td><input type="number" class="form-control form-control-sm pct-margen-input" placeholder="%" value="${prefill.U_GGH_MPC ?? ''}" readonly /></td>
+    <td><input type="number" class="form-control form-control-sm comision-input" placeholder="Comisión" value="${prefill.U_GGH_COM ?? ''}" readonly /></td>
+    <td>
+      <select class="form-select form-select-sm parcial-select">
+        <option value="Total" ${prefill.U_Parcial === 'Parcial' ? '' : 'selected'}>Total</option>
+        <option value="Parcial" ${prefill.U_Parcial === 'Parcial' ? 'selected' : ''}>Parcial</option>
+      </select>
+    </td>
+    <td class="text-end"><span class="line-total">-</span></td>
+    <td>
+      <button type="button" class="btn btn-sm btn-outline-danger btn-rm-line" aria-label="Eliminar línea">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </td>
+
+    <!-- hidden fields -->
+    <td style="display:none;">
+      <input type="number" class="form-control form-control-sm cost-input" value="${prefill.Cost ?? ''}" />
+      <input class="form-control form-control-sm warehouse-input" value="${prefill.WarehouseCode || 'A01'}" />
+      <input class="form-control form-control-sm tax-input" value="${prefill.TaxCode || 'IVA'}" />
+      <input class="form-control form-control-sm origen-input" value="${prefill.U_Origin || ''}" />
+    </td>
+  `;
+
+  // eventos
+  tr.querySelector('.btn-rm-line').addEventListener('click', () => {
+    tr.remove();
+    recalcularTotales();
+  });
+  tr.querySelector('.btn-buscar-prod').addEventListener('click', () => abrirModalBusquedaProductos(tr));
+  tr.querySelector('.price-input').addEventListener('input', () => {
+    calcularMargenYComision(tr);
+    recalcularTotales();
+  });
+  tr.querySelector('.qty-input').addEventListener('input', () => {
+    recalcularTotales();
+  });
+  tr.querySelector('.scp-select').addEventListener('change', () => {
+    // si cambia a SI, deja editar proveedor/ctc/pcs; si NO, limpiar campos
+    const val = tr.querySelector('.scp-select').value;
+    if (val === 'NO'){
+      tr.querySelector('.prov-input').value = '';
+      tr.querySelector('.cant-compra-input').value = '';
+      tr.querySelector('.precio-compra-input').value = '';
+    }
+    recalcularTotales();
+  });
+  tr.querySelector('.cant-compra-input').addEventListener('input', () => recalcularTotales());
+  tr.querySelector('.precio-compra-input').addEventListener('input', () => recalcularTotales());
+
+  tbody.appendChild(tr);
+}
+addLineRow();
+
+// -------------------- CALCULAR MARGEN / COMISIÓN (mejorada) --------------------
+function calcularMargenYComision(tr){
+  const costRaw  = tr.querySelector('.cost-input')?.value ?? "0";
+  const priceRaw = tr.querySelector('.price-input')?.value ?? "0";
+  const pmvRaw   = tr.querySelector('.pmv-input')?.value ?? "0";
+
+  const cost  = parseFloat(String(costRaw).replace(',', '.')) || 0;
+  const price = parseFloat(String(priceRaw).replace(',', '.')) || 0;
+  const pmv   = parseFloat(String(pmvRaw).replace(',', '.')) || 0;
+
+  const pctInput = tr.querySelector('.pct-margen-input');
+  const comInput = tr.querySelector('.comision-input');
+
+  // si no hay precio no podemos calcular
+  if (!price || price <= 0){
+    if (pctInput) pctInput.value = "";
+    if (comInput) comInput.value = "";
+    return;
+  }
+
+  // fallback: si cost == 0 usamos pmv como referencia
+  const referenciaCost = cost || pmv || 0;
+
+  // Si no hay referencia de costo, dejamos margen vacío pero calculamos comisión con pct=0
+  if (referenciaCost <= 0){
+    if (pctInput) pctInput.value = "";
+    if (comInput) comInput.value = getComisionPorMargen(0).toFixed(2);
+    return;
+  }
+
+  const margen = price - referenciaCost;
+  const pct    = (margen / price) * 100;
+  const com = getComisionPorMargenConEscala(pct);
+
+
+  if (pctInput) pctInput.value = Number.isFinite(pct) ? pct.toFixed(2) : "";
+  if (comInput) comInput.value = Number.isFinite(com) ? com.toFixed(2) : "0.00";
+}
+
+// ===================== TOTALES =====================
+function clp(n){ return Number(n||0).toLocaleString('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}); }
+
+function recalcularTotales(){
+  let neto = 0;
+  let iva  = 0;
+  tbody.querySelectorAll('tr.linea-item').forEach(tr => {
+    const qty   = parseFloat(tr.querySelector('.qty-input').value || "0");
+    const price = parseFloat(tr.querySelector('.price-input').value || "0");
+    const tax   = (tr.querySelector('.tax-input').value || '').toUpperCase();
+    const line  = qty * price;
+
+    // Total línea (solo visual)
+    const spanTotal = tr.querySelector('.line-total');
+    if (spanTotal){
+      spanTotal.textContent = line > 0 ? clp(line) : '-';
+    }
+
+    neto += line;
+    if (tax.includes('IVA')) iva += line * 0.19;
+
+    // recalcular margen/comisión por si cost/price cambiaron
+    calcularMargenYComision(tr);
+  });
+  const total = neto + iva;
+  if (totalesResumen){
+    totalesResumen.innerHTML = `Neto: <b>${clp(neto)}</b> | IVA (19%): <b>${clp(iva)}</b> | Total: <b>${clp(total)}</b>`;
+  }
+}
+
+// ===================== MODAL PRODUCTOS =====================
+function abrirModalBusquedaProductos(tr){
+  currentRowForProduct = tr;
+  const modalEl = document.getElementById('buscadorModal');
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+  const input = document.getElementById('buscadorInput');
+  const tableBody = document.querySelector('#tablaResultados tbody');
+
+  // limpiar
+  input.value = '';
+  tableBody.innerHTML = '';
+  modal.show();
+
+  // remover listeners previos (si existieran) para evitar duplicados
+  input.oninput = null;
+  tableBody.onclick = null;
+
+  input.oninput = async () => {
+    const q = input.value.trim();
+    if (q.length < 2){
+      tableBody.innerHTML = '';
+      return;
+    }
+
+    const url = `/buscar_items_inventario/?q=${encodeURIComponent(q)}`;
+    try{
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0){
+        tableBody.innerHTML = '<tr><td colspan="12" class="text-muted text-center">Sin resultados</td></tr>';
+        return;
+      }
+
+      tableBody.innerHTML = data.map(it => `
+        <tr
+          data-code="${it.Codigo || ''}"
+          data-name="${(it.ItemName||'').replace(/"/g,'&quot;')}"
+          data-firm="${(it.FirmName||'').replace(/"/g,'&quot;')}"
+          data-prov-name="${(it.ProveedorName||'').replace(/"/g,'&quot;')}"
+          data-prov-code="${(it.ProveedorCode||'').replace(/"/g,'&quot;')}"
+          data-a01="${it.Stock_A01 || 0}"
+          data-a02="${it.Stock_A02 || 0}"
+          data-a08="${it.Stock_A08 || 0}"
+          data-pmv="${it.U_NX_PrecioMinVta ?? it.PMV ?? 0}"
+          data-acgprice="${it.AcgPrice ?? it.UltimoPrecioCompra ?? 0}"
+          data-ultfecha="${it.UltimaFechaCompra ? String(it.UltimaFechaCompra).split('T')[0] : ''}"
+          data-origen="${(it.Origen||'').replace(/"/g,'&quot;')}"
+        >
+          <td>${it.Codigo || ''}</td>
+          <td class="text-start">${it.ItemName || ''}</td>
+          <td>${it.FirmName || ''}</td>
+          <td>${it.ProveedorName || ''}</td>
+          <td>${it.ProveedorCode || ''}</td>
+          <td>${it.Stock_A01 || 0}</td>
+          <td>${it.Stock_A02 || 0}</td>
+          <td>${it.Stock_A08 || 0}</td>
+          <td>${it.U_NX_PrecioMinVta ?? it.PMV ?? ''}</td>
+          <td>${it.AcgPrice ?? it.UltimoPrecioCompra ?? ''}</td>
+          <td>${it.UltimaFechaCompra ? String(it.UltimaFechaCompra).split('T')[0] : ''}</td>
+          <td>${it.Origen || ''}</td>
+        </tr>
+      `).join('');
+
+      // Delegación de clicks: solo un listener
+      tableBody.onclick = (ev) => {
+        const row = ev.target.closest('tr');
+        if (!row) return;
+        // asignar valores a la fila actual
+        if (currentRowForProduct){
+          currentRowForProduct.querySelector('.item-code').value  = row.dataset.code || '';
+          currentRowForProduct.querySelector('.item-name').value  = row.dataset.name || '';
+
+          const pmv    = parseFloat(row.dataset.pmv || "0") || 0;
+          const costo  = parseFloat(row.dataset.acgprice || "0") || 0;
+          const origen = row.dataset.origen || '';
+
+          const priceInput = currentRowForProduct.querySelector('.price-input');
+          const pmvInput   = currentRowForProduct.querySelector('.pmv-input');
+          const costInput  = currentRowForProduct.querySelector('.cost-input');
+          const origenInput= currentRowForProduct.querySelector('.origen-input');
+
+          if (pmvInput) pmvInput.value = pmv || '';
+          if (costInput) costInput.value = costo || '';
+          if (origenInput) origenInput.value = origen || '';
+
+          // Si no hay precio puesto, sugerimos PMV
+          if (priceInput && (!priceInput.value || priceInput.value === "")) {
+            priceInput.value = pmv || '';
+          }
+
+          // disparar cálculo y totales
+          calcularMargenYComision(currentRowForProduct);
+          recalcularTotales();
+        }
+
+        // cerrar modal inmediatamente
+        try {
+          modal.hide();
+        } catch (e) {
+          // fallback robusto: buscar instancia y cerrarla
+          const inst = bootstrap.Modal.getInstance(modalEl);
+          if (inst) inst.hide();
+        }
+      };
+
+    }catch(e){
+      console.error(e);
+      tableBody.innerHTML = '<tr><td colspan="12" class="text-danger text-center">⚠️ Error al buscar productos</td></tr>';
+    }
+  };
+}
+
+// ===================== MODAL SOCIOS (ACTUALIZADO CON DIRECCIONES) =====================
+document.getElementById('btnBuscarSocio').addEventListener('click', abrirModalSocios);
+
+function abrirModalSocios(){
+  const modalEl   = document.getElementById('sociosModal');
+  const modal     = bootstrap.Modal.getOrCreateInstance(modalEl);
+  const input     = document.getElementById('sociosInput');
+  const tableBody = document.querySelector('#tablaSocios tbody');
+
+  input.value=''; 
+  tableBody.innerHTML=''; 
+  modal.show();
+
+  input.oninput = async () => {
+    const q = input.value.trim();
+    if (q.length < 2){ tableBody.innerHTML = ''; return; }
+
+    const url = `/buscar_socios_por_nombre/?q=${encodeURIComponent(q)}`;
+    try{
+      const res = await fetch(url, {headers: {"X-Requested-With":"fetch"}});
+      const data = await res.json();
+      
+      if (!Array.isArray(data) || data.length === 0){
+        tableBody.innerHTML = '<tr><td colspan="2" class="text-muted">Sin resultados</td></tr>';
+        return;
+      }
+
+      // Renderizamos la tabla guardando las direcciones en data-addresses
+      tableBody.innerHTML = data.map(s => {
+        // Escapamos las comillas dobles para que no rompan el atributo HTML
+        const addressesSafe = JSON.stringify(s.Direcciones || []).replace(/"/g, '&quot;');
+        
+        return `
+        <tr 
+            class="cursor-pointer"
+            data-code="${s.CardCode}" 
+            data-name="${s.Nombre}"
+            data-addresses="${addressesSafe}">
+          <td>${s.CardCode}</td>
+          <td class="text-start">${s.Nombre}</td>
+        </tr>
+      `}).join('');
+
+      // Evento Click en la fila
+      tableBody.querySelectorAll('tr').forEach(row => {
+        row.addEventListener('click', () => {
+          // 1. Resaltar visualmente
+          tableBody.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+          row.classList.add('selected');
+
+          // 2. Llenar inputs básicos
+          document.getElementById('cardCode').value = row.dataset.code || '';
+          document.getElementById('cardName').value = row.dataset.name || '';
+
+          // 3. LOGICA NUEVA: Llenar el Select de Direcciones
+          const shipSelect = document.getElementById('shipToCode');
+          
+          // Limpiar opciones anteriores
+          shipSelect.innerHTML = '<option value="">-- Seleccionar Dirección --</option>';
+
+          try {
+              const addresses = JSON.parse(row.dataset.addresses || '[]');
+              
+              if (addresses.length > 0) {
+                  addresses.forEach(addr => {
+                      const option = document.createElement('option');
+                      option.value = addr.ID; // El ID de la dirección en SAP (ej: "SUCURSAL")
+                      // Mostramos: "SUCURSAL - Av. Siempreviva 123 (Santiago)"
+                      option.textContent = `${addr.ID} - ${addr.Calle || ''} ${addr.Comuna ? '('+addr.Comuna+')' : ''}`;
+                      shipSelect.appendChild(option);
+                  });
+                  // Opcional: Auto-seleccionar la primera dirección si existe
+                  shipSelect.selectedIndex = 1; 
+              } else {
+                  const option = document.createElement('option');
+                  option.text = "(Cliente sin direcciones configuradas)";
+                  shipSelect.appendChild(option);
+              }
+          } catch (err) {
+              console.error("Error parseando direcciones:", err);
+          }
+
+          // 4. Cerrar modal
+          setTimeout(() => modal.hide(), 150);
+        });
+      });
+
+    }catch(e){
+      console.error(e);
+      tableBody.innerHTML = '<tr><td colspan="2" class="text-danger">⚠️ Error al buscar socios</td></tr>';
+    }
+  };
+}
+
+// ===================== CREAR NOTA DE VENTA =====================
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  const msgOk  = document.getElementById('msgOk');
+  const msgErr = document.getElementById('msgErr');
+  msgOk.classList.add('d-none');
+  msgErr.classList.add('d-none');
+
+  const endpoint = document.getElementById('submitBtn').dataset.endpoint;
+  const cardCode = document.getElementById('cardCode').value.trim();
+  const docDate  = document.getElementById('docDate').value;
+  const dueDate  = document.getElementById('dueDate').value;
+
+  if (!cardCode || !docDate || !dueDate){
+    msgErr.textContent = "Faltan campos obligatorios (Cliente / Fechas).";
+    msgErr.classList.remove('d-none');
+    return;
+  }
+
+  // formato básico CardCode
+  if (!cardCode.startsWith('C') || !cardCode.includes('-')){
+    msgErr.textContent = "El CardCode seleccionado no tiene formato válido (revisa que el cliente exista en SAP).";
+    msgErr.classList.remove('d-none');
+    return;
+  }
+
+  const shipToCode         = document.getElementById('shipToCode').value.trim();
+  const partSupplyChk      = document.getElementById('partSupplyChk');
+  const partSupply         = (partSupplyChk && partSupplyChk.checked) ? 'Y' : 'N';
+  const transportationCode = document.getElementById('transporte_id').value || null;
+  const uTipoOrden         = document.getElementById('uTipoOrden').value.trim();
+  const uOCFolio           = document.getElementById('uOCFolio').value.trim();
+  const uFechaEntrega      = document.getElementById('uFechaEntrega').value || null;
+  const uFechaOC           = document.getElementById('uFechaOC').value || null;
+  const uTipoDespacho = document.getElementById('u_ggh_tds').value;
+  const uDocDespacho       = document.getElementById('uDocDespacho').value;
+  const uFormaPago         = document.getElementById('uFormaPago').value;
+  const uFlete             = document.getElementById('uFlete').value || "0";
+  const comments           = document.getElementById('comments').value.trim();
+
+  if (!uFormaPago){
+    msgErr.textContent = "Debes seleccionar una forma de pago válida.";
+    msgErr.classList.remove('d-none');
+    return;
+  }
+
+  const ocFileInput  = document.getElementById('ocPdf');
+  const ocFile       = ocFileInput.files[0] || null;
+
+  if (!ocFile){
+    msgErr.textContent = "Debes adjuntar el PDF de la Orden de Compra del cliente.";
+    msgErr.classList.remove('d-none');
+    return;
+  }
+
+  // ===================== LÍNEAS =====================
+  const lines = [];
+  let errorLine = null;
+
+  tbody.querySelectorAll('tr.linea-item').forEach(tr => {
+    const itemCode  = tr.querySelector('.item-code').value.trim();
+    const itemName  = tr.querySelector('.item-name').value.trim();
+    const qty       = Number(tr.querySelector('.qty-input').value || 0);
+    let unitRaw     = (tr.querySelector('.price-input').value || '').trim();
+    if (unitRaw.includes(',') && !unitRaw.includes('.')) unitRaw = unitRaw.replace(',', '.');
+    const unitPrice = Number(unitRaw || 0);
+    const pmv       = Number((tr.querySelector('.pmv-input').value || 0));
+    const warehouse = tr.querySelector('.warehouse-input').value.trim() || 'A01';
+    const tax       = tr.querySelector('.tax-input').value.trim() || 'IVA';
+    const pctMargen = Number(tr.querySelector('.pct-margen-input').value || 0);
+    const comision  = Number(tr.querySelector('.comision-input').value || 0);
+    const parcial   = (tr.querySelector('.parcial-select')?.value || 'Total');
+    const solicita  = (tr.querySelector('.scp-select')?.value || 'NO').toUpperCase();
+    const proveedor = (tr.querySelector('.prov-input')?.value || '').trim();
+    const ctc       = Number((tr.querySelector('.cant-compra-input').value || 0));
+    const pcs       = Number((tr.querySelector('.precio-compra-input').value || 0));
+
+    if (itemCode && qty > 0){
+      const linea = {
+        ItemCode:        itemCode,
+        ItemDescription: itemName,
+        Quantity:        qty,
+        UnitPrice:       unitPrice,
+        WarehouseCode:   warehouse,
+        TaxCode:         tax,
+        U_NX_PrecioMinVta: pmv,
+        U_GGH_MPC:       pctMargen,
+        U_GGH_COM:       comision,
+        U_Parcial:       parcial,
+      };
+
+      if (solicita === 'SI'){
+        if (!proveedor || ctc <= 0 || pcs <= 0){
+          errorLine = itemCode || '(línea sin código)';
+        } else {
+          linea.U_GGH_SCP  = 'SI';
+          linea.U_GGH_PROV = proveedor;
+          linea.U_GGH_CTC  = ctc;
+          linea.U_GGH_PCS  = pcs;
+        }
+      } else {
+        linea.U_GGH_SCP = 'NO';
+        // asegúrate que no mandes campos numéricos vacíos que rompan (pasan como null o no existen)
+      }
+
+      lines.push(linea);
+    }
+  });
+
+  if (!lines.length){
+    msgErr.textContent = "Debes ingresar al menos una línea válida.";
+    msgErr.classList.remove('d-none');
+    return;
+  }
+
+  if (errorLine){
+    msgErr.textContent =
+      `Hay líneas con solicitud de compra (SI) sin datos completos de Proveedor / Cantidad a comprar / Precio compra. Revisa el item ${errorLine}.`;
+    msgErr.classList.remove('d-none');
+    return;
+  }
+
+  const payload = {
+    DocDate:    docDate,
+    DocDueDate: dueDate,
+    TaxDate:    docDate,
+    CardCode:   cardCode,
+
+    ShipToCode:         shipToCode || null,
+    PartSupply:         partSupply,
+    TransportationCode: transportationCode ? Number(transportationCode) : null,
+    Comments:           comments || null,
+
+    U_NX_TipoOrden:    uTipoOrden || null,
+    U_INX_FolioRef_1:  uOCFolio || null,
+    U_NX_FechaEntrega: uFechaEntrega || null,
+    U_INX_FechaRef_1:  uFechaOC || null,
+    U_GGH_TPD:         uDocDespacho || null,
+    U_GGH_FPG:         uFormaPago,
+    U_GGH_TDS:         uTipoDespacho || null,
+    U_GGH_FLE:         uFlete,
+
+    // OV siempre tendrá la OC asociada -> ConSolicitudCompra true (compatibilidad view)
+    ConSolicitudCompra: true,
+
+    DocumentLines: lines,
+  };
+
+  try{
+    const formData = new FormData();
+    formData.append("payload", JSON.stringify(payload));
+    if (ocFile){
+      formData.append("oc_pdf", ocFile);
+    }
+
+    const resp = await fetch(endpoint, {
+      method: "POST",
+      headers: { "X-CSRFToken": getCookie('csrftoken') },
+      body: formData,
+      credentials: "same-origin",
+    });
+
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || "Error al crear Nota de Venta");
+
+    msgOk.innerHTML = `✅ Nota de Venta creada: <b>${data.DocNum}</b>`;
+    msgOk.classList.remove('d-none');
+
+  }catch(err){
+    console.error(err);
+    msgErr.textContent = String(err);
+    msgErr.classList.remove('d-none');
+  }
+});
+
+// Inicializar select de comisiones en caso de carga dinámica
+document.addEventListener('DOMContentLoaded', initCommissionSelect);
+
+
+// ===================== TABS SAP FIORI =====================
+// Activa los tabs y recuerda el último abierto (opcional)
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Seleccionar primer tab al cargar
+  const firstTab = document.querySelector('.sap-tabs .nav-link');
+  if (firstTab && !document.querySelector('.sap-tabs .nav-link.active')) {
+    const tab = new bootstrap.Tab(firstTab);
+    tab.show();
+  }
+
+  // (Opcional) Guardar último tab usado
+  document.querySelectorAll('.sap-tabs .nav-link').forEach(btn => {
+    btn.addEventListener('shown.bs.tab', e => {
+      localStorage.setItem('nv_tab_activo', e.target.id);
+    });
+  });
+
+  // (Opcional) Restaurar último tab usado
+  const last = localStorage.getItem('nv_tab_activo');
+  if (last) {
+    const lastBtn = document.getElementById(last);
+    if (lastBtn) {
+      const tab = new bootstrap.Tab(lastBtn);
+      tab.show();
+    }
+  }
+});
+
+// AGREGAR N LÍNEAS DIRECTO (sin modal)
+document.getElementById('addMultipleLinesDirect').addEventListener('click', () => {
+    const input = document.getElementById('multiLineInput');
+    const count = parseInt(input.value);
+
+    if (!count || count < 1) {
+        alert("Ingrese un número válido de líneas.");
+        return;
+    }
+
+    for (let i = 0; i < count; i++) {
+        addLineRow();
+    }
+
+    if (typeof recalcularTotales === "function") {
+        recalcularTotales();
+    }
+
+    input.value = ""; // limpiar campo
+});
+
+// =========================================================
+//  VISTA PREVIA DE LÍNEAS
+// =========================================================
+
+document.getElementById("btnPreviewLines").addEventListener("click", renderPreviewLines);
+
+function renderPreviewLines() {
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("previewLinesModal"));
+    const container = document.getElementById("previewContainer");
+
+    const rows = [...document.querySelectorAll("#linesTbl tbody tr.linea-item")];
+
+    if (rows.length === 0) {
+        container.innerHTML = `<p class="text-muted">No hay líneas para mostrar.</p>`;
+        modal.show();
+        return;
+    }
+
+    // Generar tarjetas editables
+ container.innerHTML = rows.map((tr, index) => {
+    const itemCode = tr.querySelector(".item-code").value;
+    const itemName = tr.querySelector(".item-name").value;
+    const qty = tr.querySelector(".qty-input").value;
+    const price = tr.querySelector(".price-input").value;
+
+    return `
+    <div class="preview-line-card mb-3">
+        
+        <div class="preview-line-header">
+            <span>Línea #${index + 1}</span>
+            <button class="btn-remove-line btnRemovePreview" data-index="${index}">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+
+        <div class="preview-line-body">
+            
+            <div class="preview-field">
+                <label>Código</label>
+                <input class="preview-input prev-itemCode" data-index="${index}" value="${itemCode}">
+            </div>
+
+            <div class="preview-field flex-grow">
+                <label>Descripción</label>
+                <input class="preview-input prev-itemName" data-index="${index}" value="${itemName}">
+            </div>
+
+            <div class="preview-field">
+                <label>Cantidad</label>
+                <input type="number" class="preview-input prev-qty" data-index="${index}" value="${qty}">
+            </div>
+
+            <div class="preview-field">
+                <label>Precio</label>
+                <input type="number" class="preview-input prev-price" data-index="${index}" value="${price}">
+            </div>
+
+        </div>
+    </div>
+    `;
+}).join("");
+
+
+    // Activar eventos de eliminar
+    document.querySelectorAll(".btnRemovePreview").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const idx = Number(this.dataset.index);
+            deleteLineByIndex(idx);
+            renderPreviewLines(); // refrescar modal
+        });
+    });
+
+    modal.show();
+}
+
+// =========================================================
+//  GUARDAR CAMBIOS DESDE LA VISTA PREVIA
+// =========================================================
+
+document.getElementById("savePreviewChanges").addEventListener("click", () => {
+    const rows = [...document.querySelectorAll("#linesTbl tbody tr.linea-item")];
+
+    document.querySelectorAll(".prev-itemCode").forEach(input => {
+        const idx = input.dataset.index;
+        rows[idx].querySelector(".item-code").value = input.value;
+    });
+
+    document.querySelectorAll(".prev-itemName").forEach(input => {
+        const idx = input.dataset.index;
+        rows[idx].querySelector(".item-name").value = input.value;
+    });
+
+    document.querySelectorAll(".prev-qty").forEach(input => {
+        const idx = input.dataset.index;
+        rows[idx].querySelector(".qty-input").value = input.value;
+    });
+
+    document.querySelectorAll(".prev-price").forEach(input => {
+        const idx = input.dataset.index;
+        rows[idx].querySelector(".price-input").value = input.value;
+    });
+
+    recalcularTotales();
+
+    bootstrap.Modal.getInstance(document.getElementById("previewLinesModal")).hide();
+});
+
+// =========================================================
+//  ELIMINAR UNA LÍNEA POR ÍNDICE
+// =========================================================
+
+function deleteLineByIndex(index) {
+    const rows = document.querySelectorAll("#linesTbl tbody tr.linea-item");
+    if (rows[index]) {
+        rows[index].remove();
+        recalcularTotales();
+    }
+}
+
+</script>
+{% endblock %}
